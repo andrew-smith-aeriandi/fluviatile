@@ -1,0 +1,14 @@
+﻿{
+  "shape": "Hexagon",
+  "size": 1,
+  "progress": {
+    "routeCount": 6,
+    "elapsedTime": "00:00:09.7102338"
+  },
+  "terminalNodes": [
+    1,
+    2,
+    3
+  ],
+  "steps": []
+}

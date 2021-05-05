@@ -1,0 +1,159 @@
+﻿{
+  "shape": "Hexagon",
+  "size": 2,
+  "progress": {
+    "routeCount": 11,
+    "elapsedTime": "00:00:09.6631957"
+  },
+  "terminalNodes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    9,
+    11
+  ],
+  "steps": [
+    {
+      "id": 2,
+      "previousId": 0,
+      "position": 6,
+      "direction": 1
+    },
+    {
+      "id": 1,
+      "previousId": 2,
+      "position": 23,
+      "direction": 2
+    },
+    {
+      "id": 4,
+      "previousId": 2,
+      "position": 7,
+      "direction": 0
+    },
+    {
+      "id": 3,
+      "previousId": 4,
+      "position": 0,
+      "direction": 1
+    },
+    {
+      "id": 8,
+      "previousId": 4,
+      "position": 8,
+      "direction": 5
+    },
+    {
+      "id": 7,
+      "previousId": 8,
+      "position": 9,
+      "direction": 0
+    },
+    {
+      "id": 6,
+      "previousId": 7,
+      "position": 10,
+      "direction": 1
+    },
+    {
+      "id": 5,
+      "previousId": 6,
+      "position": 1,
+      "direction": 2
+    },
+    {
+      "id": 12,
+      "previousId": 6,
+      "position": 11,
+      "direction": 0
+    },
+    {
+      "id": 11,
+      "previousId": 12,
+      "position": 12,
+      "direction": 1
+    },
+    {
+      "id": 10,
+      "previousId": 11,
+      "position": 13,
+      "direction": 2
+    },
+    {
+      "id": 9,
+      "previousId": 10,
+      "position": 2,
+      "direction": 3
+    },
+    {
+      "id": 16,
+      "previousId": 10,
+      "position": 14,
+      "direction": 1
+    },
+    {
+      "id": 15,
+      "previousId": 16,
+      "position": 15,
+      "direction": 2
+    },
+    {
+      "id": 14,
+      "previousId": 15,
+      "position": 16,
+      "direction": 3
+    },
+    {
+      "id": 13,
+      "previousId": 14,
+      "position": 3,
+      "direction": 4
+    },
+    {
+      "id": 21,
+      "previousId": 14,
+      "position": 17,
+      "direction": 2
+    },
+    {
+      "id": 20,
+      "previousId": 21,
+      "position": 18,
+      "direction": 3
+    },
+    {
+      "id": 19,
+      "previousId": 20,
+      "position": 19,
+      "direction": 4
+    },
+    {
+      "id": 18,
+      "previousId": 19,
+      "position": 4,
+      "direction": 5
+    },
+    {
+      "id": 17,
+      "previousId": 18,
+      "position": 3,
+      "direction": 0
+    },
+    {
+      "id": 23,
+      "previousId": 18,
+      "position": 5,
+      "direction": 4
+    },
+    {
+      "id": 22,
+      "previousId": 23,
+      "position": 0,
+      "direction": 5
+    }
+  ]
+}
