@@ -1,0 +1,51 @@
+﻿{
+  "shape": "Hexagon",
+  "size": 1,
+  "progress": {
+    "routeCount": 3,
+    "elapsedTime": "00:00:23.2168439"
+  },
+  "terminalNodes": [
+    1,
+    2,
+    3
+  ],
+  "steps": [
+    {
+      "id": 2,
+      "previousId": 0,
+      "position": 0,
+      "direction": 1
+    },
+    {
+      "id": 1,
+      "previousId": 2,
+      "position": 5,
+      "direction": 2
+    },
+    {
+      "id": 6,
+      "previousId": 2,
+      "position": 1,
+      "direction": 0
+    },
+    {
+      "id": 5,
+      "previousId": 6,
+      "position": 2,
+      "direction": 1
+    },
+    {
+      "id": 4,
+      "previousId": 5,
+      "position": 3,
+      "direction": 2
+    },
+    {
+      "id": 3,
+      "previousId": 4,
+      "position": 4,
+      "direction": 3
+    }
+  ]
+}
