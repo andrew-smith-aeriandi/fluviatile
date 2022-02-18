@@ -19,14 +19,19 @@ namespace Fluviatile.Grid
             return obj is Direction direction && direction.Value == Value;
         }
 
+        public static bool operator ==(Direction left, Direction right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Direction left, Direction right)
+        {
+            return !(left == right);
+        }
+
         public override int GetHashCode()
         {
             return Value;
-        }
-
-        public override string ToString()
-        {
-            return Value.ToString();
         }
 
         public static Direction operator +(Direction direction, Torsion torsion)
@@ -41,14 +46,18 @@ namespace Fluviatile.Grid
 
         public static Torsion operator -(Direction lhs, Direction rhs)
         {
-            switch ((lhs.Value - rhs.Value + Modulus) % Modulus)
+            return ((lhs.Value - rhs.Value + Modulus) % Modulus) switch
             {
-                case 0: return Torsion.None;
-                case 1: return Torsion.Right;
-                case 5: return Torsion.Left;
-                default:
-                    throw new InvalidOperationException();
-            }
+                0 => Torsion.None,
+                1 => Torsion.Right,
+                5 => Torsion.Left,
+                _ => throw new InvalidOperationException(),
+            };
+        }
+
+        public override string ToString()
+        {
+            return Value.ToString();
         }
     }
 }

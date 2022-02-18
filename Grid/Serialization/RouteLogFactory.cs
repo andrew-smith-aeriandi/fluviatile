@@ -3,9 +3,9 @@ using System.Linq;
 
 namespace Fluviatile.Grid.Serialization
 {
-    public class RouteLogFactory
+    public static class RouteLogFactory
     {
-        public RouteLog CreateLouteLog(
+        public static RouteLog CreateRouteLog(
             Tableau tableau,
             IEnumerable<TerminalNode> endPoints,
             IEnumerable<Step> routes,
@@ -21,13 +21,12 @@ namespace Fluviatile.Grid.Serialization
             };
         }
 
-        private IEnumerable<int> GetTerminalNodeIndices(IEnumerable<TerminalNode> endPoints)
+        private static IEnumerable<int> GetTerminalNodeIndices(IEnumerable<TerminalNode> endPoints)
         {
-            return endPoints
-                .Select(node => node.Index);
+            return endPoints.Select(node => node.Index);
         }
 
-        private IEnumerable<Footprint> GetDistinctSteps(IEnumerable<Step> routes)
+        private static IEnumerable<Footprint> GetDistinctSteps(IEnumerable<Step> routes)
         {
             var stack = new Stack<Step>(routes);
             var distinctSteps = new Dictionary<Step, int>();
@@ -44,7 +43,7 @@ namespace Fluviatile.Grid.Serialization
                 stepIdCounter++;
                 distinctSteps.Add(step, stepIdCounter);
 
-                if (step.Previous != null)
+                if (step.Previous is not null)
                 {
                     stack.Push(step.Previous);
                 }

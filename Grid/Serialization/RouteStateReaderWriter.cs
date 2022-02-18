@@ -8,9 +8,19 @@ using System.Text;
 
 namespace Fluviatile.Grid
 {
-    public class RouteStateReaderWriter
+    public static class RouteStateReaderWriter
     {
-        public void WriteToFile(RouteLog stateToPersist, string filePath)
+        private static readonly JsonSerializerSettings JsonSerializerSettings = new()
+        {
+            Formatting = Formatting.Indented,
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            Converters =
+            {
+                new StringEnumConverter()
+            }
+        };
+
+        public static void WriteToFile(RouteLog stateToPersist, string filePath)
         {
             if (File.Exists(filePath))
             {
@@ -23,43 +33,23 @@ namespace Fluviatile.Grid
                 File.Move(filePath, backupFilePath);
             }
 
-            using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
-            using (var streamWriter = new StreamWriter(stream, Encoding.UTF8))
-            using (var jsonWriter = new JsonTextWriter(streamWriter))
-            {
-                var jsonSerializer = new JsonSerializer
-                {
-                    Formatting = Formatting.Indented,
-                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                    Converters =
-                    {
-                        new StringEnumConverter()
-                    }
-                };
+            using var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
+            using var streamWriter = new StreamWriter(stream, Encoding.UTF8);
+            using var jsonWriter = new JsonTextWriter(streamWriter);
 
-                jsonSerializer.Serialize(jsonWriter, stateToPersist);
-                Trace.WriteLine($"Wrote {stateToPersist.Steps.Count} steps to file '{filePath}'");
-            }
+            var jsonSerializer = JsonSerializer.Create(JsonSerializerSettings);
+            jsonSerializer.Serialize(jsonWriter, stateToPersist);
+            Trace.WriteLine($"Wrote {stateToPersist.Steps.Count} steps to file '{filePath}'");
         }
 
-        public RouteLog ReadFromFile(string filePath)
+        public static RouteLog ReadFromFile(string filePath)
         {
-            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (var streamReader = new StreamReader(stream, Encoding.UTF8))
-            using (var jsonReader = new JsonTextReader(streamReader))
-            {
-                var jsonSerializer = new JsonSerializer
-                {
-                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                    Converters =
-                            {
-                                new StringEnumConverter()
-                            }
-                };
+            using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var streamReader = new StreamReader(stream, Encoding.UTF8);
+            using var jsonReader = new JsonTextReader(streamReader);
 
-                return jsonSerializer.Deserialize<RouteLog>(jsonReader);
-            }
+            var jsonSerializer = JsonSerializer.Create(JsonSerializerSettings);
+            return jsonSerializer.Deserialize<RouteLog>(jsonReader);
         }
-
     }
 }

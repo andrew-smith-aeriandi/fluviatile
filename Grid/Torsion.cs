@@ -18,14 +18,14 @@
             return obj is Torsion torsion && torsion.Value == Value;
         }
 
-        public override int GetHashCode()
+        public static bool operator ==(Torsion left, Torsion right)
         {
-            return Value;
+            return left.Equals(right);
         }
 
-        public override string ToString()
+        public static bool operator !=(Torsion left, Torsion right)
         {
-            return Value.ToString();
+            return !(left == right);
         }
 
         public static Torsion operator +(Torsion lhs, Torsion rhs)
@@ -36,6 +36,16 @@
         public static Torsion operator -(Torsion lhs, Torsion rhs)
         {
             return new Torsion(lhs.Value - rhs.Value);
+        }
+
+        public override int GetHashCode()
+        {
+            return Value;
+        }
+
+        public override string ToString()
+        {
+            return Value.ToString();
         }
     }
 }

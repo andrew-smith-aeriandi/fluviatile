@@ -16,8 +16,6 @@ namespace RouteCounter
         {
             Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
 
-            var tableauReaderWriter = new RouteStateReaderWriter();
-
             if (!Directory.Exists(Configuration.FolderName))
             {
                 Directory.CreateDirectory(Configuration.FolderName);
@@ -28,102 +26,128 @@ namespace RouteCounter
             var concurrency = GetConcurrency(args);
             var persistInterval = GetPersistInterval(args);
 
-            var terminalNodePairs = tableau
-                .TerminalNodeUniqueCombinations()
-                .GroupBy(item => (TerminalNode)item.Node1)
-                .Select(grp => (startNode: grp.Key, endNodes: grp.Select(node => (TerminalNode)node.Node2).ToList()))
+            var terminalNodePairs = tableau.TerminalNodeUniqueCombinations()
+                .GroupBy(nodePair => (TerminalNode)nodePair.Node1)
+                .Select(grp => (
+                    startNode: grp.Key,
+                    endNodes: grp.Select(node => (TerminalNode)node.Node2).ToList()))
                 .ToList();
 
-            foreach (var nodePair in terminalNodePairs)
+            foreach (var (startNode, endNodes) in terminalNodePairs)
             {
-                Trace.WriteLine($"{nodePair.startNode.Index}: {string.Join(", ", nodePair.endNodes.Select(node => node.Index))}");
+                Trace.WriteLine($"{startNode.Index}: {string.Join(", ", endNodes.Select(node => node.Index))}");
             }
 
-            var jobs = new List<(int id, List<Step> steps, List<TerminalNode> endPoints, Progress progress)>();
+            var jobs = new List<(PathFinderJob, PathFinderState)>();
 
-            foreach (var nodePair in terminalNodePairs)
+            foreach (var (startNode, endNodes) in terminalNodePairs)
             {
-                var jobId = nodePair.startNode.Index;
-                var saveFilePath = Configuration.Filename(shape, jobId);
-                if (!File.Exists(saveFilePath))
+                var jobAdded = false;
+                var jobSpec = new PathFinderJobSpec
                 {
-                    jobs.Add((
-                        jobId,
-                        nodePair.startNode.Links.Select(link => new Step(link.Value, link.Key)).ToList(),
-                        nodePair.endNodes.ToList(),
-                        new Progress(0L, TimeSpan.Zero)));
-                }
-                else
+                    Name = startNode.Index.ToString(),
+                    Tableau = tableau,
+                    StartPoint = startNode,
+                    EndPoints = endNodes,
+                    ThreadCount = concurrency,
+                    MonitorInterval = persistInterval
+                };
+
+                if (persistInterval > TimeSpan.Zero)
                 {
-                    var savedState = tableauReaderWriter.ReadFromFile(saveFilePath);
+                    var saveFilePath = Configuration.Filename(shape, jobSpec.Name);
+                    Trace.WriteLine($"Save file path: {saveFilePath}");
 
-                    if (savedState.Shape != shape.Name)
+                    if (File.Exists(saveFilePath))
                     {
-                        throw new Exception($"The shape {savedState.Shape} specfied in file '{saveFilePath}' does not match the expected value {shape.Name}.");
-                    }
+                        var savedState = RouteStateReaderWriter.ReadFromFile(saveFilePath);
 
-                    if (savedState.Size != shape.Size)
-                    {
-                        throw new Exception($"The size {savedState.Size} specfied in file '{saveFilePath}' does not match the expected value {shape.Size}.");
-                    }
-
-                    var endPoints = savedState.TerminalNodes
-                        .Select(index => tableau.TerminalNodes[index])
-                        .ToList();
-
-                    var steps = new List<Step>();
-                    var queue = new Queue<(Step step, int id)>();
-                    var items = savedState.Steps.Where(x => x.PreviousId == 0).ToList();
-                    foreach (var item in items)
-                    {
-                        var step = new Step(
-                            tableau.Nodes[item.Position],
-                            new Direction(item.Direction));
-
-                        queue.Enqueue((step, item.Id));
-                    }
-
-                    while (queue.Any())
-                    {
-                        var (previousStep, id) = queue.Dequeue();
-                        items = savedState.Steps.Where(x => x.PreviousId == id).ToList();
-
-                        if (items.Count == 0)
+                        if (savedState.Shape != shape.Name)
                         {
-                            steps.Add(previousStep);
-                            continue;
+                            throw new Exception($"The shape {savedState.Shape} specfied in file '{saveFilePath}' does not match the expected value {shape.Name}.");
                         }
+
+                        if (savedState.Size != shape.Size)
+                        {
+                            throw new Exception($"The size {savedState.Size} specfied in file '{saveFilePath}' does not match the expected value {shape.Size}.");
+                        }
+
+                        var endPoints = savedState.TerminalNodes
+                            .Select(index => tableau.TerminalNodes[index])
+                            .ToList();
+
+                        var steps = new List<Step>();
+                        var queue = new Queue<(Step step, int id)>();
+                        var items = savedState.Steps.Where(x => x.PreviousId == 0).ToList();
 
                         foreach (var item in items)
                         {
-                            var direction = new Direction(item.Direction);
-                            var twist = direction - previousStep.Direction;
-
                             var step = new Step(
-                                tableau.Nodes[item.Position],
-                                direction,
-                                twist,
-                                previousStep);
+                                node: tableau.Nodes[item.Position],
+                                direction: new Direction(item.Direction));
 
                             queue.Enqueue((step, item.Id));
                         }
-                    }
 
-                    jobs.Add((
-                        jobId,
-                        steps,
-                        endPoints,
-                        savedState.Progress));
+                        while (queue.Any())
+                        {
+                            var (previousStep, id) = queue.Dequeue();
+                            items = savedState.Steps.Where(x => x.PreviousId == id).ToList();
+
+                            if (items.Count == 0)
+                            {
+                                steps.Add(previousStep);
+                                continue;
+                            }
+
+                            foreach (var item in items)
+                            {
+                                var direction = new Direction(item.Direction);
+                                var twist = direction - previousStep.Direction;
+
+                                var step = new Step(
+                                    node: tableau.Nodes[item.Position],
+                                    direction: direction,
+                                    twist: twist,
+                                    previous: previousStep);
+
+                                queue.Enqueue((step, item.Id));
+                            }
+                        }
+
+                        var pathFinderJob = new PathFinderJob(jobSpec); //TODO: paths
+                        var pathFinderState = new PathFinderState
+                        {
+                            Name = jobSpec.Name,
+                            Steps = steps,
+                            Progress = savedState.Progress
+                        };
+
+                        jobs.Add((pathFinderJob, pathFinderState));
+                        jobAdded = true;
+                    }
+                }
+
+                if (!jobAdded)
+                {
+                    var pathFinderJob = new PathFinderJob(jobSpec);
+                    var pathFinderState = new PathFinderState
+                    {
+                        Name = jobSpec.Name,
+                        Steps = startNode.Links.Select(link => new Step(link.Value, link.Key)).ToList(),
+                        Progress = new Progress()
+                    };
+
+                    jobs.Add((pathFinderJob, pathFinderState));
                 }
             }
 
             var tokenSource = new CancellationTokenSource();
-            var tasks = new List<Task<(int id, long routeCount, TimeSpan elapsedTime)>>();
+            var tasks = new List<Task<(IDictionary<byte[], int>, PathFinderState)>>();
 
-            foreach (var job in jobs)
+            foreach (var (pathFinderJob, pathFinderState) in jobs)
             {
-                var pathFinder = new PathFinder(tableau, job.id, job.endPoints, concurrency);
-                tasks.Add(pathFinder.Explore(job.steps, persistInterval, job.progress, tokenSource.Token));
+                tasks.Add(pathFinderJob.ExploreAsync(pathFinderState, tokenSource.Token));
             }
 
             await Task.WhenAll(tasks);
@@ -131,20 +155,36 @@ namespace RouteCounter
             var combinedElapsedTime = TimeSpan.Zero;
             var combinedRouteCount = 0L;
 
+            var combinedNodeCounts = new Dictionary<byte[], int>(new ByteSequenceEqualEqualityComparer());
+
             foreach (var task in tasks)
             {
-                var (id, routeCount, elapsedTime) = task.Result;
+                var (nodeCounts, pathFinderState) = task.Result;
 
-                combinedRouteCount += routeCount;
-                if (elapsedTime > combinedElapsedTime)
+                foreach (var nodeCount in nodeCounts)
                 {
-                    combinedElapsedTime = elapsedTime;
+                    if (!combinedNodeCounts.ContainsKey(nodeCount.Key))
+                    {
+                        combinedNodeCounts.Add(nodeCount.Key, 0);
+                    }
+
+                    combinedNodeCounts[nodeCount.Key] += nodeCount.Value;
                 }
 
-                Trace.WriteLine($"Result for job {id}: routes = {routeCount}, elapsed time = {elapsedTime}");
+                var uniqueSolutionCount = nodeCounts.Count(item => item.Value == 1);
+
+                combinedRouteCount += pathFinderState.Progress.RouteCount;
+                if (pathFinderState.Progress.ElapsedTime > combinedElapsedTime)
+                {
+                    combinedElapsedTime = pathFinderState.Progress.ElapsedTime;
+                }
+
+                Trace.WriteLine($"Result for job {pathFinderState.Name}: routes = {pathFinderState.Progress.RouteCount}, distinct solutions = {nodeCounts.Count}, unique solutions = {uniqueSolutionCount}, elapsed time = {pathFinderState.Progress.ElapsedTime}");
             }
 
-            Trace.WriteLine($"Overall result: routes = {combinedRouteCount}, elapsed time = {combinedElapsedTime}");
+            var combinedUniqueSolutionCount = combinedNodeCounts.Count(item => item.Value == 1);
+
+            Trace.WriteLine($"Overall result: routes = {combinedRouteCount}, distinct solutions = {combinedNodeCounts.Count}, unique solutions = {combinedUniqueSolutionCount}, elapsed time = {combinedElapsedTime}");
         }
 
         private static Shape GetShape(string[] args)
@@ -181,8 +221,8 @@ namespace RouteCounter
         {
             return TimeSpan.FromSeconds(double.Parse(
                 args.Select(arg => Regex.Match(arg, @"^-[pP]([0-9]+(\.[0-9]+)?)$"))
-                    .FirstOrDefault(m => m.Success)
-                    ?.Groups[1].Value ?? "10"));
+                    ?.FirstOrDefault(m => m.Success)
+                    ?.Groups[1].Value ?? "0"));
         }
     }
 }

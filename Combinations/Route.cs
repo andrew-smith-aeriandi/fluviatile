@@ -20,7 +20,7 @@ namespace Combinations
             {
                 yield return Value;
 
-                for (var iterator = Previous; iterator != null; iterator = iterator.Previous)
+                for (var iterator = Previous; iterator is not null; iterator = iterator.Previous)
                 {
                     yield return iterator.Value;
                 }

@@ -27,7 +27,7 @@ namespace WindowsFormsApp2
                     seed = arg;
                 }
             }
-            Application.Run(new Form1(seed));
+            Application.Run(new Canvas(seed));
 
             /*
             var builder = new TableauBuilder(1);

@@ -5,13 +5,13 @@ using System.Windows.Forms;
 
 namespace WindowsFormsApp2
 {
-    public partial class Form1 : Form
+    public partial class Canvas : Form
     {
         private Random _random;
         private Grid _grid;
         private Bitmap _memoryImage;
 
-        public Form1(int? seed)
+        public Canvas(int? seed)
         {
             InitializeComponent();
             CreateGrid(seed);
@@ -33,11 +33,6 @@ namespace WindowsFormsApp2
             PaintIt(gx);
 
             bitmap.Save(@"C:\Users\andrews\Documents\Grid.png", ImageFormat.Png);
-        }
-
-        private void PrintButton_Click(object sender, EventArgs e)
-        {
-            SaveGrid();
         }
 
         private void PaintIt(Graphics gx)
@@ -82,7 +77,7 @@ namespace WindowsFormsApp2
             }
         }
 
-        private void Form1_Paint(object sender, PaintEventArgs e)
+        private void Canvas_Paint(object sender, PaintEventArgs e)
         {
             PaintIt(CreateGraphics());
         }

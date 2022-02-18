@@ -4,7 +4,7 @@ namespace Fluviatile.Grid
 {
     public class NodePairCoordinatesEqualiyComparer : IEqualityComparer<NodePair>
     {
-        public static readonly NodePairCoordinatesEqualiyComparer Default = new NodePairCoordinatesEqualiyComparer();
+        public static readonly NodePairCoordinatesEqualiyComparer Default = new();
         private static readonly NodeCoordinatesEqualityComparer nodeComparer = NodeCoordinatesEqualityComparer.Default;
 
         public bool Equals(NodePair x, NodePair y)
@@ -19,7 +19,8 @@ namespace Fluviatile.Grid
                 return false;
             }
 
-            return nodeComparer.Equals(x.Node1, y.Node1) && nodeComparer.Equals(x.Node2, y.Node2);
+            return nodeComparer.Equals(x.Node1, y.Node1) &&
+                nodeComparer.Equals(x.Node2, y.Node2);
         }
 
         public int GetHashCode(NodePair obj)

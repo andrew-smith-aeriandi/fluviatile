@@ -2,17 +2,16 @@
 
 namespace Fluviatile.Grid
 {
-    public class Progress
+    public record Progress
     {
-        public Progress(
-            long routeCount,
-            TimeSpan elapsedTime)
+        public Progress()
         {
-            RouteCount = routeCount;
-            ElapsedTime = elapsedTime;
+            RouteCount = 0;
+            ElapsedTime = TimeSpan.Zero;
         }
 
-        public long RouteCount { get; }
-        public TimeSpan ElapsedTime { get; }
+        public long RouteCount { get; init; }
+
+        public TimeSpan ElapsedTime { get; init; }
     }
 }

@@ -31,15 +31,23 @@ namespace Fluviatile.Grid
 
         public int Scale { get; }
 
+        public abstract int Tiles { get; }
+
         public abstract Coordinates Centre { get; }
 
-        public abstract IEnumerable<Func<Coordinates, Coordinates>> SymmetryTransformations();
+        public abstract int[][] NodeCountPermutations { get; set; }
+
+        public abstract IEnumerable<ISymmetryTransform> SymmetryTransformations { get; }
+
+        public abstract Func<Step, IEnumerable<byte[]>> GetEquivalentPathsDelegate(NodePair nodePair);
 
         public abstract Tableau CreateTableau();
 
         public abstract bool IsFullTurn(Step step1, Step step2);
 
-        public abstract int[] CountNodes(Step path);
+        public abstract byte[] CountNodes(Step path);
+
+        public abstract byte[] CountNodesAndNormalise(Step path, int[][] permutations);
 
         public override string ToString()
         {

@@ -6,12 +6,12 @@ namespace Fluviatile.Grid
     {
         public NodePair(Node node1, Node node2)
         {
-            if (node1 == null)
+            if (node1 is null)
             {
                 throw new ArgumentNullException(nameof(node1));
             }
 
-            if (node2 == null)
+            if (node2 is null)
             {
                 throw new ArgumentNullException(nameof(node2));
             }

@@ -11,6 +11,7 @@ namespace Combinations
         }
 
         public HashSet<INode<T>> Nodes { get; }
+
         public HashSet<INode<T>> TerminalNodes { get; }
     }
 }

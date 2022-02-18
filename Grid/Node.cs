@@ -20,12 +20,12 @@ namespace Fluviatile.Grid
 
         public void AddLinks(IEnumerable<(Direction direction, Node node)> links)
         {
-            if (Links != null)
+            if (Links is not null)
             {
                 throw new InvalidOperationException();
             }
 
-            if (links == null)
+            if (links is null)
             {
                 throw new ArgumentNullException(nameof(links));
             }

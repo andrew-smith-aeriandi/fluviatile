@@ -4,7 +4,7 @@ namespace Fluviatile.Grid
 {
     public class NodeCoordinatesEqualityComparer : IEqualityComparer<Node>
     {
-        public static readonly NodeCoordinatesEqualityComparer Default = new NodeCoordinatesEqualityComparer();
+        public static readonly NodeCoordinatesEqualityComparer Default = new();
 
         public bool Equals(Node x, Node y)
         {
@@ -18,7 +18,7 @@ namespace Fluviatile.Grid
                 return false;
             }
 
-            return x.Coordinates.Equals(y.Coordinates);
+            return x.Coordinates == y.Coordinates;
         }
 
         public int GetHashCode(Node obj)

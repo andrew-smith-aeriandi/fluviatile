@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Combinations
@@ -15,9 +14,9 @@ namespace Combinations
             bool IsVertex(Coordinate vertex)
             {
                 return (vertex.X + vertex.Y) % 3 == 0 &&
-                       vertex.X % 3 != 0 &&
-                       vertex.Y > vertex.X - m &&
-                       vertex.Y < vertex.X + m;
+                    vertex.X % 3 != 0 &&
+                    vertex.Y > vertex.X - m &&
+                    vertex.Y < vertex.X + m;
             }
 
             var tiles = xrange
@@ -80,6 +79,5 @@ namespace Combinations
 
             return new Tableau<Coordinate>(tiles.Values, endpoints.Values);
         }
-
     }
 }
