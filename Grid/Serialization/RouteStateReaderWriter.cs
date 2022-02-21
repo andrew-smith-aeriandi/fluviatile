@@ -1,23 +1,20 @@
 ﻿using Fluviatile.Grid.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 
 namespace Fluviatile.Grid
 {
     public static class RouteStateReaderWriter
     {
-        private static readonly JsonSerializerSettings JsonSerializerSettings = new()
+        private static readonly JsonSerializerOptions JsonSerializerOptions = new()
         {
-            Formatting = Formatting.Indented,
-            ContractResolver = new CamelCasePropertyNamesContractResolver(),
-            Converters =
-            {
-                new StringEnumConverter()
-            }
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = {
+                new JsonStringEnumConverter()
+            },
+            WriteIndented = true
         };
 
         public static void WriteToFile(RouteLog stateToPersist, string filePath)
@@ -34,22 +31,16 @@ namespace Fluviatile.Grid
             }
 
             using var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
-            using var streamWriter = new StreamWriter(stream, Encoding.UTF8);
-            using var jsonWriter = new JsonTextWriter(streamWriter);
 
-            var jsonSerializer = JsonSerializer.Create(JsonSerializerSettings);
-            jsonSerializer.Serialize(jsonWriter, stateToPersist);
+            JsonSerializer.Serialize<RouteLog>(stream, stateToPersist, JsonSerializerOptions);
             Trace.WriteLine($"Wrote {stateToPersist.Steps.Count} steps to file '{filePath}'");
         }
 
         public static RouteLog ReadFromFile(string filePath)
         {
             using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var streamReader = new StreamReader(stream, Encoding.UTF8);
-            using var jsonReader = new JsonTextReader(streamReader);
 
-            var jsonSerializer = JsonSerializer.Create(JsonSerializerSettings);
-            return jsonSerializer.Deserialize<RouteLog>(jsonReader);
+            return JsonSerializer.Deserialize<RouteLog>(stream, JsonSerializerOptions);
         }
     }
 }
