@@ -1,11 +1,12 @@
 using Fluviatile.Grid;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json;
 using System.Windows.Forms;
+using Fluviatile.Grid.Random;
 
 namespace Canvas
 {
@@ -58,18 +59,19 @@ namespace Canvas
 
             if (!string.IsNullOrEmpty(pathJson))
             {
-                var path = JsonConvert.DeserializeObject<List<Coordinates>>(pathJson);
+                var path = JsonSerializer.Deserialize<List<Coordinates>>(pathJson);
                 grid.SetSequence(path.Select(coord => (coord.X, coord.Y)));
             }
             else if (!string.IsNullOrEmpty(countJson))
             {
-                var nodeCounts = JsonConvert.DeserializeObject<List<int>>(countJson);
+                var nodeCounts = JsonSerializer.Deserialize<List<int>>(countJson);
                 grid.SetNodeCounts(NodeCountHelper.MapNodeCounts(nodeCounts));
             }
             else
             {
-                await routeFinder.Initiate();
-                var nodeCounts = routeFinder.SelectNodeCount();
+                await routeFinder.Initiate(Configuration.NodeCountsFilename(shape));
+
+                var nodeCounts = routeFinder.SelectRandomNodeCount();
                 grid.SetNodeCounts(NodeCountHelper.MapNodeCounts(nodeCounts));
             }
 

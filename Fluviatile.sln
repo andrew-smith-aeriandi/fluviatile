@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29025.244
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Combinations", "Combinations\Combinations.csproj", "{7FC2817A-511B-438F-806E-0F79E2F232C1}"
 EndProject
@@ -14,6 +14,12 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grid.Tests", "Tests\Grid.Tests\Grid.Tests.csproj", "{4C777B1C-9B0F-4B45-9BC1-5B4EB9CCCF65}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Canvas", "Canvas\Canvas.csproj", "{B0631B6C-7ECC-4DB0-9CC5-BB3F9E8FF33A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SvgGenerator", "SvgGenerator\SvgGenerator.csproj", "{EDBD5F57-4348-45CF-AB04-486EDA26ACE6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solver", "Solver\Solver.csproj", "{9D53041B-9C5B-4B4D-BB9E-97538C8CD0DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolverTests", "Tests\SolverTests\SolverTests.csproj", "{7E517FB1-552F-46E9-B160-9C217BDA79A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,12 +47,25 @@ Global
 		{B0631B6C-7ECC-4DB0-9CC5-BB3F9E8FF33A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0631B6C-7ECC-4DB0-9CC5-BB3F9E8FF33A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0631B6C-7ECC-4DB0-9CC5-BB3F9E8FF33A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDBD5F57-4348-45CF-AB04-486EDA26ACE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDBD5F57-4348-45CF-AB04-486EDA26ACE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDBD5F57-4348-45CF-AB04-486EDA26ACE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDBD5F57-4348-45CF-AB04-486EDA26ACE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D53041B-9C5B-4B4D-BB9E-97538C8CD0DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D53041B-9C5B-4B4D-BB9E-97538C8CD0DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D53041B-9C5B-4B4D-BB9E-97538C8CD0DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D53041B-9C5B-4B4D-BB9E-97538C8CD0DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E517FB1-552F-46E9-B160-9C217BDA79A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E517FB1-552F-46E9-B160-9C217BDA79A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E517FB1-552F-46E9-B160-9C217BDA79A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E517FB1-552F-46E9-B160-9C217BDA79A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4C777B1C-9B0F-4B45-9BC1-5B4EB9CCCF65} = {6B874F10-3E2A-4818-8DDB-E0168D62D66A}
+		{7E517FB1-552F-46E9-B160-9C217BDA79A3} = {6B874F10-3E2A-4818-8DDB-E0168D62D66A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {88EF4810-A200-49CF-8827-384E91D42E14}

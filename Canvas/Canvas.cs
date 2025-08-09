@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Fluviatile.Grid;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
@@ -26,7 +26,7 @@ namespace Canvas
             _dirty = true;
             Invalidate();
 
-            var nodeCounts = _routeFinder.SelectNodeCount();
+            var nodeCounts = _routeFinder.SelectRandomNodeCount();
             _grid.SetNodeCounts(NodeCountHelper.MapNodeCounts(nodeCounts));
         }
 
@@ -84,7 +84,7 @@ namespace Canvas
                 gx.DrawLine(pen, x1, y1, x2, y2);
             }
 
-            foreach (var (x, y, count) in _grid.NodeCounts())
+            foreach (var (_, _, x, y, count, _) in _grid.NodeCounts())
             {
                 var text = count.ToString();
                 var textSize = TextRenderer.MeasureText(text, font);

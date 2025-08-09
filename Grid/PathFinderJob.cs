@@ -36,7 +36,7 @@ namespace Fluviatile.Grid
             _endPoints = new HashSet<TerminalNode>(spec.EndPoints);
             _threadCount = spec.ThreadCount;
             _monitorInterval = spec.MonitorInterval;
-            _saveFilePath = Configuration.Filename(_tableau.Shape, _name);
+            _saveFilePath = Configuration.RoutesFilename(_tableau.Shape, _name);
 
             _equivalentPathsLookup = _endPoints.ToDictionary(
                 endPoint => endPoint,

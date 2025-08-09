@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Fluviatile.Grid.Random;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
-namespace Canvas
+namespace Fluviatile.Grid
 {
     public class Grid : IGrid
     {
@@ -64,17 +65,18 @@ namespace Canvas
                 .Append(((0.0f, (float)Size), (tick, (float)Size + tick)));
         }
 
-        public IEnumerable<(float x, float y, int count)> NodeCounts()
+        public IEnumerable<(string group, int index, float x, float y, int count, int max)> NodeCounts()
         {
             var third = 1.0f / 3.0f;
+            var maxNodes = 2 * Size;
 
             for (var index = 0; index < Size; index++)
             {
                 var xcount = _sequence.Count(vertex => index == vertex.x / 3);
                 var xycount = _sequence.Count(vertex => index == (Size * 3 - vertex.y + vertex.x) / 3);
 
-                yield return ((float)index + third, -third, xcount);
-                yield return ((float)index + 2 * third, Size + third, xycount);
+                yield return ("x", index, (float)index + third, -third, xcount, maxNodes);
+                yield return ("z", index, (float)index + 2 * third, Size + third, xycount, maxNodes);
             }
 
             for (var index = 0; index < Size; index++)
@@ -82,8 +84,8 @@ namespace Canvas
                 var ycount = _sequence.Count(vertex => index == vertex.y / 3);
                 var yxcount = _sequence.Count(vertex => index == (Size * 3 - vertex.x + vertex.y) / 3);
 
-                yield return (-third, (float)index + third, ycount);
-                yield return ((float)Size + third, (float)index + 2 * third, yxcount);
+                yield return ("y", index, -third, (float)index + third, ycount, maxNodes);
+                yield return ("z", index, (float)Size + third, (float)index + 2 * third, yxcount, maxNodes);
             }
         }
 
@@ -188,6 +190,11 @@ namespace Canvas
         public IEnumerable<((float x, float y) from, (float x, float y) to)> MarginLines()
         {
             return Enumerable.Empty<((float x, float y) from, (float x, float y) to)>();
+        }
+
+        public IEnumerable<((int x, int y) position, IEnumerable<(float x, float y)> polygon)> GridCells()
+        {
+            throw new NotImplementedException();
         }
     }
 }

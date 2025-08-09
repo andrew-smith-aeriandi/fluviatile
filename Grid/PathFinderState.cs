@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Fluviatile.Grid.Serialization;
+using System.Collections.Generic;
 
 namespace Fluviatile.Grid
 {

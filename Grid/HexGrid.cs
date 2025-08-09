@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Fluviatile.Grid.Random;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
-namespace Canvas
+namespace Fluviatile.Grid
 {
     public class HexGrid : IGrid
     {
@@ -126,6 +127,54 @@ namespace Canvas
             }
         }
 
+        public IEnumerable<((int x, int y) position, IEnumerable<(float x, float y)> polygon)> GridCells()
+        {
+            var size3 = Size * 3;
+            var size6 = Size * 6;
+            var xrange = Enumerable.Range(1, size6);
+            var yrange = Enumerable.Range(1, size6);
+
+            static bool IsVertex((int x, int y) vertex)
+            {
+                return (vertex.x + vertex.y) % 3 == 0 &&
+                    vertex.x % 3 != 0;
+            }
+
+            var vertices = xrange
+                .SelectMany(x => yrange, (x, y) => (x, y))
+                    .Where(vertex => Math.Abs(vertex.y - vertex.x) <= size3)
+                    .Where(IsVertex)
+                    .ToList();
+
+            foreach (var (x, y) in vertices)
+            {
+                if (x % 3 == 1)
+                {
+                    // Triangle with vertex pointing upwards
+                    yield return (
+                        position: (x, y),
+                        polygon: new List<(float x, float y)>
+                        {
+                            ((x - 1) / 3f, (y - 2) / 3f),
+                            ((x + 2) / 3f, (y + 1) / 3f),
+                            ((x - 1) / 3f, (y + 1) / 3f)
+                        });
+                }
+                else if (x % 3 == 2)
+                {
+                    // Triangle with vertex pointing downwards
+                    yield return (
+                        position: (x, y),
+                        polygon: new List<(float x, float y)>
+                        {
+                            ((x + 1) / 3f, (y + 2) / 3f),
+                            ((x - 2) / 3f, (y - 1) / 3f),
+                            ((x + 1) / 3f, (y - 1) / 3f)
+                        });
+                }
+            }
+        }
+
         public IEnumerable<((float x, float y) from, (float x, float y) to)> GridLines()
         {
             var n1 = (float)Size;
@@ -153,49 +202,70 @@ namespace Canvas
             }
         }
 
-        public IEnumerable<(float x, float y, int count)> NodeCounts()
+        public IEnumerable<(string group, int index, float x, float y, int count, int max)> NodeCounts()
         {
             var n1 = (float)Size;
             var n2 = (float)(Size * 2);
             const float half = 0.5F;
 
-            var hasNodeCounts = _nodeCounts.Count == Size * 6;
+            var hasNodeCounts = _nodeCounts?.Count == Size * 6;
             var nodeCountIndex = 0;
 
             for (var z = 0; z < 2 * Size; z += 1)
             {
+                var maxNodes = z < Size
+                    ? 2 * (z + Size) + 1
+                    : 2 * (3 * Size - z) - 1;
+
                 var nodeCount = hasNodeCounts
                     ? _nodeCounts[nodeCountIndex++]
                     : _sequence.Count(vertex => z == (Size * 3 - vertex.x + vertex.y) / 3);
 
                 yield return (
-                    Math.Min(n2 + half, n2 + n1 - z) + Delta,
-                    Math.Min(n1 + 1 + z, n2 + half) + Delta,
-                    nodeCount);
+                    group: "z",
+                    index: z,
+                    x: Math.Min(n2 + half, n2 + n1 - z) + Delta,
+                    y: Math.Min(n1 + 1 + z, n2 + half) + Delta,
+                    count: nodeCount,
+                    max: maxNodes);
             }
 
             for (var y = 2 * Size - 1; y >= 0; y--)
             {
+                var maxNodes = y < Size
+                    ? 2 * (y + Size) + 1
+                    : 2 * (3 * Size - y) - 1;
+
                 var nodeCount = hasNodeCounts
                     ? _nodeCounts[nodeCountIndex++]
                     : _sequence.Count(vertex => y == vertex.y / 3);
 
                 yield return (
-                    Math.Max(-half, y - n1) - Delta,
-                    y + half,
-                    nodeCount);
+                    group: "y",
+                    index: y,
+                    x: Math.Max(-half, y - n1) - Delta,
+                    y: y + half,
+                    count: nodeCount,
+                    max: maxNodes);
             }
 
             for (var x = 0; x < 2 * Size; x++)
             {
+                var maxNodes = x < Size
+                    ? 2 * (x + Size) + 1
+                    : 2 * (3 * Size - x) - 1;
+
                 var nodeCount = hasNodeCounts
                     ? _nodeCounts[nodeCountIndex++]
                     : _sequence.Count(vertex => x == vertex.x / 3);
 
                 yield return (
-                    x + half,
-                    Math.Max(-half, x - n1) - Delta,
-                    nodeCount);
+                    group: "x",
+                    index: x,
+                    x: x + half,
+                    y: Math.Max(-half, x - n1) - Delta,
+                    count: nodeCount,
+                    max: maxNodes);
             }
         }
 

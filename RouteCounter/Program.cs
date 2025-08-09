@@ -1,4 +1,5 @@
 ﻿using Fluviatile.Grid;
+using Fluviatile.Grid.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -55,7 +56,7 @@ namespace RouteCounter
 
                 if (persistInterval > TimeSpan.Zero)
                 {
-                    var saveFilePath = Configuration.Filename(shape, jobSpec.Name);
+                    var saveFilePath = Configuration.RoutesFilename(shape, jobSpec.Name);
                     Trace.WriteLine($"Save file path: {saveFilePath}");
 
                     if (File.Exists(saveFilePath))

@@ -1,22 +1,25 @@
-﻿using System;
-
-namespace Canvas
+﻿namespace Fluviatile.Grid.Random
 {
     public class Pseudorandom : IRandom
     {
-        private readonly Random _random;
+        private readonly System.Random _random;
 
         public Pseudorandom(int seed)
         {
             Seed = seed;
-            _random = new Random(seed);
+            _random = new System.Random(seed);
         }
 
         public int Seed { get; }
 
         public int Choose(int count)
         {
-            return _random.Next(0, count);
+            return _random.Next(count);
+        }
+
+        public bool Try(int numerator, int denominator)
+        {
+            return _random.Next(denominator) < numerator;
         }
 
         public bool Try(double probability)

@@ -25,7 +25,6 @@ namespace Grid.Tests
         {
             // Arrange
             var shape = new Hexagon(2);
-
             var coordinates = new Coordinates(1, -1);
 
             // Act
@@ -37,19 +36,20 @@ namespace Grid.Tests
             Assert.Equal(
                 new List<Coordinates>
                 {
-                    new Coordinates(1, -1),
-                    new Coordinates(8, 1),
-                    new Coordinates(13, 8),
-                    new Coordinates(11, 13),
-                    new Coordinates(4, 11),
-                    new Coordinates(-1, 4),
-                    new Coordinates(8, 13),
-                    new Coordinates(1, 8),
-                    new Coordinates(-1, 1),
-                    new Coordinates(4, -1),
-                    new Coordinates(11, 4),
-                    new Coordinates(13, 11)
-                }, results);
+                    new(1, -1),
+                    new(8, 1),
+                    new(13, 8),
+                    new(11, 13),
+                    new(4, 11),
+                    new(-1, 4),
+                    new(8, 13),
+                    new(11, 4),
+                    new(-1, 1),
+                    new(1, 8),
+                    new(4, -1),
+                    new(13, 11)
+                },
+                results);
         }
 
         [Fact]

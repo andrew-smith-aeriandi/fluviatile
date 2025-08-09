@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 
-namespace Combinations
+namespace Combinations;
+
+public interface IRoute<out T>
 {
-    public interface IRoute<out T>
-    {
-        T Value { get; }
+    T Value { get; }
 
-        IRoute<T> Previous { get; }
+    IRoute<T> Previous { get; }
 
-        IEnumerable<T> AllValues { get; }
-    }
+    IEnumerable<T> AllValues { get; }
 }

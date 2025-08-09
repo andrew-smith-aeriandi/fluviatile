@@ -1,52 +1,60 @@
-﻿using Fluviatile.Grid;
+﻿using Fluviatile.Grid.Random;
+using Fluviatile.Grid.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Canvas
+namespace Fluviatile.Grid
 {
     public class RouteFinder
     {
         private readonly IRandom _random;
-        private List<byte[]> _uniqueCounts;
+        private IReadOnlyList<byte[]> _uniqueCounts;
 
         public RouteFinder(
             IRandom random,
             Shape shape)
         {
-            if (shape is null)
-            {
-                throw new ArgumentNullException(nameof(shape));
-            }
+            ArgumentNullException.ThrowIfNull(shape);
 
             Shape = shape;
             _random = random;
         }
 
-        public async Task Initiate()
+        public async Task Initiate(string filePath)
         {
-            var uniqueCounts = await GetUniqueNodeCountsAsync(Shape);
-            _uniqueCounts = uniqueCounts.ToList();
+            var uniqueCounts = UniqueNodeCountsSerializer.Load(filePath);
+            if (uniqueCounts is null)
+            {
+                uniqueCounts = [.. await GetUniqueNodeCountsAsync(Shape)];
+                UniqueNodeCountsSerializer.Save(filePath, uniqueCounts);
+            }
+
+            Interlocked.Exchange(ref _uniqueCounts, uniqueCounts);
         }
 
         public Shape Shape { get; }
 
-        public IReadOnlyList<int> SelectNodeCount()
+        public IReadOnlyList<byte[]> UniqueCounts => _uniqueCounts;
+
+        public IReadOnlyList<int> SelectRandomNodeCount()
         {
-            var selection = _uniqueCounts[_random.Choose(_uniqueCounts.Count)];
+            var selection = _uniqueCounts is not null
+                ? _uniqueCounts[_random.Choose(_uniqueCounts.Count)]
+                : default;
 
-            /*
-            var selection = _uniqueCounts
-                .OrderBy(x => x.Sum(y => (long)y))
-                .First();
-            */
-
-            return selection.Select(b => (int)b).ToList();
+            return selection?.Select(b => (int)b).ToList();
         }
 
-        private async Task<IEnumerable<byte[]>> GetUniqueNodeCountsAsync(Shape shape)
+        public IReadOnlyList<int> SelectRandomNodeCount(Func<byte[], bool> predicate)
+        {
+            var selection = _uniqueCounts.Where(predicate).RandomElement(_random);
+            return selection?.Select(b => (int)b).ToList();
+        }
+
+        private static async Task<IEnumerable<byte[]>> GetUniqueNodeCountsAsync(Shape shape)
         {
             const int ThreadCount = 1;
 
@@ -59,15 +67,17 @@ namespace Canvas
                     endNodes: grp.Select(node => (TerminalNode)node.Node2).ToList()))
                 .ToList();
 
-            var jobSpecs = terminalNodePairs.Select(nodePair =>
-                new PathFinderJobSpec
-                {
-                    Tableau = tableau,
-                    Name = nodePair.startNode.Index.ToString(),
-                    StartPoint = nodePair.startNode,
-                    EndPoints = nodePair.endNodes.ToList(),
-                    ThreadCount = ThreadCount
-                }).ToList();
+            var jobSpecs = terminalNodePairs
+                .Select(nodePair =>
+                    new PathFinderJobSpec
+                    {
+                        Tableau = tableau,
+                        Name = nodePair.startNode.Index.ToString(),
+                        StartPoint = nodePair.startNode,
+                        EndPoints = [.. nodePair.endNodes],
+                        ThreadCount = ThreadCount
+                    })
+                .ToList();
 
             var combinedNodeCounts = new Dictionary<byte[], int>(new ByteSequenceEqualEqualityComparer());
             var tokenSource = new CancellationTokenSource();
@@ -76,11 +86,10 @@ namespace Canvas
             foreach (var jobSpec in jobSpecs)
             {
                 var pathFinderJob = new PathFinderJob(jobSpec);
-
                 var pathFinderState = new PathFinderState
                 {
                     Name = jobSpec.Name,
-                    Steps = jobSpec.StartPoint.Links.Select(link => new Step(link.Value, link.Key)).ToList(),
+                    Steps = [.. jobSpec.StartPoint.Links.Select(link => new Step(link.Value, link.Key))],
                     Progress = new Progress()
                 };
 

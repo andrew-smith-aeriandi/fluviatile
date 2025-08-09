@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace Combinations
-{
-    public interface INode<out T>
-    {
-        T Value { get; }
+namespace Combinations;
 
-        IEnumerable<INode<T>> Links { get; }
-    }
+public interface INode<out T>
+{
+    T Value { get; }
+
+    IEnumerable<INode<T>> Links { get; }
 }

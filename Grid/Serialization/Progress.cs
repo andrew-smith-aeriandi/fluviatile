@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Fluviatile.Grid
+namespace Fluviatile.Grid.Serialization
 {
     public record Progress
     {

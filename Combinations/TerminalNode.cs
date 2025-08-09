@@ -1,10 +1,9 @@
-﻿namespace Combinations
+﻿namespace Combinations;
+
+public class TerminalNode : Node
 {
-    public class TerminalNode : Node
+    public TerminalNode(Coordinate coordinate)
+        : base(coordinate)
     {
-        public TerminalNode(Coordinate coordinate)
-            : base(coordinate)
-        {
-        }
     }
 }

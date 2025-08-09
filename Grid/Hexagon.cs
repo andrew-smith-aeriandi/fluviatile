@@ -8,16 +8,16 @@ namespace Fluviatile.Grid
     {
         private static readonly IComparer<byte[]> CounterComparer = new ByteArrayComparer();
 
-        public static readonly Torsion Left = new Torsion(-1);
-        public static readonly Torsion Right = new Torsion(1);
-        public static readonly Torsion UTurn = new Torsion(3);
+        public static readonly Torsion Left = new(-1);
+        public static readonly Torsion Right = new(1);
+        public static readonly Torsion UTurn = new(3);
 
-        public static Direction Azimuth000 = new Direction(0);
-        public static Direction Azimuth060 = new Direction(1);
-        public static Direction Azimuth120 = new Direction(2);
-        public static Direction Azimuth180 = new Direction(3);
-        public static Direction Azimuth240 = new Direction(4);
-        public static Direction Azimuth300 = new Direction(5);
+        public static readonly Direction Azimuth000 = new(0);
+        public static readonly Direction Azimuth060 = new(1);
+        public static readonly Direction Azimuth120 = new(2);
+        public static readonly Direction Azimuth180 = new(3);
+        public static readonly Direction Azimuth240 = new(4);
+        public static readonly Direction Azimuth300 = new(5);
 
         private static readonly Dictionary<Direction, Coordinates> Vectors = new()
         {

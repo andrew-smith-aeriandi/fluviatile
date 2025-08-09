@@ -1,10 +1,9 @@
-﻿using Fluviatile.Grid.Serialization;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Diagnostics;
-using System.IO;
 
-namespace Fluviatile.Grid
+namespace Fluviatile.Grid.Serialization
 {
     public static class RouteStateReaderWriter
     {

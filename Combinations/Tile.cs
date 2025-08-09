@@ -1,10 +1,9 @@
-﻿namespace Combinations
+﻿namespace Combinations;
+
+public class Tile : Node
 {
-    public class Tile : Node
+    public Tile(Coordinate coordinate)
+        : base(coordinate)
     {
-        public Tile(Coordinate coordinate)
-            : base(coordinate)
-        {
-        }
     }
 }

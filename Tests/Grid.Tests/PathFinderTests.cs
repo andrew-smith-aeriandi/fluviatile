@@ -1,4 +1,5 @@
 ﻿using Fluviatile.Grid;
+using Fluviatile.Grid.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -128,29 +129,37 @@ namespace Grid.Tests
                 new Step(gridNodes[0], Hexagon.Azimuth180)
             };
 
-            var pathFinder = new PathFinder(
-                tableau: tableau,
-                id: "999",
-                endPoints: endPoints,
-                threadCount: 1);
-
-            // Act
-            var progress = new Progress
+            var pathFinderJobSpec = new PathFinderJobSpec
             {
-                RouteCount = 0,
-                ElapsedTime = TimeSpan.Zero
+                Tableau = tableau,
+                Name = "999",
+                StartPoint = terminalNodes[0],
+                EndPoints = endPoints,
+                ThreadCount = 1
             };
 
-            var (id, routeCount, uniqueSolutionCount, _) = await pathFinder.Explore(
-                steps: steps,
-                monitorInterval: TimeSpan.Zero,
-                progress: progress,
+            var pathFinderJob = new PathFinderJob(pathFinderJobSpec);
+
+            // Act
+            var pathFinderState = new PathFinderState
+            {
+                Name = pathFinderJobSpec.Name,
+                Steps = steps,
+                Progress = new Progress
+                {
+                    RouteCount = 0,
+                    ElapsedTime = TimeSpan.Zero
+                }
+            };
+
+            var (uniqueSolutionCount, state) = await pathFinderJob.ExploreAsync(
+                state: pathFinderState,
                 cancellationToken: CancellationToken.None);
 
             // Assert
-            Assert.Equal("999", id);
-            Assert.Equal(5, routeCount);
-            //Assert.Equal(4, uniqueSolutionCount);
+            Assert.Equal("999", state.Name);
+            Assert.Equal(5, state.Progress.RouteCount);
+            Assert.Equal(5, uniqueSolutionCount.Count);
         }
     }
 }

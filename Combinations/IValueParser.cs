@@ -1,7 +1,6 @@
-﻿namespace Combinations
+﻿namespace Combinations;
+
+public interface IValueParser<out T>
 {
-    public interface IValueParser<out T>
-    {
-        T Parse(string text);
-    }
+    T Parse(string text);
 }
