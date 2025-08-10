@@ -1,6 +1,6 @@
 ﻿namespace Fluviatile.Grid
 {
-    public struct Aisle
+    public readonly struct Aisle
     {
         public Aisle(int direction, int index)
         {

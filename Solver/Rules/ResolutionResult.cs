@@ -1,5 +1,6 @@
 ﻿using Solver.Components;
-using Solver.Rules;
+
+namespace Solver.Rules;
 
 public record ResolutionResult(
     IComponent Component,

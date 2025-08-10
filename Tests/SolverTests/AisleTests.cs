@@ -137,13 +137,13 @@ public class AisleTests
 
         var tiles = new List<Tile>
         {
-            new(new Coordinates(-7, -1, 8), Grid.ShapeUp),
-            new(new Coordinates(-8, 1, 7), Grid.ShapeDown),
-            new(new Coordinates(-7, 2, 5), Grid.ShapeUp),
-            new(new Coordinates(-8, 4, 4), Grid.ShapeDown),
-            new(new Coordinates(-7, 5, 2), Grid.ShapeUp),
-            new(new Coordinates(-8, 7, 1), Grid.ShapeDown),
-            new(new Coordinates(-7, 8, -1), Grid.ShapeUp)
+            new(new Coordinates(-7, -1, 8), SolverGrid.ShapeUp),
+            new(new Coordinates(-8, 1, 7), SolverGrid.ShapeDown),
+            new(new Coordinates(-7, 2, 5), SolverGrid.ShapeUp),
+            new(new Coordinates(-8, 4, 4), SolverGrid.ShapeDown),
+            new(new Coordinates(-7, 5, 2), SolverGrid.ShapeUp),
+            new(new Coordinates(-8, 7, 1), SolverGrid.ShapeDown),
+            new(new Coordinates(-7, 8, -1), SolverGrid.ShapeUp)
         };
 
         // Act
@@ -177,12 +177,12 @@ public class AisleTests
 
         var tiles = new List<Tile>
         {
-            new(new Coordinates(-7, -1, 8), Grid.ShapeUp),
-            new(new Coordinates(-8, 1, 7), Grid.ShapeDown),
-            new(new Coordinates(-7, 2, 5), Grid.ShapeUp),
-            new(new Coordinates(-8, 4, 4), Grid.ShapeDown),
-            new(new Coordinates(-7, 5, 2), Grid.ShapeUp),
-            new(new Coordinates(-8, 7, 1), Grid.ShapeDown)
+            new(new Coordinates(-7, -1, 8), SolverGrid.ShapeUp),
+            new(new Coordinates(-8, 1, 7), SolverGrid.ShapeDown),
+            new(new Coordinates(-7, 2, 5), SolverGrid.ShapeUp),
+            new(new Coordinates(-8, 4, 4), SolverGrid.ShapeDown),
+            new(new Coordinates(-7, 5, 2), SolverGrid.ShapeUp),
+            new(new Coordinates(-8, 7, 1), SolverGrid.ShapeDown)
         };
 
         // Act
@@ -197,18 +197,18 @@ public class AisleTests
     [Fact]
     public void SetTiles_ValidLength_PopulatesTilesProperty()
     {
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var instance = new Aisle(Axis.X, 5, false, 7, 3);
 
         var tiles = new List<Tile>
         {
-            new(new Coordinates(7, -8, 1), Grid.ShapeDown),
-            new(new Coordinates(8, -7, -1), Grid.ShapeUp),
-            new(new Coordinates(7, -5, -2), Grid.ShapeDown),
-            new(new Coordinates(8, -4, -4), Grid.ShapeUp),
-            new(new Coordinates(7, -2, -5), Grid.ShapeDown),
-            new(new Coordinates(8, -1, -7), Grid.ShapeUp),
-            new(new Coordinates(7, 1, -8), Grid.ShapeDown)
+            new(new Coordinates(7, -8, 1), SolverGrid.ShapeDown),
+            new(new Coordinates(8, -7, -1), SolverGrid.ShapeUp),
+            new(new Coordinates(7, -5, -2), SolverGrid.ShapeDown),
+            new(new Coordinates(8, -4, -4), SolverGrid.ShapeUp),
+            new(new Coordinates(7, -2, -5), SolverGrid.ShapeDown),
+            new(new Coordinates(8, -1, -7), SolverGrid.ShapeUp),
+            new(new Coordinates(7, 1, -8), SolverGrid.ShapeDown)
         };
 
         var edges = tiles
@@ -246,18 +246,18 @@ public class AisleTests
     [Fact]
     public void Freeze_AfterSetTiles_FreezesInstance()
     {
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var instance = new Aisle(Axis.Y, 5, false, 7, 7);
 
         var tiles = new List<Tile>
         {
-            new(new Coordinates(1, 7, -8), Grid.ShapeDown),
-            new(new Coordinates(-1, 8, -7), Grid.ShapeUp),
-            new(new Coordinates(-2, 7, -5), Grid.ShapeDown),
-            new(new Coordinates(-4, 8, -4), Grid.ShapeUp),
-            new(new Coordinates(-5, 7, -2), Grid.ShapeDown),
-            new(new Coordinates(-7, 8, -1), Grid.ShapeUp),
-            new(new Coordinates(-8, 7, 1), Grid.ShapeDown)
+            new(new Coordinates(1, 7, -8), SolverGrid.ShapeDown),
+            new(new Coordinates(-1, 8, -7), SolverGrid.ShapeUp),
+            new(new Coordinates(-2, 7, -5), SolverGrid.ShapeDown),
+            new(new Coordinates(-4, 8, -4), SolverGrid.ShapeUp),
+            new(new Coordinates(-5, 7, -2), SolverGrid.ShapeDown),
+            new(new Coordinates(-7, 8, -1), SolverGrid.ShapeUp),
+            new(new Coordinates(-8, 7, 1), SolverGrid.ShapeDown)
         };
 
         var edges = tiles

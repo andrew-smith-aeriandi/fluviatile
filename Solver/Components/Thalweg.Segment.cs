@@ -276,7 +276,7 @@ public partial class Thalweg
                 node = node.Previous;
             }
 
-            _rotation +=  GetRotation(self) + GetRotation(self?.Next) - segment.Rotation;
+            _rotation += GetRotation(self) + GetRotation(self?.Next) - segment.Rotation;
             _terminationCount += segment.TerminationCount;
 
             InvalidateStringRepresention();
@@ -293,7 +293,7 @@ public partial class Thalweg
             var p2 = node.Value.Coordinates;
             var p3 = node.Next.Value.Coordinates;
 
-            return ((p2.X - p1.X) * (p3.Y - p2.Y) - (p2.Y - p1.Y) * (p3.X - p2.X)) / Grid.Scale;
+            return ((p2.X - p1.X) * (p3.Y - p2.Y) - (p2.Y - p1.Y) * (p3.X - p2.X)) / SolverGrid.Scale;
         }
 
         private static string GetStringRepresentation(LinkedList<ILinkable> links)

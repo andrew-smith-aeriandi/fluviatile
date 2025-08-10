@@ -1,6 +1,5 @@
 ﻿using Solver.Components;
 using Solver.Framework;
-using System.Diagnostics;
 
 namespace Solver.Rules;
 

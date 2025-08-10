@@ -5,7 +5,7 @@ namespace Fluviatile.Grid
 {
     public static class StepExtensions
     {
-        private static readonly ByteArrayEqualityComparer byteArrayComparer = new ByteArrayEqualityComparer();
+        private static readonly ByteArrayEqualityComparer ByteArrayComparer = new();
 
         public static Step TakeStep(this Step step, Torsion twist)
         {
@@ -69,7 +69,7 @@ namespace Fluviatile.Grid
 
             yield return path;
 
-            if (!byteArrayComparer.Equals(mirroredPath, path))
+            if (!ByteArrayComparer.Equals(mirroredPath, path))
             {
                 yield return mirroredPath;
             }
@@ -93,7 +93,7 @@ namespace Fluviatile.Grid
             yield return path;
             yield return invertedPath;
 
-            if (!byteArrayComparer.Equals(mirroredPath, path))
+            if (!ByteArrayComparer.Equals(mirroredPath, path))
             {
                 yield return mirroredPath;
                 yield return rotatedPath;

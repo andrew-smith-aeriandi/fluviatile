@@ -25,10 +25,7 @@ namespace Fluviatile.Grid
                 throw new InvalidOperationException();
             }
 
-            if (links is null)
-            {
-                throw new ArgumentNullException(nameof(links));
-            }
+            ArgumentNullException.ThrowIfNull(links);
 
             Links = links.ToDictionary(
                 item => item.direction,

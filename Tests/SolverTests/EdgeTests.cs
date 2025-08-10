@@ -26,7 +26,7 @@ public class EdgeTests
     public void Constructor_CoordinatesEqual_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         var coordinates1 = new Coordinates(-3, 6, -3);
         var coordinates2 = new Coordinates(-3, 6, -3);
@@ -44,7 +44,7 @@ public class EdgeTests
     public void Constructor_WithCoordinatesNormalToXAxis_ReturnsInstance()
     {
         // Act
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         var coordinates1 = new Coordinates(-3, 6, -3);
         var coordinates2 = new Coordinates(-3, 3, 0);
@@ -75,7 +75,7 @@ public class EdgeTests
     public void Constructor_WithCoordinatesNormalToYAxis_ReturnsInstance()
     {
         // Act
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         var coordinates1 = new Coordinates(-6, 6, 0);
         var coordinates2 = new Coordinates(-3, 6, -3);
@@ -106,7 +106,7 @@ public class EdgeTests
     public void Constructor_WithCoordinatesNormalToZAxis_ReturnsInstance()
     {
         // Act
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         var coordinates1 = new Coordinates(-3, 3, 0);
         var coordinates2 = new Coordinates(-6, 6, 0);
@@ -137,7 +137,7 @@ public class EdgeTests
     public void Constructor_EdgeWithVerticesOutOfOrder_OrdersVertices()
     {
         // Act
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         var coordinates1 = new Coordinates(-6, 6, 0);
         var coordinates2 = new Coordinates(-3, 3, 0);
@@ -165,7 +165,7 @@ public class EdgeTests
     public void Constructor_CoordinatesOnBorder_IsBorderTrue()
     {
         // Act
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         var coordinates1 = new Coordinates(-9, 6, 3);
         var coordinates2 = new Coordinates(-9, 3, 6);
@@ -193,7 +193,7 @@ public class EdgeTests
     public void Constructor_InvalidCoordinates_Throws()
     {
         // Act
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         var coordinates1 = new Coordinates(-6, 0, 6);
         var coordinates2 = new Coordinates(-3, 3, 0);
@@ -209,7 +209,7 @@ public class EdgeTests
     public void Freeze_WhenUnfrozen_Freezes()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         var coordinates1 = new Coordinates(-6, 0, 6);
         var coordinates2 = new Coordinates(-3, 0, 3);
@@ -228,7 +228,7 @@ public class EdgeTests
     public void SetTiles_WhenFrozen_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         var coordinates1 = new Coordinates(-6, 0, 6);
         var coordinates2 = new Coordinates(-3, 0, 3);
@@ -236,8 +236,8 @@ public class EdgeTests
         var instance = new Edge(coordinates1, coordinates2, grid);
         instance.Freeze();
 
-        var tile1 = new Tile(new Coordinates(-4, -1, 5), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(-5, 1, 4), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(-4, -1, 5), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(-5, 1, 4), SolverGrid.ShapeDown);
 
         // Act
         var ex = Assert.Throws<InvalidOperationException>(() =>
@@ -254,15 +254,15 @@ public class EdgeTests
     public void SetTiles_WhenUnfrozen_SetsTiles()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         var coordinates1 = new Coordinates(-6, 0, 6);
         var coordinates2 = new Coordinates(-3, 0, 3);
 
         var instance = new Edge(coordinates1, coordinates2, grid);
 
-        var tile1 = new Tile(new Coordinates(-4, -1, 5), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(-5, 1, 4), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(-4, -1, 5), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(-5, 1, 4), SolverGrid.ShapeDown);
 
         // Act
         instance.SetTiles(tile1, tile2);
@@ -279,15 +279,15 @@ public class EdgeTests
     public void SetTiles_WhenTilesInWrongOrder_SetsTilesInCorrectOrder()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         var coordinates1 = new Coordinates(-6, 0, 6);
         var coordinates2 = new Coordinates(-3, 0, 3);
 
         var instance = new Edge(coordinates1, coordinates2, grid);
 
-        var tile1 = new Tile(new Coordinates(-5, 1, 4), Grid.ShapeDown);
-        var tile2 = new Tile(new Coordinates(-4, -1, 5), Grid.ShapeUp);
+        var tile1 = new Tile(new Coordinates(-5, 1, 4), SolverGrid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(-4, -1, 5), SolverGrid.ShapeUp);
 
         // Act
         instance.SetTiles(tile1, tile2);
@@ -301,7 +301,7 @@ public class EdgeTests
     public void Resolve_WithEmptyWhenFrozen_Resolves()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var notifier = Substitute.For<INotifier>();
 
         var coordinates1 = new Coordinates(-6, 0, 6);
@@ -310,8 +310,8 @@ public class EdgeTests
         var instance = new Edge(coordinates1, coordinates2, grid);
         var hashCodeBefore = instance.GetHashCode();
 
-        var tile1 = new Tile(new Coordinates(-4, -1, 5), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(-5, 1, 4), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(-4, -1, 5), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(-5, 1, 4), SolverGrid.ShapeDown);
 
         instance.SetTiles(tile1, tile2);
         instance.Freeze();
@@ -334,7 +334,7 @@ public class EdgeTests
     public void Resolve_WithChannelWhenFrozen_Resolves()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var notifier = Substitute.For<INotifier>();
 
         var coordinates1 = new Coordinates(-6, 0, 6);
@@ -343,8 +343,8 @@ public class EdgeTests
         var instance = new Edge(coordinates1, coordinates2, grid);
         var hashCodeBefore = instance.GetHashCode();
 
-        var tile1 = new Tile(new Coordinates(-4, -1, 5), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(-5, 1, 4), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(-4, -1, 5), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(-5, 1, 4), SolverGrid.ShapeDown);
 
         instance.SetTiles(tile1, tile2);
         instance.Freeze();
@@ -367,7 +367,7 @@ public class EdgeTests
     public void IsExit_WithBorderResolvedAsChannel_ReturnsTrue()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var notifier = Substitute.For<INotifier>();
 
         var coordinates1 = new Coordinates(3, 6, -9);
@@ -376,7 +376,7 @@ public class EdgeTests
         var instance = new Edge(coordinates1, coordinates2, grid);
 
         var tile1 = (Tile?)null;
-        var tile2 = new Tile(new Coordinates(1, 7, -8), Grid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(1, 7, -8), SolverGrid.ShapeDown);
 
         instance.SetTiles(tile1, tile2);
         instance.Freeze();
@@ -397,7 +397,7 @@ public class EdgeTests
     public void IsExit_WithBorderResolvedAsEmpty_ReturnsFalse()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var notifier = Substitute.For<INotifier>();
 
         var coordinates1 = new Coordinates(3, 6, -9);
@@ -406,7 +406,7 @@ public class EdgeTests
         var instance = new Edge(coordinates1, coordinates2, grid);
 
         var tile1 = (Tile?)null;
-        var tile2 = new Tile(new Coordinates(1, 7, -8), Grid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(1, 7, -8), SolverGrid.ShapeDown);
 
         instance.SetTiles(tile1, tile2);
         instance.Freeze();
@@ -427,7 +427,7 @@ public class EdgeTests
     public void IsExit_WithBorderNotResolved_ReturnsNull()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         var coordinates1 = new Coordinates(3, 6, -9);
         var coordinates2 = new Coordinates(0, 9, -9);
@@ -435,7 +435,7 @@ public class EdgeTests
         var instance = new Edge(coordinates1, coordinates2, grid);
 
         var tile1 = (Tile?)null;
-        var tile2 = new Tile(new Coordinates(1, 7, -8), Grid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(1, 7, -8), SolverGrid.ShapeDown);
 
         instance.SetTiles(tile1, tile2);
         instance.Freeze();
@@ -455,7 +455,7 @@ public class EdgeTests
     public void IsExit_WithInteriorEdgeResolvedAsChannel_ReturnsFalse()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var notifier = Substitute.For<INotifier>();
 
         var coordinates1 = new Coordinates(3, 6, -9);
@@ -464,7 +464,7 @@ public class EdgeTests
         var instance = new Edge(coordinates1, coordinates2, grid);
 
         var tile1 = (Tile?)null;
-        var tile2 = new Tile(new Coordinates(1, 7, -8), Grid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(1, 7, -8), SolverGrid.ShapeDown);
 
         instance.SetTiles(tile1, tile2);
         instance.Freeze();

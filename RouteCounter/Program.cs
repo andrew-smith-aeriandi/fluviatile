@@ -11,8 +11,12 @@ using System.Threading.Tasks;
 
 namespace RouteCounter
 {
-    public class Program
+    public partial class Program
     {
+        private readonly static Regex SizeArgPattern = SizeArgRegex();
+        private readonly static Regex ConcurrencyArgPattern = ConcurrencyArgRegex();
+        private readonly static Regex PersistIntervalArgPattern = PersistIntervalArgRegex();
+
         public static async Task Main(string[] args)
         {
             Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
@@ -90,10 +94,10 @@ namespace RouteCounter
                             queue.Enqueue((step, item.Id));
                         }
 
-                        while (queue.Any())
+                        while (queue.Count > 0)
                         {
                             var (previousStep, id) = queue.Dequeue();
-                            items = savedState.Steps.Where(x => x.PreviousId == id).ToList();
+                            items = [.. savedState.Steps.Where(x => x.PreviousId == id)];
 
                             if (items.Count == 0)
                             {
@@ -135,7 +139,7 @@ namespace RouteCounter
                     var pathFinderState = new PathFinderState
                     {
                         Name = jobSpec.Name,
-                        Steps = startNode.Links.Select(link => new Step(link.Value, link.Key)).ToList(),
+                        Steps = [.. startNode.Links.Select(link => new Step(link.Value, link.Key))],
                         Progress = new Progress()
                     };
 
@@ -164,11 +168,7 @@ namespace RouteCounter
 
                 foreach (var nodeCount in nodeCounts)
                 {
-                    if (!combinedNodeCounts.ContainsKey(nodeCount.Key))
-                    {
-                        combinedNodeCounts.Add(nodeCount.Key, 0);
-                    }
-
+                    combinedNodeCounts.TryAdd(nodeCount.Key, 0);
                     combinedNodeCounts[nodeCount.Key] += nodeCount.Value;
                 }
 
@@ -188,42 +188,57 @@ namespace RouteCounter
             Trace.WriteLine($"Overall result: routes = {combinedRouteCount}, distinct solutions = {combinedNodeCounts.Count}, unique solutions = {combinedUniqueSolutionCount}, elapsed time = {combinedElapsedTime}");
         }
 
-        private static Shape GetShape(string[] args)
+        private static Hexagon GetShape(string[] args)
         {
-            var size = int.Parse(
-                args.Select(arg => Regex.Match(arg, "^-([1-9][0-9]*)$"))
-                    .FirstOrDefault(m => m.Success)
-                    ?.Groups[1].Value ?? "1");
+            var sizeArgMatch = args
+                .Select(arg => SizeArgPattern.Match(arg))
+                .FirstOrDefault(m => m.Success);
+
+            var size = sizeArgMatch is not null
+                ? int.Parse(sizeArgMatch.Groups[1].Value)
+                : 1;
 
             if (args.Length == 0)
             {
                 return new Hexagon(size);
             }
 
-            switch (args[0].ToLowerInvariant())
+            return args[0].ToLowerInvariant() switch
             {
-                case "hexagon":
-                    return new Hexagon(size);
-
-                default:
-                    throw new NotSupportedException($"Shape '{args[0]}' not currently supported.");
-            }
+                "hexagon" => new Hexagon(size),
+                _ => throw new NotSupportedException($"Shape '{args[0]}' not currently supported."),
+            };
         }
 
         private static int GetConcurrency(string[] args)
         {
-            return int.Parse(
-                args.Select(arg => Regex.Match(arg, "^-[cC]([1-9][0-9]*)$"))
-                    .FirstOrDefault(m => m.Success)
-                    ?.Groups[1].Value ?? "1");
+            var concurrencyArgMatch = args
+                .Select(arg => ConcurrencyArgPattern.Match(arg))
+                .FirstOrDefault(m => m.Success);
+
+            return concurrencyArgMatch is not null
+                ? int.Parse(concurrencyArgMatch.Groups[1].Value)
+                : 1;
         }
 
         private static TimeSpan GetPersistInterval(string[] args)
         {
-            return TimeSpan.FromSeconds(double.Parse(
-                args.Select(arg => Regex.Match(arg, @"^-[pP]([0-9]+(\.[0-9]+)?)$"))
-                    ?.FirstOrDefault(m => m.Success)
-                    ?.Groups[1].Value ?? "0"));
+            var persistIntervalArgMatch = args
+                .Select(arg => PersistIntervalArgPattern.Match(arg))
+                .FirstOrDefault(m => m.Success);
+
+            return persistIntervalArgMatch is not null
+                ? TimeSpan.FromSeconds(double.Parse(persistIntervalArgMatch.Groups[1].Value))
+                : TimeSpan.Zero;
         }
+
+        [GeneratedRegex("^-([1-9][0-9]*)$")]
+        private static partial Regex SizeArgRegex();
+
+        [GeneratedRegex("^-[cC]([1-9][0-9]*)$")]
+        private static partial Regex ConcurrencyArgRegex();
+
+        [GeneratedRegex(@"^-[pP]([0-9]+(\.[0-9]+)?)$")]
+        private static partial Regex PersistIntervalArgRegex();
     }
 }

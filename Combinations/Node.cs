@@ -10,8 +10,8 @@ public class Node : INode<Coordinate>
     public Node(Coordinate coordinate)
     {
         Value = coordinate;
-        _links = new HashSet<INode<Coordinate>>();
-        _countIndexes = new List<int>();
+        _links = [];
+        _countIndexes = [];
     }
 
     public Coordinate Value { get; }

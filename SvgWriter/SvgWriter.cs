@@ -1,33 +1,49 @@
 using Fluviatile.Grid;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using GridWriter.Settings;
 using System.Xml;
 
-namespace SvgGenerator;
+namespace GridWriter;
 
 public class SvgWriter
 {
-    private readonly static int Height = 800;
-    private readonly static int Width = 1000;
+    private const float Zero = 0f;
+    private const float One = 1f;
+    private const float Three = 3f;
+    private const float OneThird = 1f / 3f;
+    private const float TwoThirds = 2f / 3f;
+    private const float Half = 0.5f;
+    private const float Cos60 = 0.5f;
+    private const float Sin60 = 0.8660254f;
 
-    private readonly static float Scale = 80f;
-    private readonly static float XOffset = 4f;
-    private readonly static float YOffset = 2f;
-    private readonly static float XFactor = 0.5f;
-    private readonly static float YFactor = 0.5f * (float)Math.Sqrt(3);
-    private readonly static float TextSize = 0.4f * Scale;
-    private readonly static (float x, float y) Origin = Transform((0f, 0f));
-
-    private static (float x, float y) Transform((float x, float y) point) =>
-        (Scale * (XOffset + point.x - XFactor * point.y), Scale * (YOffset + point.y * YFactor));
+    private readonly int _size;
+    private readonly int _height;
+    private readonly int _width;
+    private readonly float _scale;
+    private readonly float _xoffset;
+    private readonly float _yoffset;
+    private readonly float _textSize;
+    private readonly (float x, float y) _origin;
 
     private readonly XmlWriter _xmlWriter;
 
-    public SvgWriter(XmlWriter xmlWriter)
+    public SvgWriter(XmlWriter xmlWriter, int size, SvgOptions options)
     {
         _xmlWriter = xmlWriter;
+
+        _size = size;
+        _height = options.Height;
+        _width = options.Width;
+        _scale = options.Scale;
+
+        _xoffset = _scale * (_size + 3f);
+        _yoffset = _scale * (_size + 2f);
+        _textSize = _scale * 0.4f;
+        _origin = Transform((0f, 0f));
     }
+
+    private (float x, float y) Transform((float x, float y) point) => (
+        _xoffset + _scale * (Cos60 * point.x + point.y),
+        _yoffset + _scale * (Sin60 * point.x));
 
     public void WritePolygon(
         IEnumerable<(float x, float y)> vertices,
@@ -38,21 +54,25 @@ public class SvgWriter
         // <polygon points="200,10 250,190 160,210" />
         _xmlWriter.WriteStartElement("polygon");
         _xmlWriter.WriteAttributeString("points", string.Join(" ", vertices.Select(p => $"{p.x},{p.y}")));
+
         if (!string.IsNullOrEmpty(id))
         {
             _xmlWriter.WriteAttributeString("id", id);
         }
+
         if (!string.IsNullOrEmpty(className))
         {
             _xmlWriter.WriteAttributeString("class", className);
         }
+
         if (metadata is not null && metadata.Count > 0)
         {
-            foreach(var (key, value) in metadata)
+            foreach (var (key, value) in metadata)
             {
                 _xmlWriter.WriteAttributeString($"data-{key}", value);
             }
         }
+
         _xmlWriter.WriteFullEndElement();
     }
 
@@ -65,14 +85,17 @@ public class SvgWriter
         // <polyline points="20,20 40,25 60,40 80,120 120,140 200,180" />
         _xmlWriter.WriteStartElement("polyline");
         _xmlWriter.WriteAttributeString("points", string.Join(" ", vertices.Select(p => $"{p.x},{p.y}")));
+
         if (!string.IsNullOrEmpty(id))
         {
             _xmlWriter.WriteAttributeString("id", id);
         }
+
         if (!string.IsNullOrEmpty(className))
         {
             _xmlWriter.WriteAttributeString("class", className);
         }
+
         if (metadata is not null && metadata.Count > 0)
         {
             foreach (var (key, value) in metadata)
@@ -80,6 +103,7 @@ public class SvgWriter
                 _xmlWriter.WriteAttributeString($"data-{key}", value);
             }
         }
+
         _xmlWriter.WriteFullEndElement();
     }
 
@@ -96,14 +120,17 @@ public class SvgWriter
         _xmlWriter.WriteAttributeString("y1", $"{start.y}");
         _xmlWriter.WriteAttributeString("x2", $"{end.x}");
         _xmlWriter.WriteAttributeString("y2", $"{end.y}");
+
         if (!string.IsNullOrEmpty(id))
         {
             _xmlWriter.WriteAttributeString("id", id);
         }
+
         if (!string.IsNullOrEmpty(className))
         {
             _xmlWriter.WriteAttributeString("class", className);
         }
+
         if (metadata is not null && metadata.Count > 0)
         {
             foreach (var (key, value) in metadata)
@@ -111,6 +138,7 @@ public class SvgWriter
                 _xmlWriter.WriteAttributeString($"data-{key}", value);
             }
         }
+
         _xmlWriter.WriteFullEndElement();
     }
 
@@ -127,14 +155,17 @@ public class SvgWriter
         _xmlWriter.WriteAttributeString("x", $"{start.x}");
         _xmlWriter.WriteAttributeString("y", $"{start.y}");
         _xmlWriter.WriteAttributeString("transform", $"rotate({rotation.degrees}, {rotation.x}, {rotation.y})");
+
         if (!string.IsNullOrEmpty(id))
         {
             _xmlWriter.WriteAttributeString("id", id);
         }
+
         if (!string.IsNullOrEmpty(className))
         {
             _xmlWriter.WriteAttributeString("class", className);
         }
+
         if (metadata is not null && metadata.Count > 0)
         {
             foreach (var (key, value) in metadata)
@@ -142,17 +173,20 @@ public class SvgWriter
                 _xmlWriter.WriteAttributeString($"data-{key}", value);
             }
         }
+
         _xmlWriter.WriteString(text);
         _xmlWriter.WriteFullEndElement();
     }
 
     public void WriteStartSvg(
+        IGrid grid,
         float height,
         float width)
     {
         // <svg height="500" width="500">
         _xmlWriter.WriteStartElement("svg");
         _xmlWriter.WriteAttributeString("id", "fluviatile-grid");
+        _xmlWriter.WriteAttributeString("data-size", $"{grid.Size}");
         _xmlWriter.WriteAttributeString("height", $"{height}");
         _xmlWriter.WriteAttributeString("width", $"{width}");
     }
@@ -164,7 +198,7 @@ public class SvgWriter
 
     public void WriteSvg(IGrid grid)
     {
-        WriteStartSvg(Height, Width);
+        WriteStartSvg(grid, _height, _width);
 
         foreach (var item in grid.GetMargins())
         {
@@ -183,19 +217,19 @@ public class SvgWriter
 
         foreach (var (position, polygon) in grid.GridCells())
         {
-            var (x, y) = Transform((x: position.x / 3f, y: position.y / 3f));
+            var (x, y) = Transform((x: position.x / Three, y: position.y / Three));
             var metadata = new Dictionary<string, string>
             {
                 ["u"] = position.x.ToString(),
                 ["v"] = position.y.ToString(),
-                ["x"] = (x - Origin.x).ToString(),
-                ["y"] = (y - Origin.y).ToString()
+                ["x"] = (x - _origin.x).ToString(),
+                ["y"] = (y - _origin.y).ToString()
             };
 
             WritePolygon(
                 vertices: polygon.Select(p => Transform(p)),
                 className: "cell",
-                id: $"cell-{position.x}-{position.y}",
+                id: string.Concat("cell", position.x.ToString("+#;-#"), position.y.ToString("+#;-#")),
                 metadata: metadata);
         }
 
@@ -206,15 +240,15 @@ public class SvgWriter
 
             var rotation = (group) switch
             {
-                "x" => -60f,
-                "y" => 0f,
-                "z" => 60f,
+                "x" => 0f,
+                "y" => 60f,
+                "z" => -60f,
                 _ => 0f
             };
 
             WriteText(
                 text: count.ToString(),
-                start: (xt - 0.3f * TextSize, yt + 0.4f * TextSize),
+                start: (xt - 0.3f * _textSize, yt + 0.4f * _textSize),
                 rotation: (rotation, xt, yt),
                 className: "node-count",
                 id: $"node-count-{group}{index}",
@@ -231,35 +265,35 @@ public class SvgWriter
 
         _xmlWriter.WriteStartElement("circle");
         _xmlWriter.WriteAttributeString("id", "channel-1");
-        _xmlWriter.WriteAttributeString("cx", $"{Origin.x}");
-        _xmlWriter.WriteAttributeString("cy", $"{Origin.y}");
+        _xmlWriter.WriteAttributeString("cx", $"{_origin.x}");
+        _xmlWriter.WriteAttributeString("cy", $"{_origin.y}");
         _xmlWriter.WriteAttributeString("r", "2");
         _xmlWriter.WriteAttributeString("class", "river");
         _xmlWriter.WriteFullEndElement(); // circle
 
-        var p = Transform((x: 1f / 3f, y: 2f / 3f));
-        var p0 = (x: p.x - Origin.x, y: p.y - Origin.y);
+        var p = Transform((x: TwoThirds, y: -OneThird));
+        var p0 = (x: p.x - _origin.x, y: p.y - _origin.y);
 
-        var radius = 0.5f * Scale;
-        var p1 = Transform((x: 0f, y: 0.5f));
-        var p2 = Transform((x: 0.5f, y: 0.5f));
-        var p3 = Transform((x: 0.5f, y: 1f));
+        var radius = Half * _scale;
+        var p1 = Transform((x: One, y: -Half));
+        var p2 = Transform((x: Half, y: Zero));
+        var p3 = Transform((x: Half, y: -Half));
 
         _xmlWriter.WriteStartElement("path");
         _xmlWriter.WriteAttributeString("id", "channel-7");
-        _xmlWriter.WriteAttributeString("d", $"M {p1.x - p0.x},{p1.y - p0.y} A {radius} {radius} 60 0 0 {p2.x - p0.x},{p2.y - p0.y}");
+        _xmlWriter.WriteAttributeString("d", $"M {p1.x - p0.x},{p1.y - p0.y} A {radius} {radius} 60 0 1 {p2.x - p0.x},{p2.y - p0.y}");
         _xmlWriter.WriteAttributeString("class", "river");
         _xmlWriter.WriteFullEndElement();
 
         _xmlWriter.WriteStartElement("path");
         _xmlWriter.WriteAttributeString("id", "channel-13");
-        _xmlWriter.WriteAttributeString("d", $"M {p2.x - p0.x},{p2.y - p0.y} A {radius} {radius} 60 0 0 {p3.x - p0.x},{p3.y - p0.y}");
+        _xmlWriter.WriteAttributeString("d", $"M {p2.x - p0.x},{p2.y - p0.y} A {radius} {radius} 60 0 1 {p3.x - p0.x},{p3.y - p0.y}");
         _xmlWriter.WriteAttributeString("class", "river");
         _xmlWriter.WriteFullEndElement();
 
         _xmlWriter.WriteStartElement("path");
         _xmlWriter.WriteAttributeString("id", "channel-11");
-        _xmlWriter.WriteAttributeString("d", $"M {p3.x - p0.x},{p3.y - p0.y} A {radius} {radius} 60 0 0 {p1.x - p0.x},{p1.y - p0.y}");
+        _xmlWriter.WriteAttributeString("d", $"M {p3.x - p0.x},{p3.y - p0.y} A {radius} {radius} 60 0 1 {p1.x - p0.x},{p1.y - p0.y}");
         _xmlWriter.WriteAttributeString("class", "river");
         _xmlWriter.WriteFullEndElement();
 
@@ -281,28 +315,28 @@ public class SvgWriter
         _xmlWriter.WriteAttributeString("class", "river");
         _xmlWriter.WriteFullEndElement();
 
-        var q = Transform((x: 2f / 3f, y: 1f / 3f));
-        var q0 = (x: q.x - Origin.x, y: q.y - Origin.y);
+        var q = Transform((x: OneThird, y: OneThird));
+        var q0 = (x: q.x - _origin.x, y: q.y - _origin.y);
 
-        var q1 = Transform((x: 1f, y: 0.5f));
-        var q2 = Transform((x: 0.5f, y: 0.5f));
-        var q3 = Transform((x: 0.5f, y: 0f));
+        var q1 = Transform((x: Zero, y: Half));
+        var q2 = Transform((x: Half, y: Zero));
+        var q3 = Transform((x: Half, y: Half));
 
         _xmlWriter.WriteStartElement("path");
         _xmlWriter.WriteAttributeString("id", "channel-49");
-        _xmlWriter.WriteAttributeString("d", $"M {q1.x - q0.x},{q1.y - q0.y} A {radius} {radius} 60 0 0 {q2.x - q0.x},{q2.y - q0.y}");
+        _xmlWriter.WriteAttributeString("d", $"M {q1.x - q0.x},{q1.y - q0.y} A {radius} {radius} 60 0 1 {q2.x - q0.x},{q2.y - q0.y}");
         _xmlWriter.WriteAttributeString("class", "river");
         _xmlWriter.WriteFullEndElement();
 
         _xmlWriter.WriteStartElement("path");
         _xmlWriter.WriteAttributeString("id", "channel-97");
-        _xmlWriter.WriteAttributeString("d", $"M {q2.x - q0.x},{q2.y - q0.y} A {radius} {radius} 60 0 0 {q3.x - q0.x},{q3.y - q0.y}");
+        _xmlWriter.WriteAttributeString("d", $"M {q2.x - q0.x},{q2.y - q0.y} A {radius} {radius} 60 0 1 {q3.x - q0.x},{q3.y - q0.y}");
         _xmlWriter.WriteAttributeString("class", "river");
         _xmlWriter.WriteFullEndElement();
 
         _xmlWriter.WriteStartElement("path");
         _xmlWriter.WriteAttributeString("id", "channel-81");
-        _xmlWriter.WriteAttributeString("d", $"M {q3.x - q0.x},{q3.y - q0.y} A {radius} {radius} 60 0 0 {q1.x - q0.x},{q1.y - q0.y}");
+        _xmlWriter.WriteAttributeString("d", $"M {q3.x - q0.x},{q3.y - q0.y} A {radius} {radius} 60 0 1 {q1.x - q0.x},{q1.y - q0.y}");
         _xmlWriter.WriteAttributeString("class", "river");
         _xmlWriter.WriteFullEndElement();
 
@@ -326,8 +360,15 @@ public class SvgWriter
 
         _xmlWriter.WriteFullEndElement(); // defs
 
-        WriteText("Save", Transform((-2.5f, -0.5f)), (0f, 0f, 0f), className: "button", id: "save-state");
-        WriteText("Revert", Transform((-2.5f, 0f)), (0f, 0f, 0f), className: "button", id: "revert-state");
+        var displayText = $"Counts: {grid.DisplayText}";
+        var displayTextMetadata = new Dictionary<string, string>
+        {
+            ["copy-text"] = grid.DisplayText
+        };
+
+        WriteText(displayText, (5f * _textSize, 2f * _textSize), (0f, 0f, 0f), className: "title", id: "display-text", metadata: displayTextMetadata);
+        WriteText("Save", (5f * _textSize, 4f * _textSize), (0f, 0f, 0f), className: "button", id: "save-state");
+        WriteText("Revert", (5f * _textSize, 5f * _textSize), (0f, 0f, 0f), className: "button", id: "revert-state");
 
         WriteEndSvg();
     }

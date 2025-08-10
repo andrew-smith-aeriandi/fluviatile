@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solver", "Solver\Solver.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolverTests", "Tests\SolverTests\SolverTests.csproj", "{7E517FB1-552F-46E9-B160-9C217BDA79A3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GridWriter", "SvgWriter\GridWriter.csproj", "{360DAAF8-2136-4B0F-9314-DAF072011F62}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{7E517FB1-552F-46E9-B160-9C217BDA79A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E517FB1-552F-46E9-B160-9C217BDA79A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E517FB1-552F-46E9-B160-9C217BDA79A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{360DAAF8-2136-4B0F-9314-DAF072011F62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{360DAAF8-2136-4B0F-9314-DAF072011F62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{360DAAF8-2136-4B0F-9314-DAF072011F62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{360DAAF8-2136-4B0F-9314-DAF072011F62}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

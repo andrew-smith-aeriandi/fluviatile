@@ -6,7 +6,7 @@ namespace Solver.Components;
 public class Tableau : IComponent
 {
     public Tableau(
-        Grid grid,
+        SolverGrid grid,
         Thalweg thalweg,
         IEnumerable<Aisle> aisles,
         IEnumerable<Tile> tiles,
@@ -49,7 +49,7 @@ public class Tableau : IComponent
 
     public int ResolvedEmptyCount => EmptyCount - UnresolvedEmptyCount;
 
-    public Grid Grid { get; }
+    public SolverGrid Grid { get; }
 
     public Thalweg Thalweg { get; }
 

@@ -1,4 +1,7 @@
-﻿using Solver.Framework;
+﻿using Fluviatile.Grid;
+using GridWriter;
+using GridWriter.Settings;
+using Solver.Framework;
 using Solver.Rules;
 
 namespace Solver;
@@ -11,7 +14,7 @@ internal class Program
     static void Main(string[] args)
     {
         var factory = new TableauFactory();
-        var grid = new Grid(Size);
+        var solverGrid = new SolverGrid(Size);
 
         //int[] channelCounts = [3, 6, 8, 10, 6, 3, 6, 6, 8, 8, 8, 0, 3, 6, 5, 8, 9, 5]; // Solved: True, Rule Invocations: 447, Reasons: 11
         //int[] channelCounts = [7, 5, 6, 8, 5, 7, 5, 8, 6, 10, 7, 2, 3, 6, 10, 8, 4, 7]; // Solved: True, Rule Invocations: 445, Reasons: 9
@@ -34,24 +37,26 @@ internal class Program
         //int[] channelCounts = [5, 4, 6, 8, 9, 3, 7, 4, 9, 8, 5, 2, 5, 2, 7, 10, 6, 5]; // Solved: True, Rule Invocations: 448, Reasons: 7
         //int[] channelCounts = [5, 4, 4, 8, 6, 6, 5, 6, 8, 8, 6, 0, 4, 6, 2, 10, 7, 4]; // Solved: True, Rule Invocations: 448, Reasons: 8
         //int[] channelCounts = [4, 4, 7, 7, 6, 3, 3, 7, 9, 2, 8, 2, 3, 6, 7, 5, 4, 6]; // Solved: True, Rule Invocations: 213, Reasons: 8
+        //int[] channelCounts = [3, 6, 6, 11, 5, 5, 4, 6, 8, 7, 7, 4, 5, 6, 10, 6, 6, 3]; // Solved: True, Rule Invocations: 456, Reasons: 9
         //int[] channelCounts = [7, 6, 7, 7, 6, 7, 7, 5, 8, 9, 8, 3, 5, 5, 10, 6, 8, 6]; // not solved - very hard with hypotheticals required
+        //int[] channelCounts = [0, 0, 5, 6, 5, 6, 3, 6, 4, 6, 2, 1, 5, 4, 4, 6, 3, 0]; // Solved: True, Rule Invocations: 450, Reasons: 10
         //int[] channelCounts = [4, 7, 10, 8, 6, 7, 6, 8, 9, 11, 5, 3, 3, 8, 10, 7, 8, 6]; // not solved
         //int[] channelCounts = [4, 8, 5, 6, 5, 7, 3, 7, 9, 7, 6, 3, 3, 7, 8, 9, 4, 4]; // not solved
-        //int[] channelCounts = [5, 6, 8, 7, 5, 5, 6, 8, 8, 8, 6, 0, 0, 6, 8, 7, 8, 7]; // not solved
+        int[] channelCounts = [5, 6, 8, 7, 5, 5, 6, 8, 8, 8, 6, 0, 0, 6, 8, 7, 8, 7]; // not solved
         //int[] channelCounts = [5, 7, 7, 8, 6, 7, 6, 8, 9, 8, 7, 2, 3, 6, 9, 10, 6, 6]; // not solved
         //int[] channelCounts = [3, 8, 8, 9, 5, 7, 7, 8, 8, 8, 7, 2, 3, 7, 8, 8, 9, 5]; // not solved
-        int[] channelCounts = [5, 7, 8, 7, 8, 6, 7, 6, 10, 10, 5, 3, 4, 4, 11, 8, 9, 5];
+        //int[] channelCounts = [5, 7, 8, 7, 8, 6, 7, 6, 10, 10, 5, 3, 4, 4, 11, 8, 9, 5]; // not solved
 
-        var tableau = factory.Create(grid, channelCounts);
+        var tableau = factory.Create(solverGrid, channelCounts);
 
         var rules = new List<IRule>
         {
             new AisleCountRule(),
             new MeanderRule(),
             new TileEdgeRule(),
-            new AisleResolutionPatternRule(grid),
-            new AisleCountIntersectionRule(grid),
-            new ExitCountRule(grid),
+            new AisleResolutionPatternRule(solverGrid),
+            new AisleCountIntersectionRule(solverGrid),
+            new ExitCountRule(solverGrid),
             new ChannelContinuityRule(),
             new TarjansRule()
         };
@@ -108,5 +113,18 @@ internal class Program
 
         Console.WriteLine($"Solved: {isSolved}, Rule Invocations: {ruleInvocations}, Reasons: {reasons.Length}");
         Console.WriteLine();
+
+        if (!isSolved)
+        {
+            var grid = new HexGrid(tableau.Grid.Size);
+
+            //TODO:
+
+            var options = new GridHtmlWriterOptions();
+            var htmlWriter = new GridHtmlWriter(options);
+            var outputPath = htmlWriter.Write(grid);
+
+            Console.WriteLine($"Output written to:\n{outputPath}");
+        }
     }
 }

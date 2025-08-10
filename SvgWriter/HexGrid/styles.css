@@ -1,0 +1,84 @@
+﻿svg text {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+svg text::selection {
+    background: none;
+}
+
+#fluviatile-grid {
+    cursor: pointer;
+}
+
+#fluviatile-grid.tracing {
+    cursor: grabbing;
+}
+
+.margin {
+    pointer-events: none;
+    fill: LightSteelBlue;
+    fill-opacity: 1.0;
+    stroke: White;
+    stroke-width: 0;
+    stroke-linejoin: round;
+}
+
+.margin.line {
+    stroke-width: 2;
+}
+
+.title {
+    font: bold 24px sans-serif;
+    fill: SlateGray;
+}
+
+.button {
+    cursor: default;
+    font: bold 24px sans-serif;
+    fill: SlateGray;
+}
+
+.button:hover {
+    fill: DarkSlateGray;
+}
+
+.node-count {
+    pointer-events: none;
+    font: bold 24px sans-serif;
+    fill: White;
+}
+
+.node-count.error {
+    fill: Red;
+}
+
+.cell {
+    fill: LightGreen;
+    fill-opacity: 1.0;
+    stroke: Linen;
+    stroke-width: 2;
+    stroke-linejoin: round;
+}
+
+.cell.plain {
+    fill: ForestGreen;
+}
+
+.river {
+    pointer-events: none;
+    fill: none;
+    stroke: Teal;
+    stroke-width: 3;
+    stroke-linejoin: round;
+}
+
+.trace {
+    pointer-events: none;
+    fill: none;
+    stroke: Teal;
+    stroke-width: 1;
+    stroke-dasharray: 2;
+}

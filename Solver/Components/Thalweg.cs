@@ -6,7 +6,7 @@ namespace Solver.Components;
 
 public partial class Thalweg : IComponent
 {
-    private readonly Grid _grid;
+    private readonly SolverGrid _grid;
     private readonly int _tileCount;
     private int _linkedTileCount;
 
@@ -15,7 +15,7 @@ public partial class Thalweg : IComponent
     private readonly List<Segment> _segments;
 
     public Thalweg(
-        Grid grid,
+        SolverGrid grid,
         int tileCount)
     {
         ArgumentNullException.ThrowIfNull(grid);
@@ -31,10 +31,10 @@ public partial class Thalweg : IComponent
         _tileCount = tileCount;
         _linkedTileCount = 0;
 
-        var linkCount = tileCount + Grid.ExitCount;
+        var linkCount = tileCount + SolverGrid.ExitCount;
         _membership = new(linkCount, LocationComparer.Default);
         _segments = new(linkCount / 2);
-        _terminations = new List<Termination>(Grid.ExitCount);
+        _terminations = new List<Termination>(SolverGrid.ExitCount);
     }
 
     public IReadOnlyList<Segment> Segments => _segments;
@@ -49,11 +49,11 @@ public partial class Thalweg : IComponent
 
     public IReadOnlyList<Termination> Exits => _terminations;
 
-    public int ExitCount => Grid.ExitCount;
+    public int ExitCount => SolverGrid.ExitCount;
 
     public int ResolvedExitCount => _terminations.Count;
 
-    public int UnresolvedExitCount => Grid.ExitCount - _terminations.Count;
+    public int UnresolvedExitCount => SolverGrid.ExitCount - _terminations.Count;
 
     public bool TryGetSegment(ILinkable link, out Segment? segment)
     {
@@ -186,14 +186,14 @@ public partial class Thalweg : IComponent
             segment ??= otherSegment ?? throw new UnreachableException("Both segments cannot be null.");
             tile ??= otherTile ?? throw new UnreachableException("Both tiles cannot be null.");
 
-            if (_grid.TryGetAdjacentCoordinates(tile, edge.NormalAxis, out var coordinates))
+            if (SolverGrid.TryGetAdjacentCoordinates(tile, edge.NormalAxis, out var coordinates))
             {
                 var termination = new Termination(coordinates, edge);
                 if (!_membership.ContainsKey(termination))
                 {
-                    if (_terminations.Count >= Grid.ExitCount)
+                    if (_terminations.Count >= SolverGrid.ExitCount)
                     {
-                        throw new InvalidOperationException($"Number of exits cannot exceed {Grid.ExitCount}");
+                        throw new InvalidOperationException($"Number of exits cannot exceed {SolverGrid.ExitCount}");
                     }
 
                     if (tile == segment.First)
@@ -216,14 +216,14 @@ public partial class Thalweg : IComponent
             // Create a new channel segment linking tile to termination
             tile ??= otherTile ?? throw new UnreachableException("Both tiles cannot be null.");
 
-            if (_grid.TryGetAdjacentCoordinates(tile, edge.NormalAxis, out var coordinates))
+            if (SolverGrid.TryGetAdjacentCoordinates(tile, edge.NormalAxis, out var coordinates))
             {
                 var termination = new Termination(coordinates, edge);
                 if (!_membership.ContainsKey(termination))
                 {
-                    if (_terminations.Count >= Grid.ExitCount)
+                    if (_terminations.Count >= SolverGrid.ExitCount)
                     {
-                        throw new InvalidOperationException($"Number of exits cannot exceed {Grid.ExitCount}");
+                        throw new InvalidOperationException($"Number of exits cannot exceed {SolverGrid.ExitCount}");
                     }
 
                     var newSegment = new Segment(this, tile, termination);

@@ -6,8 +6,8 @@ public class Tableau<T>
 {
     public Tableau(IEnumerable<INode<T>> nodes, IEnumerable<INode<T>> terminalNodes)
     {
-        Nodes = new HashSet<INode<T>>(nodes);
-        TerminalNodes = new HashSet<INode<T>>(terminalNodes);
+        Nodes = [.. nodes];
+        TerminalNodes = [.. terminalNodes];
     }
 
     public HashSet<INode<T>> Nodes { get; }

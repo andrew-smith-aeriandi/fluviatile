@@ -9,7 +9,7 @@ public class GridTests
     {
         // Act
         var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
-            new Grid(0));
+            new SolverGrid(0));
 
         // Assert
         Assert.Equal("size", ex.ParamName);
@@ -20,7 +20,7 @@ public class GridTests
     public void Constructor_ValidSize_ReturnsInstance()
     {
         // Act
-        var instance = new Grid(3);
+        var instance = new SolverGrid(3);
 
         // Assert
         Assert.NotNull(instance);
@@ -33,7 +33,7 @@ public class GridTests
         Assert.Equal(54, instance.TileCount);
         Assert.Equal(90, instance.EdgeCount);
 
-        Assert.Equal(3, Grid.Scale);
+        Assert.Equal(3, SolverGrid.Scale);
         Assert.Equal(9, instance.Radius);
 
         var expectedVertices = new List<Coordinates>
@@ -96,7 +96,7 @@ public class GridTests
     public void CoordinateLength_ReturnsExpectedValue(int indexValue, bool fromEnd, int expectedResult)
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var index = new Index(indexValue, fromEnd);
 
         // Act
@@ -110,7 +110,7 @@ public class GridTests
     public void Axes_Enumerates_ReturnsAxes()
     {
         // Assert
-        Assert.Equal([Axis.X, Axis.Y, Axis.Z], Grid.Axes);
+        Assert.Equal([Axis.X, Axis.Y, Axis.Z], SolverGrid.Axes);
     }
 
     [Theory]
@@ -123,7 +123,7 @@ public class GridTests
     public void AisleTileCount_ValidIndex_ReturnsExpectedValue(int index, int expectedValue)
     {
         // Arrange
-        var instance = new Grid(3);
+        var instance = new SolverGrid(3);
 
         // Act
         var result = instance.AisleTileCount(index);
@@ -138,7 +138,7 @@ public class GridTests
     public void AisleTileCount_InvalidIndex_Throws(int index)
     {
         // Arrange
-        var instance = new Grid(3);
+        var instance = new SolverGrid(3);
 
         // Act
         var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
@@ -155,11 +155,11 @@ public class GridTests
     public void GetTileOrientation_WhenCentre_Returns(int x, int y, Orientation expectedResult)
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var coordinates = new Coordinates(x, y);
 
         // Act
-        var result = grid.GetTileOrientation(coordinates);
+        var result = SolverGrid.GetTileOrientation(coordinates);
 
         // Assert
         Assert.Equal(expectedResult, result);
@@ -170,12 +170,12 @@ public class GridTests
     public void GetTileOrientation_WhenNotCentre_Throws(int x, int y)
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var coordinates = new Coordinates(x, y);
 
         // Act
         var ex = Assert.Throws<ArgumentException>(() =>
-            grid.GetTileOrientation(coordinates));
+            SolverGrid.GetTileOrientation(coordinates));
 
         // Assert
         Assert.Equal("centre", ex.ParamName);
@@ -206,7 +206,7 @@ public class GridTests
     public void TryGetAisleIndex_ValidCoordinate_ReturnsTrue(int coordinate, bool expectedResult, int expectedIndex)
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         // Act
         var result = grid.TryGetAisleIndex(coordinate, out var index);
@@ -220,7 +220,7 @@ public class GridTests
     public void GetEdgeCoordinates_With3Vertices_EnumeratesEdges()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         var vertices = new List<Coordinates>
         {
@@ -262,7 +262,7 @@ public class GridTests
     public void InRange_WithCoordinate_ReturnsExpectedBool(int coordinate, bool expectedResult)
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         // Act
         var result = grid.InRange(coordinate);
@@ -275,7 +275,7 @@ public class GridTests
     [InlineData(-6, 10, false)]
     [InlineData(-10, 7, false)]
     [InlineData(-9, 3, true)]
-    [InlineData(-3, 6,  true)]
+    [InlineData(-3, 6, true)]
     [InlineData(0, 0, true)]
     [InlineData(6, -3, true)]
     [InlineData(9, -6, true)]
@@ -284,7 +284,7 @@ public class GridTests
     public void InRange_WithCoordinates_ReturnsExpectedBool(int x, int y, bool expectedResult)
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var coordinates = new Coordinates(x, y);
 
         // Act
@@ -298,7 +298,7 @@ public class GridTests
     public void TryGetTileCentreCoordinates_OrientationUpInRange_ReturnsTrue()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         // Act
         var result = grid.TryGetTileCentreCoordinates(Orientation.Up, 4, 2, out var centre);
@@ -312,7 +312,7 @@ public class GridTests
     public void TryGetTileCentreCoordinates_OrientationDownInRange_ReturnsTrue()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         // Act
         var result = grid.TryGetTileCentreCoordinates(Orientation.Down, 4, 2, out var centre);
@@ -326,7 +326,7 @@ public class GridTests
     public void TryGetTileCentreCoordinates_OrientationUpOutOfRange_ReturnsFalse()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         // Act
         var result = grid.TryGetTileCentreCoordinates(Orientation.Up, 4, 4, out var centre);
@@ -340,7 +340,7 @@ public class GridTests
     public void TryGetTileCentreCoordinates_OrientationDownOutOfRange_ReturnsTrue()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         // Act
         var result = grid.TryGetTileCentreCoordinates(Orientation.Down, 6, 2, out var centre);

@@ -16,12 +16,16 @@ namespace Fluviatile.Grid
 
         public Grid(int size, double minStepsPercentage, IRandom random)
         {
-            Size = size;
             _minSteps = (int)(minStepsPercentage * size * size * 2);
             _random = random;
+
+            Size = size;
+            DisplayText = _random.Seed.ToString();
         }
 
         public int Size { get; }
+
+        public string DisplayText { get; }
 
         public void CreateSequence()
         {
@@ -41,7 +45,7 @@ namespace Fluviatile.Grid
 
         public void SetSequence(IEnumerable<(int x, int y)> sequence)
         {
-            Interlocked.Exchange(ref _sequence, sequence.ToList());
+            Interlocked.Exchange(ref _sequence, [.. sequence]);
         }
 
         public void SetNodeCounts(IEnumerable<int> nodeCounts)
@@ -91,7 +95,7 @@ namespace Fluviatile.Grid
 
         private bool TryCreateSequence(int minSteps, out List<(int x, int y)> sequence)
         {
-            sequence = new List<(int x, int y)>();
+            sequence = [];
 
             var size3 = Size * 3;
             var xrange = Enumerable.Range(1, size3);
@@ -167,11 +171,6 @@ namespace Fluviatile.Grid
             }
         }
 
-        public string DisplayText()
-        {
-            return _random.Seed.ToString();
-        }
-
         public void Dump()
         {
             foreach (var (x, y) in _sequence)
@@ -189,10 +188,20 @@ namespace Fluviatile.Grid
 
         public IEnumerable<((float x, float y) from, (float x, float y) to)> MarginLines()
         {
-            return Enumerable.Empty<((float x, float y) from, (float x, float y) to)>();
+            return [];
         }
 
         public IEnumerable<((int x, int y) position, IEnumerable<(float x, float y)> polygon)> GridCells()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetInitialState(IEnumerable<NodeState> state)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<NodeState> IGrid.GetInitialState()
         {
             throw new NotImplementedException();
         }

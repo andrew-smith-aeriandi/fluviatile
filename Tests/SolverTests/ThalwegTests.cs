@@ -1,7 +1,6 @@
 using NSubstitute;
 using Solver.Components;
 using Solver.Framework;
-using Solver.Rules;
 
 namespace SolverTests;
 
@@ -11,7 +10,7 @@ public class ThalwegTests
     public void Constructor_ValidArguments_ReturnsInstance()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         // Act
         var thalweg = new Thalweg(grid, 29);
@@ -52,7 +51,7 @@ public class ThalwegTests
     public void Constructor_InvalidTileCount_Throws(int size, int tileCount)
     {
         // Arrange
-        var grid = new Grid(size);
+        var grid = new SolverGrid(size);
 
         // Act
         var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
@@ -356,7 +355,7 @@ public class ThalwegTests
     private static Tableau GetExampleTableau(INotifier notifier)
     {
         var factory = new TableauFactory();
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         var tableau = factory.Create(
             grid,

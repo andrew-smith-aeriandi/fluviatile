@@ -37,7 +37,7 @@ namespace Grid.Tests
             var result = shape.ToString();
 
             // Assert
-            Assert.Equal("Hexagon(2)", shape.ToString());
+            Assert.Equal("Hexagon(2)", result);
         }
 
         [Fact]

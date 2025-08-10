@@ -6,7 +6,7 @@ namespace Solver.Framework;
 
 public class TableauFactory
 {
-    public Tableau Create(Grid grid, IEnumerable<int> counts)
+    public Tableau Create(SolverGrid grid, IEnumerable<int> counts)
     {
         ArgumentNullException.ThrowIfNull(grid);
         ArgumentNullException.ThrowIfNull(counts);
@@ -38,7 +38,7 @@ public class TableauFactory
         var edges = new HashSet<Edge>(EdgeComparer.Default);
 
         var inputIndex = 0;
-        foreach (var axis in Grid.Axes)
+        foreach (var axis in SolverGrid.Axes)
         {
             for (var index = 0; index < grid.AisleCountPerAxis; index++)
             {
@@ -63,7 +63,7 @@ public class TableauFactory
                     aisleYIndex,
                     out var centreDown))
                 {
-                    var tileDown = new Tile(centreDown, Grid.ShapeDown);
+                    var tileDown = new Tile(centreDown, SolverGrid.ShapeDown);
                     edges.UnionWith(grid.CreateEdgesFromVertices(tileDown.Vertices));
                     tiles.Add(tileDown);
                 }
@@ -74,7 +74,7 @@ public class TableauFactory
                     aisleYIndex,
                     out var centreUp))
                 {
-                    var tileUp = new Tile(centreUp, Grid.ShapeUp);
+                    var tileUp = new Tile(centreUp, SolverGrid.ShapeUp);
                     edges.UnionWith(grid.CreateEdgesFromVertices(tileUp.Vertices));
                     tiles.Add(tileUp);
                 }
@@ -108,14 +108,14 @@ public class TableauFactory
             var (keyMinus, keyPlus) = edge.NormalAxis switch
             {
                 Axis.X => (
-                    (v0.Y <= v1.Y ? v0 : v1).Add(-Grid.OneThird, Grid.TwoThird),
-                    (v1.Y >= v0.Y ? v1 : v0).Add(Grid.OneThird, -Grid.TwoThird)),
+                    (v0.Y <= v1.Y ? v0 : v1).Add(-SolverGrid.OneThird, SolverGrid.TwoThird),
+                    (v1.Y >= v0.Y ? v1 : v0).Add(SolverGrid.OneThird, -SolverGrid.TwoThird)),
                 Axis.Y => (
-                    (v0.Z <= v1.Z ? v0 : v1).Add(-Grid.OneThird, -Grid.OneThird),
-                    (v1.Z >= v0.Z ? v1 : v0).Add(Grid.OneThird, Grid.OneThird)),
+                    (v0.Z <= v1.Z ? v0 : v1).Add(-SolverGrid.OneThird, -SolverGrid.OneThird),
+                    (v1.Z >= v0.Z ? v1 : v0).Add(SolverGrid.OneThird, SolverGrid.OneThird)),
                 Axis.Z => (
-                    (v0.X <= v1.X ? v0 : v1).Add(Grid.TwoThird, -Grid.OneThird),
-                    (v1.X >= v0.X ? v1 : v0).Add(-Grid.TwoThird, Grid.OneThird)),
+                    (v0.X <= v1.X ? v0 : v1).Add(SolverGrid.TwoThird, -SolverGrid.OneThird),
+                    (v1.X >= v0.X ? v1 : v0).Add(-SolverGrid.TwoThird, SolverGrid.OneThird)),
                 _ => throw new UnreachableException($"Unsupported axis: {edge.NormalAxis}")
             };
 

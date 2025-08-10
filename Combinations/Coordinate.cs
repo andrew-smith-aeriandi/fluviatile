@@ -1,6 +1,6 @@
 ﻿namespace Combinations;
 
-public struct Coordinate
+public readonly struct Coordinate
 {
     public Coordinate(int x, int y)
     {

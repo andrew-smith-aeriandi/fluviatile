@@ -19,7 +19,7 @@ public class Tile : IResolvableComponent, ILinkable, IFreezable
 
         Coordinates = coordinates;
         Orientation = shape.Orientation;
-        Vertices = shape.VertexOffsets.Select(offset => coordinates + offset).ToArray();
+        Vertices = [.. shape.VertexOffsets.Select(offset => coordinates + offset)];
     }
 
     public bool IsFrozen => _frozen;
@@ -102,7 +102,7 @@ public class Tile : IResolvableComponent, ILinkable, IFreezable
 
         ArgumentNullException.ThrowIfNull(aisles);
 
-        if (!Grid.IncludesAllAxes(aisles.Select(aisle => aisle.Axis)))
+        if (!SolverGrid.IncludesAllAxes(aisles.Select(aisle => aisle.Axis)))
         {
             throw new ArgumentException("Must include an aisle for all axes.", nameof(aisles));
         }
@@ -135,7 +135,7 @@ public class Tile : IResolvableComponent, ILinkable, IFreezable
             throw new InvalidOperationException("Object instance is frozen.");
         }
 
-        if (!Grid.IncludesAllAxes(edges.Select(edge => edge.NormalAxis)))
+        if (!SolverGrid.IncludesAllAxes(edges.Select(edge => edge.NormalAxis)))
         {
             throw new ArgumentException("Must include edges normal to each axis.", nameof(edges));
         }

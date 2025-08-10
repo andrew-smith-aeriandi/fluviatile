@@ -9,10 +9,7 @@ namespace Fluviatile.Grid.Random
             this IEnumerable<T> source,
             IRandom random)
         {
-            if (random is null)
-            {
-                throw new ArgumentNullException(nameof(random));
-            }
+            ArgumentNullException.ThrowIfNull(random);
 
             var iterator = source.GetEnumerator();
             var current = default(T);

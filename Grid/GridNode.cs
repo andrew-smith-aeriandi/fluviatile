@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Fluviatile.Grid
 {
@@ -12,7 +11,7 @@ namespace Fluviatile.Grid
 
         public void AddCounterIndexes(IEnumerable<int> indexes)
         {
-            CounterIndexes = indexes.ToArray();
+            CounterIndexes = [.. indexes];
         }
 
         public IReadOnlyList<int> CounterIndexes { get; private set; }

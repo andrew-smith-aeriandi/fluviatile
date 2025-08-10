@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Grid\Grid.csproj" />
+    <ProjectReference Include="..\SvgWriter\GridWriter.csproj" />
   </ItemGroup>
 
 

@@ -15,8 +15,8 @@ namespace Fluviatile.Grid
             IEnumerable<TerminalNode> terminalNodes)
         {
             Shape = shape;
-            _nodes = nodes.ToArray();
-            _terminalNodes = terminalNodes.ToArray();
+            _nodes = [.. nodes];
+            _terminalNodes = [.. terminalNodes];
 
             _coordinatesLookup = _nodes
                 .Concat(_terminalNodes)

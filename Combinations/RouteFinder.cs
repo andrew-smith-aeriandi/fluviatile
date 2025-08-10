@@ -153,13 +153,13 @@ public class RouteFinder<T>
     private static bool IsBlocked(IRoute<INode<T>> route)
     {
         return IsBlocked(
-            new HashSet<INode<T>> { route.Value },
-            new HashSet<INode<T>>(route.AllValues));
+            [route.Value],
+            [.. route.AllValues]);
     }
 
-    private static bool IsBlocked(ISet<INode<T>> currentNodes, ISet<INode<T>> blockingNodes)
+    private static bool IsBlocked(HashSet<INode<T>> currentNodes, HashSet<INode<T>> blockingNodes)
     {
-        while (currentNodes.Any())
+        while (currentNodes.Count > 0)
         {
             var linkedNodes = new HashSet<INode<T>>();
 

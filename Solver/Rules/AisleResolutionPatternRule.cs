@@ -7,7 +7,7 @@ public class AisleResolutionPatternRule : IRule
 {
     private readonly List<List<Resolution[]>> _tilePatterns;
 
-    public AisleResolutionPatternRule(Grid grid)
+    public AisleResolutionPatternRule(SolverGrid grid)
     {
         ArgumentNullException.ThrowIfNull(grid);
 
@@ -192,7 +192,7 @@ public class AisleResolutionPatternRule : IRule
         }
     }
 
-    private static List<List<Resolution[]>> GetPatterns(Grid grid)
+    private static List<List<Resolution[]>> GetPatterns(SolverGrid grid)
     {
         if (grid.Size != 3)
         {

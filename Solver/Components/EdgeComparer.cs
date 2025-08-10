@@ -17,7 +17,7 @@ public class EdgeComparer : IEqualityComparer<Edge>
         {
             return true;
         }
-        
+
         return x.Vertices == y.Vertices;
     }
 

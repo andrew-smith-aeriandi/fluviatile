@@ -6,7 +6,7 @@ using static Solver.Framework.LinqExtensions;
 
 namespace Solver.Framework;
 
-public record Grid
+public record SolverGrid
 {
     public const int MinSize = 1;
     public const int MaxSize = 8;
@@ -46,7 +46,7 @@ public record Grid
         ]
     };
 
-    public Grid(int size)
+    public SolverGrid(int size)
     {
         if (size < MinSize || size > MaxSize)
         {
@@ -132,7 +132,7 @@ public record Grid
         return (coordinate >= 0 ? coordinate : coordinate - TwoThird) / Scale + Size;
     }
 
-    public Orientation GetTileOrientation(Coordinates centre)
+    public static Orientation GetTileOrientation(Coordinates centre)
     {
         return Maths.Mod(centre.X, Scale) switch
         {
@@ -154,7 +154,7 @@ public record Grid
         return InRange(coordinates.X) && InRange(coordinates.Y) && InRange(coordinates.Z);
     }
 
-    public bool TryGetAdjacentCoordinates(
+    public static bool TryGetAdjacentCoordinates(
         Tile? tile,
         Axis direction,
         out Coordinates centre)
@@ -165,7 +165,7 @@ public record Grid
             return false;
         }
 
-        var vector =  (tile.Orientation, direction) switch
+        var vector = (tile.Orientation, direction) switch
         {
             (Orientation.Up, Axis.X) => new Coordinates(TwoThird, -OneThird, -OneThird),
             (Orientation.Down, Axis.X) => new Coordinates(-TwoThird, OneThird, OneThird),
@@ -240,6 +240,6 @@ public record Grid
 
     public override string ToString()
     {
-        return $"{nameof(Grid)}, Size:{Size}, Scale:{Scale}";
+        return $"{nameof(SolverGrid)}, Size:{Size}, Scale:{Scale}";
     }
 }

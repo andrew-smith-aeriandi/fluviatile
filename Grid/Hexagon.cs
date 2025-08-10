@@ -31,8 +31,8 @@ namespace Fluviatile.Grid
 
         private static readonly Dictionary<int, Direction[]> Directions = new()
         {
-            [1] = new[] { Azimuth060, Azimuth180, Azimuth300 },
-            [2] = new[] { Azimuth000, Azimuth120, Azimuth240 }
+            [1] = [Azimuth060, Azimuth180, Azimuth300],
+            [2] = [Azimuth000, Azimuth120, Azimuth240]
         };
 
         private Func<int, int> ConvertToIndex { get; }
@@ -46,7 +46,7 @@ namespace Fluviatile.Grid
             ConvertToIndex = (coordinate) => (coordinate >= 0 ? coordinate : coordinate - Scale + 1) / Scale;
             Centre = new Coordinates(Size * Scale, Size * Scale);
             Tiles = 6 * size * size;
-            SymmetryTransformations = GetSymmetryTransforms(Centre).ToList();
+            SymmetryTransformations = [.. GetSymmetryTransforms(Centre)];
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Fluviatile.Grid
                 var position = Centre - new Coordinates(shell * Scale + 2, shell * Scale + 1);
                 var direction = Azimuth060;
 
-                for ( var sector = 0; sector < Edges; sector++)
+                for (var sector = 0; sector < Edges; sector++)
                 {
                     var n = 2 * shell + 1;
                     for (var i = 0; i < n; i++)
@@ -109,7 +109,7 @@ namespace Fluviatile.Grid
                         var terminalNode = new TerminalNode(
                             terminalNodeCount,
                             coordinates,
-                            new[] { (direction.Turn(UTurn), (Node)gridNode) },
+                            [(direction.Turn(UTurn), gridNode)],
                             aisle);
 
                         terminalNodes.Add(coordinates, terminalNode);
@@ -141,51 +141,51 @@ namespace Fluviatile.Grid
             // TODO: write algorithm to calculate this for any sixe
             NodeCountPermutations = Size switch
             {
-                1 => new int[][]
-                {
-                    new int[] { 0, 1, 2, 3, 4, 5 },
-                    new int[] { 5, 0, 1, 2, 3, 4 },
-                    new int[] { 4, 5, 0, 1, 2, 3 },
-                    new int[] { 3, 4, 5, 0, 1, 2 },
-                    new int[] { 2, 3, 4, 5, 0, 1 },
-                    new int[] { 1, 2, 3, 4, 5, 0 },
-                    new int[] { 4, 3, 2, 1, 0, 5 },
-                    new int[] { 0, 5, 4, 3, 2, 1 },
-                    new int[] { 2, 1, 0, 5, 4, 3 },
-                    new int[] { 1, 0, 5, 4, 3, 2 },
-                    new int[] { 5, 4, 3, 2, 1, 0 },
-                    new int[] { 3, 2, 1, 0, 5, 4 }
-                },
-                2 => new int[][]
-                {
-                    new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 },
-                    new int[] { 10, 11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
-                    new int[] { 8, 9, 10, 11, 0, 1, 2, 3, 4, 5, 6, 7 },
-                    new int[] { 6, 7, 8, 9, 10, 11, 0, 1, 2, 3, 4, 5 },
-                    new int[] { 4, 5, 6, 7, 8, 9, 10, 11, 0, 1, 2, 3 },
-                    new int[] { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 1 },
-                    new int[] { 8, 9, 6, 7, 4, 5, 2, 3, 0, 1, 10, 11 },
-                    new int[] { 0, 1, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3 },
-                    new int[] { 4, 5, 2, 3, 0, 1, 10, 11, 8, 9, 6, 7 },
-                    new int[] { 2, 3, 0, 1, 10, 11, 8, 9, 6, 7, 4, 5 },
-                    new int[] { 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1 },
-                    new int[] { 6, 7, 4, 5, 2, 3, 0, 1, 10, 11, 8, 9 }
-                },
-                3 => new int[][]
-                {
-                    new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
-                    new int[] { 15, 16, 17, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 },
-                    new int[] { 12, 13, 14, 15, 16, 17, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 },
-                    new int[] { 9, 10, 11, 12, 13, 14, 15, 16, 17, 0, 1, 2, 3, 4, 5, 6, 7, 8 },
-                    new int[] { 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 0, 1, 2, 3, 4, 5 },
-                    new int[] { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 0, 1, 2 },
-                    new int[] { 12, 13, 14, 9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2, 15, 16, 17 },
-                    new int[] { 0, 1, 2, 15, 16, 17, 12, 13, 14, 9, 10, 11, 6, 7, 8, 3, 4, 5 },
-                    new int[] { 6, 7, 8, 3, 4, 5, 0, 1, 2, 15, 16, 17, 12, 13, 14, 9, 10, 11 },
-                    new int[] { 3, 4, 5, 0, 1, 2, 15, 16, 17, 12, 13, 14, 9, 10, 11, 6, 7, 8 },
-                    new int[] { 15, 16, 17, 12, 13, 14, 9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2 },
-                    new int[] { 9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2, 15, 16, 17, 12, 13, 14 }
-                },
+                1 =>
+                [
+                    [0, 1, 2, 3, 4, 5],
+                    [5, 0, 1, 2, 3, 4],
+                    [4, 5, 0, 1, 2, 3],
+                    [3, 4, 5, 0, 1, 2],
+                    [2, 3, 4, 5, 0, 1],
+                    [1, 2, 3, 4, 5, 0],
+                    [4, 3, 2, 1, 0, 5],
+                    [0, 5, 4, 3, 2, 1],
+                    [2, 1, 0, 5, 4, 3],
+                    [1, 0, 5, 4, 3, 2],
+                    [5, 4, 3, 2, 1, 0],
+                    [3, 2, 1, 0, 5, 4]
+                ],
+                2 =>
+                [
+                    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+                    [10, 11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+                    [8, 9, 10, 11, 0, 1, 2, 3, 4, 5, 6, 7],
+                    [6, 7, 8, 9, 10, 11, 0, 1, 2, 3, 4, 5],
+                    [4, 5, 6, 7, 8, 9, 10, 11, 0, 1, 2, 3],
+                    [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 1],
+                    [8, 9, 6, 7, 4, 5, 2, 3, 0, 1, 10, 11],
+                    [0, 1, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3],
+                    [4, 5, 2, 3, 0, 1, 10, 11, 8, 9, 6, 7],
+                    [2, 3, 0, 1, 10, 11, 8, 9, 6, 7, 4, 5],
+                    [10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1],
+                    [6, 7, 4, 5, 2, 3, 0, 1, 10, 11, 8, 9]
+                ],
+                3 =>
+                [
+                    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+                    [15, 16, 17, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+                    [12, 13, 14, 15, 16, 17, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+                    [9, 10, 11, 12, 13, 14, 15, 16, 17, 0, 1, 2, 3, 4, 5, 6, 7, 8],
+                    [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 0, 1, 2, 3, 4, 5],
+                    [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 0, 1, 2],
+                    [12, 13, 14, 9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2, 15, 16, 17],
+                    [0, 1, 2, 15, 16, 17, 12, 13, 14, 9, 10, 11, 6, 7, 8, 3, 4, 5],
+                    [6, 7, 8, 3, 4, 5, 0, 1, 2, 15, 16, 17, 12, 13, 14, 9, 10, 11],
+                    [3, 4, 5, 0, 1, 2, 15, 16, 17, 12, 13, 14, 9, 10, 11, 6, 7, 8],
+                    [15, 16, 17, 12, 13, 14, 9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2],
+                    [9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2, 15, 16, 17, 12, 13, 14]
+                ],
                 _ => throw new InvalidOperationException($"Size {Size} not supported")
             };
 

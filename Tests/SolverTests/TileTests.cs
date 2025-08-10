@@ -28,7 +28,7 @@ public class TileTests
         var centre = new Coordinates(-1, -4, 5);
 
         // Act
-        var instance = new Tile(centre, Grid.ShapeUp);
+        var instance = new Tile(centre, SolverGrid.ShapeUp);
 
         // Assert
         Assert.False(instance.IsFrozen);
@@ -60,7 +60,7 @@ public class TileTests
         var centre = new Coordinates(4, -2, -2);
 
         // Act
-        var instance = new Tile(centre, Grid.ShapeDown);
+        var instance = new Tile(centre, SolverGrid.ShapeDown);
 
         // Assert
         Assert.False(instance.IsFrozen);
@@ -90,7 +90,7 @@ public class TileTests
     {
         // Arrange
         var centre = new Coordinates(4, -2, -2);
-        var instance = new Tile(centre, Grid.ShapeDown);
+        var instance = new Tile(centre, SolverGrid.ShapeDown);
 
         var aisleX = new Aisle(Axis.X, 4, false, 9, 4);
         var aisleY = new Aisle(Axis.Y, 2, false, 11, 6);
@@ -112,7 +112,7 @@ public class TileTests
     {
         // Arrange
         var centre = new Coordinates(4, -2, -2);
-        var instance = new Tile(centre, Grid.ShapeDown);
+        var instance = new Tile(centre, SolverGrid.ShapeDown);
 
         var aisleX = new Aisle(Axis.X, 4, false, 9, 4);
         var aisleY = new Aisle(Axis.Y, 2, false, 11, 6);
@@ -145,10 +145,10 @@ public class TileTests
     public void SetEdges_WhenUnfrozen_SetsEdges()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         var centre = new Coordinates(4, -2, -2);
-        var instance = new Tile(centre, Grid.ShapeDown);
+        var instance = new Tile(centre, SolverGrid.ShapeDown);
 
         var edgeX = new Edge(instance.Vertices[1], instance.Vertices[2], grid);
         var edgeY = new Edge(instance.Vertices[2], instance.Vertices[0], grid);
@@ -181,10 +181,10 @@ public class TileTests
     public void Freeze_WhenUnfrozen_Freezes()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
 
         var centre = new Coordinates(4, -2, -2);
-        var instance = new Tile(centre, Grid.ShapeDown);
+        var instance = new Tile(centre, SolverGrid.ShapeDown);
 
         var aisleX = new Aisle(Axis.X, 4, false, 9, 4);
         var aisleY = new Aisle(Axis.Y, 2, false, 11, 6);
@@ -224,11 +224,11 @@ public class TileTests
     public void Resolve_WhenFrozen_SetsResolution()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var notifier = Substitute.For<INotifier>();
 
         var centre = new Coordinates(4, -2, -2);
-        var instance = new Tile(centre, Grid.ShapeDown);
+        var instance = new Tile(centre, SolverGrid.ShapeDown);
 
         var aisleX = new Aisle(Axis.X, 4, false, 9, 4);
         var aisleY = new Aisle(Axis.Y, 2, false, 11, 6);

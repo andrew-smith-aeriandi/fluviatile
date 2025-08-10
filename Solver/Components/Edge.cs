@@ -10,7 +10,7 @@ public class Edge : IResolvableComponent, IFreezable
     public Edge(
         Coordinates v1,
         Coordinates v2,
-        Grid grid)
+        SolverGrid grid)
     {
         ArgumentNullException.ThrowIfNull(grid);
 
@@ -121,6 +121,6 @@ public class Edge : IResolvableComponent, IFreezable
 
     public override string ToString()
     {
-        return $"{(IsBorder ? "Border": "Edge")}:{Vertices}=>{Resolution}";
+        return $"{(IsBorder ? "Border" : "Edge")}:{Vertices}=>{Resolution}";
     }
 }

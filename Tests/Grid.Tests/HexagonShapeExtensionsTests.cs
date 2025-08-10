@@ -1,5 +1,4 @@
 ﻿using Fluviatile.Grid;
-using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -34,8 +33,7 @@ namespace Grid.Tests
 
             // Assert
             Assert.Equal(
-                new List<Coordinates>
-                {
+                [
                     new(1, -1),
                     new(8, 1),
                     new(13, 8),
@@ -48,7 +46,7 @@ namespace Grid.Tests
                     new(1, 8),
                     new(4, -1),
                     new(13, 11)
-                },
+                ],
                 results);
         }
 

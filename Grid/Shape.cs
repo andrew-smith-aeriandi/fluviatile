@@ -7,15 +7,8 @@ namespace Fluviatile.Grid
     {
         protected Shape(string name, int edges, int size, int scale)
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (size <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(size));
-            }
+            ArgumentException.ThrowIfNullOrEmpty(name);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(size);
 
             Name = name;
             Edges = edges;

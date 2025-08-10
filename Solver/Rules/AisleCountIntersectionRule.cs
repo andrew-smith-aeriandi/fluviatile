@@ -6,9 +6,9 @@ namespace Solver.Rules;
 
 public class AisleCountIntersectionRule : IRule
 {
-    private readonly Grid _grid;
+    private readonly SolverGrid _grid;
 
-    public AisleCountIntersectionRule(Grid grid)
+    public AisleCountIntersectionRule(SolverGrid grid)
     {
         ArgumentNullException.ThrowIfNull(grid);
 

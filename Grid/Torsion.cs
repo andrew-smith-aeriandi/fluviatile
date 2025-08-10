@@ -1,10 +1,10 @@
 ﻿namespace Fluviatile.Grid
 {
-    public struct Torsion
+    public readonly struct Torsion
     {
-        public static readonly Torsion None = new Torsion(0);
-        public static readonly Torsion Left = new Torsion(-1);
-        public static readonly Torsion Right = new Torsion(1);
+        public static readonly Torsion None = new(0);
+        public static readonly Torsion Left = new(-1);
+        public static readonly Torsion Right = new(1);
 
         public Torsion(int value)
         {

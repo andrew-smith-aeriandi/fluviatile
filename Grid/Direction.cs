@@ -14,7 +14,7 @@ namespace Fluviatile.Grid
 
         public int Value { get; }
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is Direction direction && direction.Value == Value;
         }
@@ -29,7 +29,7 @@ namespace Fluviatile.Grid
             return !(left == right);
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return Value;
         }
@@ -55,7 +55,7 @@ namespace Fluviatile.Grid
             };
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return Value.ToString();
         }

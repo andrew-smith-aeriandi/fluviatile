@@ -5,10 +5,10 @@ namespace Solver.Rules;
 
 public class ExitCountRule : IRule
 {
-    private readonly Grid _grid;
+    private readonly SolverGrid _grid;
     private readonly IReadOnlyList<UnorderedPair<Coordinates>> _cornerRadialCoordinates;
 
-    public ExitCountRule(Grid grid)
+    public ExitCountRule(SolverGrid grid)
     {
         ArgumentNullException.ThrowIfNull(grid);
 

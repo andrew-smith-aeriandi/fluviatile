@@ -21,7 +21,7 @@ namespace Fluviatile.Grid
         private readonly TimeSpan _monitorInterval;
         private readonly string _saveFilePath;
 
-        private readonly IReadOnlyDictionary<TerminalNode, Func<Step, IEnumerable<byte[]>>> _equivalentPathsLookup;
+        private readonly Dictionary<TerminalNode, Func<Step, IEnumerable<byte[]>>> _equivalentPathsLookup;
         private readonly ConcurrentDictionary<byte[], int> _nodeCounts;
         private readonly ConcurrentHashSet<byte[]> _paths;
 
@@ -33,7 +33,7 @@ namespace Fluviatile.Grid
             _name = spec.Name;
             _tableau = spec.Tableau;
             _startPoint = spec.StartPoint;
-            _endPoints = new HashSet<TerminalNode>(spec.EndPoints);
+            _endPoints = [.. spec.EndPoints];
             _threadCount = spec.ThreadCount;
             _monitorInterval = spec.MonitorInterval;
             _saveFilePath = Configuration.RoutesFilename(_tableau.Shape, _name);
@@ -67,13 +67,13 @@ namespace Fluviatile.Grid
 
             foreach (var step in state.Steps)
             {
-                routes.Add(step);
+                routes.Add(step, CancellationToken.None);
             }
 
             var latch = new ManualResetEventSlim(initialState: true);
             void StartWalkAction() => Interlocked.Add(ref routeCount, StartWalk(routes, latch));
 
-            while (routes.Any())
+            while (routes.Count > 0)
             {
                 var tasks = Enumerable.Range(0, _threadCount)
                     .Select(index => Task.Run(StartWalkAction, cancellationToken))
@@ -95,7 +95,7 @@ namespace Fluviatile.Grid
                     var routeLog = RouteLogFactory.CreateRouteLog(
                         _tableau,
                         _endPoints,
-                        routes.ToArray(),
+                        [.. routes],
                         new Progress
                         {
                             RouteCount = routeCount,
@@ -115,7 +115,7 @@ namespace Fluviatile.Grid
                 nodeCounts: _nodeCounts,
                 state: state with
                 {
-                    Steps = routes.ToList(),
+                    Steps = [.. routes],
                     Progress = new Progress
                     {
                         RouteCount = routeCount,

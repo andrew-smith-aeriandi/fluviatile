@@ -16,8 +16,8 @@ namespace Fluviatile.Grid.Serialization
                 Shape = tableau.Shape.Name,
                 Size = tableau.Shape.Size,
                 Progress = progress,
-                TerminalNodes = GetTerminalNodeIndices(endPoints).ToList(),
-                Steps = GetDistinctSteps(routes).ToList()
+                TerminalNodes = [.. GetTerminalNodeIndices(endPoints)],
+                Steps = [.. GetDistinctSteps(routes)]
             };
         }
 
@@ -32,7 +32,7 @@ namespace Fluviatile.Grid.Serialization
             var distinctSteps = new Dictionary<Step, int>();
             var stepIdCounter = 0;
 
-            while (stack.Any())
+            while (stack.Count > 0)
             {
                 var step = stack.Pop();
                 if (distinctSteps.ContainsKey(step))

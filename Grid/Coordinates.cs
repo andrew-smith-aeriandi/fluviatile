@@ -1,6 +1,6 @@
 ﻿namespace Fluviatile.Grid
 {
-    public struct Coordinates
+    public readonly struct Coordinates
     {
         public Coordinates(int x, int y)
         {
@@ -24,7 +24,7 @@
 
         public override bool Equals(object obj)
         {
-             return obj is Coordinates other && this == other;
+            return obj is Coordinates other && this == other;
         }
 
         public static bool operator ==(Coordinates a, Coordinates b)

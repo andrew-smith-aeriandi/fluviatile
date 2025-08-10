@@ -9,7 +9,7 @@ public class ThalwegSegmentTests
     public void Constructor_ZeroLinks_ReturnsInstance()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
         // Act
@@ -38,10 +38,10 @@ public class ThalwegSegmentTests
     public void Constructor_SingleTile_ReturnsInstance()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile = new Tile(new Coordinates(-5, 1), Grid.ShapeDown);
+        var tile = new Tile(new Coordinates(-5, 1), SolverGrid.ShapeDown);
 
         // Act
         var instance = new Thalweg.Segment(thalweg, tile);
@@ -69,7 +69,7 @@ public class ThalwegSegmentTests
     public void Constructor_SingleTermination_ReturnsInstance()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
         var termination = new Termination(
@@ -102,11 +102,11 @@ public class ThalwegSegmentTests
     public void Constructor_TwoTiles_ReturnsInstance()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(-5, 1), Grid.ShapeDown);
-        var tile2 = new Tile(new Coordinates(-4, -1), Grid.ShapeUp);
+        var tile1 = new Tile(new Coordinates(-5, 1), SolverGrid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(-4, -1), SolverGrid.ShapeUp);
 
         // Act
         var instance = new Thalweg.Segment(thalweg, tile1, tile2);
@@ -134,12 +134,12 @@ public class ThalwegSegmentTests
     public void Constructor_ThreeTiles_ReturnsInstance()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(-5, 1), Grid.ShapeDown);
-        var tile2 = new Tile(new Coordinates(-4, -1), Grid.ShapeUp);
-        var tile3 = new Tile(new Coordinates(-2, -2), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(-5, 1), SolverGrid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(-4, -1), SolverGrid.ShapeUp);
+        var tile3 = new Tile(new Coordinates(-2, -2), SolverGrid.ShapeDown);
 
         // Act
         var instance = new Thalweg.Segment(thalweg, tile1, tile2, tile3);
@@ -167,10 +167,10 @@ public class ThalwegSegmentTests
     public void Constructor_TileAndTermination_ReturnsInstance()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile = new Tile(new Coordinates(7, -8), Grid.ShapeDown);
+        var tile = new Tile(new Coordinates(7, -8), SolverGrid.ShapeDown);
 
         var termination = new Termination(
             new Coordinates(8, -10),
@@ -202,14 +202,14 @@ public class ThalwegSegmentTests
     public void Constructor_TerminationAndTile_ReturnsInstance()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
         var termination = new Termination(
             new Coordinates(8, -10),
             new Edge(new Coordinates(6, -9), new Coordinates(9, -9), grid));
 
-        var tile = new Tile(new Coordinates(7, -8), Grid.ShapeDown);
+        var tile = new Tile(new Coordinates(7, -8), SolverGrid.ShapeDown);
 
         // Act
         var instance = new Thalweg.Segment(thalweg, termination, tile);
@@ -237,7 +237,7 @@ public class ThalwegSegmentTests
     public void Constructor_AllLinks_ReturnsInstance()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
         var termination1 = new Termination(
@@ -250,39 +250,39 @@ public class ThalwegSegmentTests
 
         var tiles = new List<Tile>
         {
-            new(new Coordinates(7, -8), Grid.ShapeDown),
-            new(new Coordinates(5, -7), Grid.ShapeUp),
-            new(new Coordinates(4, -8), Grid.ShapeDown),
-            new(new Coordinates(2, -7), Grid.ShapeUp),
-            new(new Coordinates(1, -5), Grid.ShapeDown),
-            new(new Coordinates(2, -4), Grid.ShapeUp),
-            new(new Coordinates(4, -5), Grid.ShapeDown),
-            new(new Coordinates(5, -4), Grid.ShapeUp),
-            new(new Coordinates(7, -5), Grid.ShapeDown),
-            new(new Coordinates(8, -4), Grid.ShapeUp),
-            new(new Coordinates(7, -2), Grid.ShapeDown),
-            new(new Coordinates(5, -1), Grid.ShapeUp),
-            new(new Coordinates(4, 1), Grid.ShapeDown),
-            new(new Coordinates(5, 2), Grid.ShapeUp),
-            new(new Coordinates(4, 4), Grid.ShapeDown),
-            new(new Coordinates(2, 5), Grid.ShapeUp),
-            new(new Coordinates(1, 4), Grid.ShapeDown),
-            new(new Coordinates(-1, 5), Grid.ShapeUp),
-            new(new Coordinates(-2, 4), Grid.ShapeDown),
-            new(new Coordinates(-4, 5), Grid.ShapeUp),
-            new(new Coordinates(-5, 4), Grid.ShapeDown),
-            new(new Coordinates(-4, 2), Grid.ShapeUp),
-            new(new Coordinates(-2, 1), Grid.ShapeDown),
-            new(new Coordinates(-1, -1), Grid.ShapeUp),
-            new(new Coordinates(-2, -2), Grid.ShapeDown),
-            new(new Coordinates(-4, -1), Grid.ShapeUp),
-            new(new Coordinates(-5, 1), Grid.ShapeDown),
-            new(new Coordinates(-7, 2), Grid.ShapeUp),
-            new(new Coordinates(-8, 1), Grid.ShapeDown)
+            new(new Coordinates(7, -8), SolverGrid.ShapeDown),
+            new(new Coordinates(5, -7), SolverGrid.ShapeUp),
+            new(new Coordinates(4, -8), SolverGrid.ShapeDown),
+            new(new Coordinates(2, -7), SolverGrid.ShapeUp),
+            new(new Coordinates(1, -5), SolverGrid.ShapeDown),
+            new(new Coordinates(2, -4), SolverGrid.ShapeUp),
+            new(new Coordinates(4, -5), SolverGrid.ShapeDown),
+            new(new Coordinates(5, -4), SolverGrid.ShapeUp),
+            new(new Coordinates(7, -5), SolverGrid.ShapeDown),
+            new(new Coordinates(8, -4), SolverGrid.ShapeUp),
+            new(new Coordinates(7, -2), SolverGrid.ShapeDown),
+            new(new Coordinates(5, -1), SolverGrid.ShapeUp),
+            new(new Coordinates(4, 1), SolverGrid.ShapeDown),
+            new(new Coordinates(5, 2), SolverGrid.ShapeUp),
+            new(new Coordinates(4, 4), SolverGrid.ShapeDown),
+            new(new Coordinates(2, 5), SolverGrid.ShapeUp),
+            new(new Coordinates(1, 4), SolverGrid.ShapeDown),
+            new(new Coordinates(-1, 5), SolverGrid.ShapeUp),
+            new(new Coordinates(-2, 4), SolverGrid.ShapeDown),
+            new(new Coordinates(-4, 5), SolverGrid.ShapeUp),
+            new(new Coordinates(-5, 4), SolverGrid.ShapeDown),
+            new(new Coordinates(-4, 2), SolverGrid.ShapeUp),
+            new(new Coordinates(-2, 1), SolverGrid.ShapeDown),
+            new(new Coordinates(-1, -1), SolverGrid.ShapeUp),
+            new(new Coordinates(-2, -2), SolverGrid.ShapeDown),
+            new(new Coordinates(-4, -1), SolverGrid.ShapeUp),
+            new(new Coordinates(-5, 1), SolverGrid.ShapeDown),
+            new(new Coordinates(-7, 2), SolverGrid.ShapeUp),
+            new(new Coordinates(-8, 1), SolverGrid.ShapeDown)
         };
 
         // Act
-        var instance = new Thalweg.Segment(thalweg, [termination1, ..tiles, termination2]);
+        var instance = new Thalweg.Segment(thalweg, [termination1, .. tiles, termination2]);
 
         // Assert
         Assert.NotNull(instance);
@@ -309,7 +309,7 @@ public class ThalwegSegmentTests
     public void AddToFirst_NullLink_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
         var segment = new Thalweg.Segment(thalweg);
 
@@ -325,17 +325,17 @@ public class ThalwegSegmentTests
     public void AddToFirst_CannotAddLinkToTermination_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
         var termination = new Termination(
             new Coordinates(8, -10),
             new Edge(new Coordinates(6, -9), new Coordinates(9, -9), grid));
 
-        var tile = new Tile(new Coordinates(7, -8), Grid.ShapeDown);
+        var tile = new Tile(new Coordinates(7, -8), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, termination, tile);
-        var invalidTile = new Tile(new Coordinates(10, -11), Grid.ShapeDown);
+        var invalidTile = new Tile(new Coordinates(10, -11), SolverGrid.ShapeDown);
 
         // Act
         var ex = Assert.Throws<InvalidOperationException>(() =>
@@ -349,11 +349,11 @@ public class ThalwegSegmentTests
     public void AddToFirst_LinkAlreadyInSegment_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(7, -8), Grid.ShapeDown);
-        var tile2 = new Tile(new Coordinates(5, -7), Grid.ShapeUp);
+        var tile1 = new Tile(new Coordinates(7, -8), SolverGrid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(5, -7), SolverGrid.ShapeUp);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
 
@@ -369,11 +369,11 @@ public class ThalwegSegmentTests
     public void AddToFirst_TileWithZeroLinks_AddsLink()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
         var segment = new Thalweg.Segment(thalweg);
 
-        var tile = new Tile(new Coordinates(7, -8), Grid.ShapeDown);
+        var tile = new Tile(new Coordinates(7, -8), SolverGrid.ShapeDown);
 
         // Act
         segment.AddToFirst(tile);
@@ -396,7 +396,7 @@ public class ThalwegSegmentTests
     public void AddToFirst_TerminationWithZeroLinks_AddsLink()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
         var segment = new Thalweg.Segment(thalweg);
 
@@ -425,11 +425,11 @@ public class ThalwegSegmentTests
     public void AddToFirst_TileWithSingleTileSegment_AddsLink()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(7, -8), Grid.ShapeDown);
-        var tile2 = new Tile(new Coordinates(5, -7), Grid.ShapeUp);
+        var tile1 = new Tile(new Coordinates(7, -8), SolverGrid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(5, -7), SolverGrid.ShapeUp);
 
         var segment = new Thalweg.Segment(thalweg, tile2);
 
@@ -454,12 +454,12 @@ public class ThalwegSegmentTests
     public void AddToFirst_TileWithTwoTileSegment_AddsLink()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(7, -8), Grid.ShapeDown);
-        var tile2 = new Tile(new Coordinates(5, -7), Grid.ShapeUp);
-        var tile3 = new Tile(new Coordinates(4, -8), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(7, -8), SolverGrid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(5, -7), SolverGrid.ShapeUp);
+        var tile3 = new Tile(new Coordinates(4, -8), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile2, tile1);
 
@@ -484,7 +484,7 @@ public class ThalwegSegmentTests
     public void AddToLast_NullLink_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
         var segment = new Thalweg.Segment(thalweg);
 
@@ -500,17 +500,17 @@ public class ThalwegSegmentTests
     public void AddToLast_CannotAddLinkToTermination_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
         var termination = new Termination(
             new Coordinates(8, -10),
             new Edge(new Coordinates(6, -9), new Coordinates(9, -9), grid));
 
-        var tile = new Tile(new Coordinates(7, -8), Grid.ShapeDown);
+        var tile = new Tile(new Coordinates(7, -8), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile, termination);
-        var invalidTile = new Tile(new Coordinates(10, -11), Grid.ShapeDown);
+        var invalidTile = new Tile(new Coordinates(10, -11), SolverGrid.ShapeDown);
 
         // Act
         var ex = Assert.Throws<InvalidOperationException>(() =>
@@ -524,11 +524,11 @@ public class ThalwegSegmentTests
     public void AddToLast_LinkAlreadyInSegment_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(7, -8), Grid.ShapeDown);
-        var tile2 = new Tile(new Coordinates(5, -7), Grid.ShapeUp);
+        var tile1 = new Tile(new Coordinates(7, -8), SolverGrid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(5, -7), SolverGrid.ShapeUp);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
 
@@ -544,11 +544,11 @@ public class ThalwegSegmentTests
     public void AddToLast_TileWithZeroLinks_AddsLink()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
         var segment = new Thalweg.Segment(thalweg);
 
-        var tile = new Tile(new Coordinates(7, -8), Grid.ShapeDown);
+        var tile = new Tile(new Coordinates(7, -8), SolverGrid.ShapeDown);
 
         // Act
         segment.AddToLast(tile);
@@ -571,7 +571,7 @@ public class ThalwegSegmentTests
     public void AddToLast_TerminationWithZeroLinks_AddsLink()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
         var segment = new Thalweg.Segment(thalweg);
 
@@ -600,11 +600,11 @@ public class ThalwegSegmentTests
     public void AddToLast_TileWithSingleTileSegment_AddsLink()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(7, -8), Grid.ShapeDown);
-        var tile2 = new Tile(new Coordinates(5, -7), Grid.ShapeUp);
+        var tile1 = new Tile(new Coordinates(7, -8), SolverGrid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(5, -7), SolverGrid.ShapeUp);
 
         var segment = new Thalweg.Segment(thalweg, tile1);
 
@@ -629,12 +629,12 @@ public class ThalwegSegmentTests
     public void AddToLast_TileWithTwoTileSegment_AddsLink()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(7, -8), Grid.ShapeDown);
-        var tile2 = new Tile(new Coordinates(5, -7), Grid.ShapeUp);
-        var tile3 = new Tile(new Coordinates(4, -8), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(7, -8), SolverGrid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(5, -7), SolverGrid.ShapeUp);
+        var tile3 = new Tile(new Coordinates(4, -8), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
 
@@ -659,11 +659,11 @@ public class ThalwegSegmentTests
     public void AddLastToFirst_WithNullSegment_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
 
@@ -679,11 +679,11 @@ public class ThalwegSegmentTests
     public void AddLastToFirst_WithSameSegment_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
 
@@ -700,12 +700,12 @@ public class ThalwegSegmentTests
     public void AddLastToFirst_CannotJoinSegmentsAtTermination_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
-        var tile3 = new Tile(new Coordinates(4, 4), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
+        var tile3 = new Tile(new Coordinates(4, 4), SolverGrid.ShapeDown);
 
         var termination = new Termination(
             new Coordinates(5, 5),
@@ -726,11 +726,11 @@ public class ThalwegSegmentTests
     public void AddLastToFirst_WithEmptySegment_MergesSegments()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
         var otherSegment = new Thalweg.Segment(thalweg);
@@ -759,12 +759,12 @@ public class ThalwegSegmentTests
     public void AddLastToFirst_WhenCurrentSegmentIsEmpty_MergesSegments()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
-        var tile2 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile3 = new Tile(new Coordinates(4, 4), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile3 = new Tile(new Coordinates(4, 4), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg);
         var otherSegment = new Thalweg.Segment(thalweg, tile1, tile2, tile3);
@@ -793,13 +793,13 @@ public class ThalwegSegmentTests
     public void AddLastToFirst_WithTwoTileSegments_MergesSegments()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(2, 5), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 4), Grid.ShapeDown);
-        var tile3 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile4 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(2, 5), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 4), SolverGrid.ShapeDown);
+        var tile3 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile4 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
 
         var otherSegment = new Thalweg.Segment(thalweg, tile1, tile2);
         var segment = new Thalweg.Segment(thalweg, tile3, tile4);
@@ -828,11 +828,11 @@ public class ThalwegSegmentTests
     public void AddFirstToFirst_WithNullSegment_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
 
@@ -848,11 +848,11 @@ public class ThalwegSegmentTests
     public void AddFirstToFirst_WithSameSegment_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
 
@@ -869,12 +869,12 @@ public class ThalwegSegmentTests
     public void AddFirstToFirst_CannotJoinSegmentsAtTermination_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
-        var tile3 = new Tile(new Coordinates(4, 4), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
+        var tile3 = new Tile(new Coordinates(4, 4), SolverGrid.ShapeDown);
 
         var termination = new Termination(
             new Coordinates(5, 5),
@@ -895,11 +895,11 @@ public class ThalwegSegmentTests
     public void AddFirstToFirst_WithEmptySegment_MergesSegments()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
         var otherSegment = new Thalweg.Segment(thalweg);
@@ -928,12 +928,12 @@ public class ThalwegSegmentTests
     public void AddFirstToFirst_WhenCurrentSegmentIsEmpty_MergesSegments()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
-        var tile2 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile3 = new Tile(new Coordinates(4, 4), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile3 = new Tile(new Coordinates(4, 4), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg);
         var otherSegment = new Thalweg.Segment(thalweg, tile1, tile2, tile3);
@@ -962,13 +962,13 @@ public class ThalwegSegmentTests
     public void AddFirstToFirst_WithTwoTileSegments_MergesSegments()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(2, 5), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 4), Grid.ShapeDown);
-        var tile3 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile4 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(2, 5), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 4), SolverGrid.ShapeDown);
+        var tile3 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile4 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
 
         var otherSegment = new Thalweg.Segment(thalweg, tile2, tile1);
         var segment = new Thalweg.Segment(thalweg, tile3, tile4);
@@ -997,11 +997,11 @@ public class ThalwegSegmentTests
     public void AddFirstToLast_WithNullSegment_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
 
@@ -1017,11 +1017,11 @@ public class ThalwegSegmentTests
     public void AddFirstToLast_WithSameSegment_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
 
@@ -1038,12 +1038,12 @@ public class ThalwegSegmentTests
     public void AddFirstToLast_CannotJoinSegmentsAtTermination_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
-        var tile3 = new Tile(new Coordinates(4, 4), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
+        var tile3 = new Tile(new Coordinates(4, 4), SolverGrid.ShapeDown);
 
         var termination = new Termination(
             new Coordinates(5, 5),
@@ -1064,11 +1064,11 @@ public class ThalwegSegmentTests
     public void AddFirstToLast_WithEmptySegment_MergesSegments()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
         var otherSegment = new Thalweg.Segment(thalweg);
@@ -1097,12 +1097,12 @@ public class ThalwegSegmentTests
     public void AddFirstToLast_WhenCurrentSegmentIsEmpty_MergesSegments()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
-        var tile2 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile3 = new Tile(new Coordinates(4, 4), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile3 = new Tile(new Coordinates(4, 4), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg);
         var otherSegment = new Thalweg.Segment(thalweg, tile1, tile2, tile3);
@@ -1131,13 +1131,13 @@ public class ThalwegSegmentTests
     public void AddFirstToLast_WithTwoTileSegments_MergesSegments()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(2, 5), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 4), Grid.ShapeDown);
-        var tile3 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile4 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(2, 5), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 4), SolverGrid.ShapeDown);
+        var tile3 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile4 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
         var otherSegment = new Thalweg.Segment(thalweg, tile3, tile4);
@@ -1166,11 +1166,11 @@ public class ThalwegSegmentTests
     public void AddLastToLast_WithNullSegment_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
 
@@ -1186,11 +1186,11 @@ public class ThalwegSegmentTests
     public void AddLastToLast_WithSameSegment_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
 
@@ -1207,12 +1207,12 @@ public class ThalwegSegmentTests
     public void AddLastToLast_CannotJoinSegmentsAtTermination_Throws()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
-        var tile3 = new Tile(new Coordinates(4, 4), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
+        var tile3 = new Tile(new Coordinates(4, 4), SolverGrid.ShapeDown);
 
         var termination = new Termination(
             new Coordinates(5, 5),
@@ -1233,11 +1233,11 @@ public class ThalwegSegmentTests
     public void AddLastToLast_WithEmptySegment_MergesSegments()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
         var otherSegment = new Thalweg.Segment(thalweg);
@@ -1266,12 +1266,12 @@ public class ThalwegSegmentTests
     public void AddLastToLast_WhenCurrentSegmentIsEmpty_MergesSegments()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
-        var tile2 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile3 = new Tile(new Coordinates(4, 4), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
+        var tile2 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile3 = new Tile(new Coordinates(4, 4), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg);
         var otherSegment = new Thalweg.Segment(thalweg, tile1, tile2, tile3);
@@ -1300,13 +1300,13 @@ public class ThalwegSegmentTests
     public void AddLastToLast_WithTwoTileSegments_MergesSegments()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
-        var tile1 = new Tile(new Coordinates(2, 5), Grid.ShapeUp);
-        var tile2 = new Tile(new Coordinates(4, 4), Grid.ShapeDown);
-        var tile3 = new Tile(new Coordinates(5, 2), Grid.ShapeUp);
-        var tile4 = new Tile(new Coordinates(4, 1), Grid.ShapeDown);
+        var tile1 = new Tile(new Coordinates(2, 5), SolverGrid.ShapeUp);
+        var tile2 = new Tile(new Coordinates(4, 4), SolverGrid.ShapeDown);
+        var tile3 = new Tile(new Coordinates(5, 2), SolverGrid.ShapeUp);
+        var tile4 = new Tile(new Coordinates(4, 1), SolverGrid.ShapeDown);
 
         var segment = new Thalweg.Segment(thalweg, tile1, tile2);
         var otherSegment = new Thalweg.Segment(thalweg, tile4, tile3);
@@ -1335,7 +1335,7 @@ public class ThalwegSegmentTests
     public void AddLastToLast_TwoSegmentsWithAllTiles_MergesSegments()
     {
         // Arrange
-        var grid = new Grid(3);
+        var grid = new SolverGrid(3);
         var thalweg = new Thalweg(grid, 29);
 
         var termination1 = new Termination(
@@ -1344,23 +1344,23 @@ public class ThalwegSegmentTests
 
         var tiles1 = new List<Tile>
         {
-            new(new Coordinates(7, -8), Grid.ShapeDown),
-            new(new Coordinates(5, -7), Grid.ShapeUp),
-            new(new Coordinates(4, -8), Grid.ShapeDown),
-            new(new Coordinates(2, -7), Grid.ShapeUp),
-            new(new Coordinates(1, -5), Grid.ShapeDown),
-            new(new Coordinates(2, -4), Grid.ShapeUp),
-            new(new Coordinates(4, -5), Grid.ShapeDown),
-            new(new Coordinates(5, -4), Grid.ShapeUp),
-            new(new Coordinates(7, -5), Grid.ShapeDown),
-            new(new Coordinates(8, -4), Grid.ShapeUp),
-            new(new Coordinates(7, -2), Grid.ShapeDown),
-            new(new Coordinates(5, -1), Grid.ShapeUp),
-            new(new Coordinates(4, 1), Grid.ShapeDown),
-            new(new Coordinates(5, 2), Grid.ShapeUp),
-            new(new Coordinates(4, 4), Grid.ShapeDown),
-            new(new Coordinates(2, 5), Grid.ShapeUp),
-            new(new Coordinates(1, 4), Grid.ShapeDown)
+            new(new Coordinates(7, -8), SolverGrid.ShapeDown),
+            new(new Coordinates(5, -7), SolverGrid.ShapeUp),
+            new(new Coordinates(4, -8), SolverGrid.ShapeDown),
+            new(new Coordinates(2, -7), SolverGrid.ShapeUp),
+            new(new Coordinates(1, -5), SolverGrid.ShapeDown),
+            new(new Coordinates(2, -4), SolverGrid.ShapeUp),
+            new(new Coordinates(4, -5), SolverGrid.ShapeDown),
+            new(new Coordinates(5, -4), SolverGrid.ShapeUp),
+            new(new Coordinates(7, -5), SolverGrid.ShapeDown),
+            new(new Coordinates(8, -4), SolverGrid.ShapeUp),
+            new(new Coordinates(7, -2), SolverGrid.ShapeDown),
+            new(new Coordinates(5, -1), SolverGrid.ShapeUp),
+            new(new Coordinates(4, 1), SolverGrid.ShapeDown),
+            new(new Coordinates(5, 2), SolverGrid.ShapeUp),
+            new(new Coordinates(4, 4), SolverGrid.ShapeDown),
+            new(new Coordinates(2, 5), SolverGrid.ShapeUp),
+            new(new Coordinates(1, 4), SolverGrid.ShapeDown)
         };
 
         var termination2 = new Termination(
@@ -1369,22 +1369,22 @@ public class ThalwegSegmentTests
 
         var tiles2 = new List<Tile>
         {
-            new(new Coordinates(-8, 1), Grid.ShapeDown),
-            new(new Coordinates(-7, 2), Grid.ShapeUp),
-            new(new Coordinates(-5, 1), Grid.ShapeDown),
-            new(new Coordinates(-4, -1), Grid.ShapeUp),
-            new(new Coordinates(-2, -2), Grid.ShapeDown),
-            new(new Coordinates(-1, -1), Grid.ShapeUp),
-            new(new Coordinates(-2, 1), Grid.ShapeDown),
-            new(new Coordinates(-4, 2), Grid.ShapeUp),
-            new(new Coordinates(-5, 4), Grid.ShapeDown),
-            new(new Coordinates(-4, 5), Grid.ShapeUp),
-            new(new Coordinates(-2, 4), Grid.ShapeDown),
-            new(new Coordinates(-1, 5), Grid.ShapeUp)
+            new(new Coordinates(-8, 1), SolverGrid.ShapeDown),
+            new(new Coordinates(-7, 2), SolverGrid.ShapeUp),
+            new(new Coordinates(-5, 1), SolverGrid.ShapeDown),
+            new(new Coordinates(-4, -1), SolverGrid.ShapeUp),
+            new(new Coordinates(-2, -2), SolverGrid.ShapeDown),
+            new(new Coordinates(-1, -1), SolverGrid.ShapeUp),
+            new(new Coordinates(-2, 1), SolverGrid.ShapeDown),
+            new(new Coordinates(-4, 2), SolverGrid.ShapeUp),
+            new(new Coordinates(-5, 4), SolverGrid.ShapeDown),
+            new(new Coordinates(-4, 5), SolverGrid.ShapeUp),
+            new(new Coordinates(-2, 4), SolverGrid.ShapeDown),
+            new(new Coordinates(-1, 5), SolverGrid.ShapeUp)
         };
 
         var segment = new Thalweg.Segment(thalweg, [termination1, .. tiles1]);
-        var otherSegment = new Thalweg.Segment(thalweg, [termination2, ..tiles2]);
+        var otherSegment = new Thalweg.Segment(thalweg, [termination2, .. tiles2]);
         Assert.Equal(2, thalweg.SegmentCount);
 
         // Act
@@ -1400,8 +1400,8 @@ public class ThalwegSegmentTests
         Assert.Same(termination2, segment.Last);
 
         var tiles2Reversed = tiles2.AsEnumerable().Reverse().ToList();
-        Assert.Equal([termination1, ..tiles1, .. tiles2Reversed, termination2], segment.Links);
-        Assert.Equal([..tiles1, .. tiles2Reversed], segment.Tiles);
+        Assert.Equal([termination1, .. tiles1, .. tiles2Reversed, termination2], segment.Links);
+        Assert.Equal([.. tiles1, .. tiles2Reversed], segment.Tiles);
         Assert.Equal([termination1, termination2], segment.Terminations);
 
         Assert.Equal(1, thalweg.SegmentCount);

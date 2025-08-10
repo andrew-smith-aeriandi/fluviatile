@@ -38,7 +38,7 @@ public static class TableauExtensions
     {
         var maxIndex = tableau.Grid.AisleCountPerAxis - 1;
 
-        foreach (var axis in Grid.Axes)
+        foreach (var axis in SolverGrid.Axes)
         {
             yield return tableau.Aisles[(axis, 0)];
             yield return tableau.Aisles[(axis, maxIndex)];
