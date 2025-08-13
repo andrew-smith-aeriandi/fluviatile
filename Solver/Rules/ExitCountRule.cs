@@ -51,6 +51,7 @@ public class ExitCountRule : IRule
 
     private void InvokeWithAllExitsResolved(Tableau tableau, INotifier notifier)
     {
+        // No unresolved border can be an exit
         foreach (var border in tableau.GetBorders())
         {
             border.TryResolve(Resolution.Empty, notifier, ResolutionReason.ExitCount);
@@ -59,28 +60,52 @@ public class ExitCountRule : IRule
 
     private void InvokeWithUnresolvedExits(Tableau tableau, INotifier notifier)
     {
-        // Populate list with all sets of border edges that have at least one exit as determined by the aisle count,
-        // plus single-element sets for any already-resolved exits.
-        var sets = tableau.Thalweg.Exits
-            .Select(termination => new HashSet<Edge>([termination.Border]))
-            .ToList();
+        var exitSets = new List<ExitSet>();
 
-        // NOTE: if the channel tile count is 1, 2 or 4 there must be at laest one exit regardless of the grid size.
-        foreach (var aisle in tableau.Aisles.Values.Where(a => a.IsMargin))
+        // Add single-element set for any already-resolved exit (either zwro or one).
+        foreach (var termination in tableau.Thalweg.Exits)
         {
-            switch (aisle.ChannelTileCount)
-            {
-                case 1:
-                    sets.Add([.. aisle.Borders.Where(e => e.NormalAxis != aisle.Axis)]);
-                    break;
+            exitSets.Add(new ExitSet(1, 1, [termination.Border]));
+        }
 
-                case 2:
-                case 4:
-                    sets.Add([.. aisle.Borders]);
-                    break;
+        // Populate list with all sets of border edges that have at least one exit as determined by the aisle count,
+        foreach (var aisle in tableau.Aisles.Values)
+        {
+            if (aisle.IsMargin)
+            {
+                // If the channel tile count is 1, 2 or 4 there must be at least one exit.
+                switch (aisle.ChannelTileCount)
+                {
+                    case 1:
+                        exitSets.Add(new ExitSet(1, 1, [.. aisle.Borders.Where(e => e.NormalAxis != aisle.Axis)]));
+                        break;
+
+                    case 2:
+                    case 4:
+                        exitSets.Add(new ExitSet(1, 2, [.. aisle.Borders]));
+                        break;
+                }
+            }
+            else
+            {
+                switch (aisle.ChannelTileCount)
+                {
+                    case 1:
+                        exitSets.Add(new ExitSet(1, 1, [.. aisle.Borders]));
+                        break;
+
+                    case 3:
+                        if (tableau.Aisles[(aisle.Axis, aisle.Index - 1)].ChannelTileCount > 0 &&
+                            tableau.Aisles[(aisle.Axis, aisle.Index + 1)].ChannelTileCount > 0)
+                        {
+                            exitSets.Add(new ExitSet(1, 1, [.. aisle.Borders]));
+                        }
+                        break;
+                }
             }
         }
 
+        // Add adjacent borders with 3 adjacent thalweg segment terminations since there must be a single exit.
         var borderTiles = new HashSet<Tile>();
         var interiorTiles = new HashSet<Tile>();
         foreach (var segment in tableau.Thalweg.Segments)
@@ -119,142 +144,161 @@ public class ExitCountRule : IRule
 
             if (adjacentBorderTiles.Length == 2)
             {
-                sets.Add([.. adjacentBorderTiles.SelectMany(t => t.Edges.Where(e => e.IsBorder))]);
+                var adjacentBorders = adjacentBorderTiles.SelectMany(t => t.Edges.Where(e => e.IsBorder));
+                exitSets.Add(new ExitSet(1, 1, [..adjacentBorders]));
             }
         }
 
-        // Reduce sets by mapping overlapping pairs of sets to their intersections
-        // until the collection of sets includes only non-overlapping sets.
-        while (true)
+        if (exitSets.Count == 0)
         {
-            var touchedSets = new HashSet<HashSet<Edge>>();
-            var updatedSets = new List<HashSet<Edge>>();
-
-            foreach (var (set1, set2) in sets.GetAllPairs())
+            foreach (var aisle in tableau.GetMarginAisles())
             {
-                if (set1.Overlaps(set2))
+                switch (aisle.ChannelTileCount)
                 {
-                    touchedSets.Add(set1);
-                    touchedSets.Add(set2);
-
-                    if (set1.IsSubsetOf(set2))
-                    {
-                        updatedSets.Add(set1);
-                    }
-                    else if (set2.IsSubsetOf(set1))
-                    {
-                        updatedSets.Add(set2);
-                    }
-                    else
-                    {
-                        updatedSets.Add([.. set1.Intersect(set2)]);
-                    }
+                    case 1:
+                        foreach (var border in aisle.Borders.Where(e => e.NormalAxis == aisle.Axis))
+                        {
+                            border.TryResolve(Resolution.Empty, notifier, ResolutionReason.BorderAisleCount);
+                        }
+                        break;
                 }
             }
 
-            if (touchedSets.Count == 0)
-            {
-                // Reduction is complete when no pairs of sets overlap
-                break;
-            }
-
-            // Include any sets that do not overlap with other sets
-            updatedSets.AddRange(sets.Except(touchedSets));
-            sets = updatedSets;
+            // Nothing more can be done.
+            return;
         }
 
-        var bordersWithPotentialExits = new HashSet<Edge>();
-        sets.InvokeForEach(bordersWithPotentialExits.UnionWith);
+        var potentialExits = new Dictionary<Edge, Exit>();
 
-        switch (sets.Count)
+        foreach (var exitSet in exitSets)
         {
-            case 2:
+            foreach (var border in exitSet.Borders)
+            {
+                if (!potentialExits.TryGetValue(border, out var potentialExit))
                 {
-                    // We have accounted for all exits within non-overlapping sets of borders,
-                    // so all other borders must be empty.
-                    foreach (var border in tableau.GetBorders())
-                    {
-                        if (!bordersWithPotentialExits.Contains(border))
-                        {
-                            border.TryResolve(Resolution.Empty, notifier, ResolutionReason.ExitCount);
-                        }
-                    }
+                    potentialExit = new Exit(border);
+                    potentialExits.Add(border, potentialExit);
                 }
-                break;
 
-            case 1:
+                potentialExit.ExitSets.Add(exitSet);
+            }
+        }
+
+        var possibleExits = new HashSet<Edge>();
+
+        foreach (var (exit1, exit2) in potentialExits.Values.GetAllPairs())
+        {
+            var commonExitSets = exit1.ExitSets.Intersect(exit2.ExitSets);
+            if (commonExitSets.Any(exitSet => exitSet.MaxExits < 2))
+            {
+                continue;
+            }
+
+            if (exitSets.Except(exit1.ExitSets).Except(exit2.ExitSets).Any())
+            {
+                continue;
+            }
+
+            possibleExits.Add(exit1.Border);
+            possibleExits.Add(exit2.Border);
+        }
+
+        if (possibleExits.Count == 2)
+        {
+            // Both exits are resolved
+            foreach (var border in possibleExits)
+            {
+                border.TryResolve(Resolution.Channel, notifier, ResolutionReason.ExitCount);
+            }
+
+            // No remaining unresolved border can be an exit
+            foreach (var border in tableau.GetBorders())
+            {
+                border.TryResolve(Resolution.Empty, notifier, ResolutionReason.ExitCount);
+            }
+
+            return;
+        }
+
+        if (potentialExits.Values.None(exit => exit.ExitSets.Count == exitSets.Count))
+        {
+            // No single potential exit can account for all the identified exit sets so both exits
+            // must be in the possibleExits set and all borders not in this set can be marked as resolved.
+            foreach (var border in tableau.GetBorders().Except(possibleExits))
+            {
+                border.TryResolve(Resolution.Empty, notifier, ResolutionReason.ExitCount);
+            }
+        }
+        else
+        {
+            // Corner exit rule
+            var cornerRadialEdges = _cornerRadialCoordinates.Select(coords =>
+                tableau.Edges[coords]);
+
+            foreach (var edge in cornerRadialEdges)
+            {
+                if (!edge.IsResolved &&
+                    edge.Tiles.All(t =>
+                        t.Resolution == Resolution.Channel &&
+                        !t.Edges.Any(e => possibleExits.Contains(e))))
                 {
-                    // Corner exit rule
-                    var cornerRadialEdges = _cornerRadialCoordinates.Select(coords =>
-                        tableau.Edges[coords]);
+                    edge.TryResolve(Resolution.Channel, notifier, ResolutionReason.CornerTileWithSinglePotentialExit);
+                }
+            }
 
-                    foreach (var edge in cornerRadialEdges)
+            foreach (var aisle in tableau.GetMarginAisles())
+            {
+                if (!possibleExits.Overlaps(aisle.Borders))
+                {
+                    // If there must be an exit that does not overlap with the aisle borders then we
+                    // can resolve some aisle borders for specific channel tile counts.
+                    switch (aisle.ChannelTileCount)
                     {
-                        if (!edge.IsResolved &&
-                            edge.Tiles.All(t =>
-                                t.Resolution == Resolution.Channel &&
-                                !t.Edges.Any(e => bordersWithPotentialExits.Contains(e))))
-                        {
-                            edge.TryResolve(Resolution.Channel, notifier, ResolutionReason.CornerTileWithSinglePotentialExit);
-                        }
-                    }
-
-                    foreach (var aisle in tableau.Aisles.Values.Where(a => a.IsMargin))
-                    {
-                        if (!bordersWithPotentialExits.Overlaps(aisle.Borders))
-                        {
-                            // If there must be an exit that does not overlap with the aisle borders then we
-                            // can resolve some aisle borders for specific channel tile counts.
-                            switch (aisle.ChannelTileCount)
+                        case 1:
+                        case 3:
+                            foreach (var border in aisle.Borders.Where(e => e.NormalAxis == aisle.Axis))
                             {
-                                case 1:
-                                case 3:
-                                    foreach (var border in aisle.Borders.Where(e => e.NormalAxis == aisle.Axis))
-                                    {
-                                        border.TryResolve(Resolution.Empty, notifier, ResolutionReason.BorderAisleCountWithSinglePotentialExit);
-                                    }
-                                    break;
-
-                                case 2:
-                                    foreach (var border in aisle.Borders.Where(e => e.NormalAxis != aisle.Axis))
-                                    {
-                                        border.TryResolve(Resolution.Empty, notifier, ResolutionReason.BorderAisleCountWithSinglePotentialExit);
-                                    }
-                                    break;
-
-                                case 6:
-                                    foreach (var border in aisle.Borders.Where(e => e.NormalAxis == aisle.Axis))
-                                    {
-                                        var aisleIndex = aisle.Tiles.IndexOf(border.Tiles.Single());
-                                        if (aisleIndex >= 0 && Math.Max(aisleIndex + 1, aisle.TileCount - aisleIndex) < 6)
-                                        {
-                                            border.TryResolve(Resolution.Empty, notifier, ResolutionReason.BorderAisleCountWithSinglePotentialExit);
-                                        }
-                                    }
-                                    break;
+                                border.TryResolve(Resolution.Empty, notifier, ResolutionReason.BorderAisleCountWithSinglePotentialExit);
                             }
-                        }
-                    }
-                }
-                break;
+                            break;
 
-            case 0:
-                {
-                    foreach (var aisle in tableau.GetMarginAisles())
-                    {
-                        switch (aisle.ChannelTileCount)
-                        {
-                            case 1:
-                                foreach (var border in aisle.Borders.Where(e => e.NormalAxis == aisle.Axis))
+                        case 2:
+                            foreach (var border in aisle.Borders.Where(e => e.NormalAxis != aisle.Axis))
+                            {
+                                border.TryResolve(Resolution.Empty, notifier, ResolutionReason.BorderAisleCountWithSinglePotentialExit);
+                            }
+                            break;
+
+                        case 6:
+                            foreach (var border in aisle.Borders.Where(e => e.NormalAxis == aisle.Axis))
+                            {
+                                var aisleIndex = aisle.Tiles.IndexOf(border.Tiles.Single());
+                                if (aisleIndex >= 0 && Math.Max(aisleIndex + 1, aisle.TileCount - aisleIndex) < 6)
                                 {
-                                    border.TryResolve(Resolution.Empty, notifier, ResolutionReason.BorderAisleCount);
+                                    border.TryResolve(Resolution.Empty, notifier, ResolutionReason.BorderAisleCountWithSinglePotentialExit);
                                 }
-                                break;
-                        }
+                            }
+                            break;
                     }
                 }
-                break;
+            }
         }
+    }
+
+    public readonly struct Exit(Edge border)
+    {
+        public Edge Border { get; } = border;
+
+        public HashSet<ExitSet> ExitSets { get; } = [];
+    }
+
+    public readonly struct ExitSet(int minExits, int maxExits, IEnumerable<Edge> borders)
+    {
+        public HashSet<Edge> Borders { get; } = [.. borders];
+
+        public int MinExits { get; } = minExits;
+
+        public int MaxExits { get; } = maxExits;
     }
 
     public override string ToString()

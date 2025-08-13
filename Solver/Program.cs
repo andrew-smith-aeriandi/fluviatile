@@ -1,6 +1,7 @@
 ﻿using Fluviatile.Grid;
 using GridWriter;
 using GridWriter.Settings;
+using Solver.Components;
 using Solver.Framework;
 using Solver.Rules;
 
@@ -38,14 +39,27 @@ internal class Program
         //int[] channelCounts = [5, 4, 4, 8, 6, 6, 5, 6, 8, 8, 6, 0, 4, 6, 2, 10, 7, 4]; // Solved: True, Rule Invocations: 448, Reasons: 8
         //int[] channelCounts = [4, 4, 7, 7, 6, 3, 3, 7, 9, 2, 8, 2, 3, 6, 7, 5, 4, 6]; // Solved: True, Rule Invocations: 213, Reasons: 8
         //int[] channelCounts = [3, 6, 6, 11, 5, 5, 4, 6, 8, 7, 7, 4, 5, 6, 10, 6, 6, 3]; // Solved: True, Rule Invocations: 456, Reasons: 9
-        //int[] channelCounts = [7, 6, 7, 7, 6, 7, 7, 5, 8, 9, 8, 3, 5, 5, 10, 6, 8, 6]; // not solved - very hard with hypotheticals required
         //int[] channelCounts = [0, 0, 5, 6, 5, 6, 3, 6, 4, 6, 2, 1, 5, 4, 4, 6, 3, 0]; // Solved: True, Rule Invocations: 450, Reasons: 10
-        //int[] channelCounts = [4, 7, 10, 8, 6, 7, 6, 8, 9, 11, 5, 3, 3, 8, 10, 7, 8, 6]; // not solved
-        //int[] channelCounts = [4, 8, 5, 6, 5, 7, 3, 7, 9, 7, 6, 3, 3, 7, 8, 9, 4, 4]; // not solved
-        int[] channelCounts = [5, 6, 8, 7, 5, 5, 6, 8, 8, 8, 6, 0, 0, 6, 8, 7, 8, 7]; // not solved
-        //int[] channelCounts = [5, 7, 7, 8, 6, 7, 6, 8, 9, 8, 7, 2, 3, 6, 9, 10, 6, 6]; // not solved
-        //int[] channelCounts = [3, 8, 8, 9, 5, 7, 7, 8, 8, 8, 7, 2, 3, 7, 8, 8, 9, 5]; // not solved
-        //int[] channelCounts = [5, 7, 8, 7, 8, 6, 7, 6, 10, 10, 5, 3, 4, 4, 11, 8, 9, 5]; // not solved
+        //int[] channelCounts = [2, 7, 6, 8, 6, 3, 3, 6, 6, 6, 4, 7, 6, 7, 5, 5, 6, 3]; // Solved: True, Rule Invocations: 458, Reasons: 12
+        //int[] channelCounts = [2, 7, 10, 9, 4, 3, 3, 4, 7, 8, 8, 5, 7, 7, 4, 7, 7, 3]; // Solved: True, Rule Invocations: 454, Reasons: 12
+        //int[] channelCounts = [2, 4, 10, 2, 2, 7, 7, 4, 4, 3, 5, 4, 2, 5, 6, 7, 4, 3]; // Solved: True, Rule Invocations: 448, Reasons: 8
+        //int[] channelCounts = [0, 7, 8, 6, 8, 5, 7, 4, 5, 8, 7, 3, 5, 7, 9, 4, 6, 3]; // Solved: True, Rule Invocations: 458, Reasons: 11
+        //int[] channelCounts = [0, 9, 7, 10, 7, 5, 4, 7, 7, 8, 7, 5, 7, 9, 8, 5, 4, 5]; // Solved: True, Rule Invocations: 462, Reasons: 11
+        //int[] channelCounts = [1, 5, 9, 6, 4, 5, 4, 5, 8, 4, 4, 5, 3, 7, 9, 4, 3, 4]; // Solved: True, Rule Invocations: 257, Reasons: 8
+        //int[] channelCounts = [4, 3, 10, 9, 7, 5, 6, 7, 6, 8, 7, 4, 5, 7, 8, 8, 6, 4]; // Solved: True, Rule Invocations: 357, Reasons: 8
+
+        //int[] channelCounts = [7, 6, 7, 7, 6, 7, 7, 5, 8, 9, 8, 3, 5, 5, 10, 6, 8, 6]; // not solved - very hard with hypotheticals required
+        //int[] channelCounts = [4, 7, 10, 8, 6, 7, 6, 8, 9, 11, 5, 3, 3, 8, 10, 7, 8, 6]; // not solved - hard with hypotheticala
+        //int[] channelCounts = [5, 6, 8, 7, 5, 5, 6, 8, 8, 8, 6, 0, 0, 6, 8, 7, 8, 7]; // not solved (Tarjan on edges should solve this)
+        //int[] channelCounts = [5, 7, 7, 8, 6, 7, 6, 8, 9, 8, 7, 2, 3, 6, 9, 10, 6, 6]; // not solved (hard: hypotheticals required)
+        //int[] channelCounts = [3, 8, 8, 9, 5, 7, 7, 8, 8, 8, 7, 2, 3, 7, 8, 8, 9, 5]; // not solved (small channel continuity hypothesis)
+        //int[] channelCounts = [5, 7, 8, 7, 8, 6, 7, 6, 10, 10, 5, 3, 4, 4, 11, 8, 9, 5]; // not solved (solved by exit count hypothesis)
+        //int[] channelCounts = [5, 7, 2, 6, 7, 6, 5, 8, 8, 5, 4, 3, 3, 4, 7, 8, 6, 5]; // not solved (maybe solvable by Tarjans rule)
+        //int[] channelCounts = [5, 6, 4, 6, 8, 5, 3, 9, 10, 8, 4, 0, 2, 5, 6, 9, 7, 5]; // not solved (closed loop hypothetical needed)
+        //int[] channelCounts = [2, 9, 6, 10, 6, 6, 7, 6, 8, 7, 6, 5, 5, 6, 9, 9, 5, 5]; // not solved - very hard
+        int[] channelCounts = [4, 8, 5, 6, 5, 7, 3, 7, 9, 7, 6, 3, 3, 7, 8, 9, 4, 4]; // not solved - aisle count / channel adjacency should have done better
+
+
 
         var tableau = factory.Create(solverGrid, channelCounts);
 
@@ -73,7 +87,7 @@ internal class Program
         {
             var foregroundColour = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"{ex.GetType().Name}: {ex.Message}");
+            Console.WriteLine($"{ex.GetType().Name}: {ex}");
             Console.WriteLine();
             Console.ForegroundColor = foregroundColour;
         }
@@ -118,7 +132,8 @@ internal class Program
         {
             var grid = new HexGrid(tableau.Grid.Size);
 
-            //TODO:
+            grid.SetNodeCounts(channelCounts);
+            grid.SetInitialState(tableau.GetNodeState());
 
             var options = new GridHtmlWriterOptions();
             var htmlWriter = new GridHtmlWriter(options);

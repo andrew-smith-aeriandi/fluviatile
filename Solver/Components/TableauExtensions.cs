@@ -1,4 +1,5 @@
-﻿using Solver.Framework;
+﻿using Fluviatile.Grid;
+using Solver.Framework;
 
 namespace Solver.Components;
 
@@ -64,5 +65,38 @@ public static class TableauExtensions
 
         return tableau.Edges.TryGetValue(tile.GetEdgeKey(axis), out edge);
     }
-}
 
+    public static IEnumerable<NodeState> GetNodeState(this Tableau tableau)
+    {
+        foreach (var (coordinates, tile) in tableau.Tiles)
+        {
+            switch (tile.Resolution)
+            {
+                case Resolution.Unknown:
+                    yield return new(coordinates.X, coordinates.Y, 0);
+                    break;
+
+                case Resolution.Empty:
+                    yield return new(coordinates.X, coordinates.Y, 256);
+                    break;
+
+                case Resolution.Channel:
+                    var mask = tile.Edges
+                        .Where(e => e.Resolution == Resolution.Channel)
+                        .Aggregate(1, (m, edge) => m | (tile.Orientation, edge.NormalAxis) switch
+                        {
+                            (Orientation.Up, Axis.X) => 2,
+                            (Orientation.Up, Axis.Y) => 4,
+                            (Orientation.Up, Axis.Z) => 8,
+                            (Orientation.Down, Axis.X) => 16,
+                            (Orientation.Down, Axis.Y) => 32,
+                            (Orientation.Down, Axis.Z) => 64,
+                            _ => 0
+                        });
+
+                    yield return new(coordinates.X, coordinates.Y, mask);
+                    break;
+            }
+        }
+    }
+}
