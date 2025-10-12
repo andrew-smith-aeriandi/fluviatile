@@ -20,5 +20,7 @@ public enum ResolutionReason
     HypotheticalMeanderRuleConstrainedByAisleCount,
     AisleCountIntersection,
     SingleChannel,
-    NoClosedLoop
+    NoClosedLoop,
+    ThalwegChannelCount,
+    TarjansAlgorithm
 }

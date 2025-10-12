@@ -35,4 +35,9 @@ public class VertexState<T>
     {
         IsArticulationPoint = true;
     }
+
+    public override string ToString()
+    {
+        return $"{Value}=>{Adjacency.Count}";
+    }
 }

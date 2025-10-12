@@ -1,4 +1,6 @@
-﻿namespace Solver.Framework;
+﻿using System.Runtime.CompilerServices;
+
+namespace Solver.Framework;
 
 public static class Maths
 {
@@ -11,6 +13,7 @@ public static class Maths
     /// <param name="value">dividend</param>
     /// <param name="n">divisor</param>
     /// <returns>modulus in the range [0,n)</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Mod(int value, int n)
     {
         var m = value % n;

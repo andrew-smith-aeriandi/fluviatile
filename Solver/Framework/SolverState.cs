@@ -6,10 +6,10 @@ namespace Solver.Framework;
 public class SolverState : INotifier
 {
     private readonly Tableau _tableau;
-    private readonly List<ResolutionResult> _resolutionResults;
     private readonly Dictionary<Type, List<(IRule, int)>> _ruleRegistry;
-    private readonly PriorityQueue<RuleInvocation, int> _priorityQueue;
     private readonly IRule _housekeepingRule;
+    private readonly PriorityQueue<RuleInvocation, int> _priorityQueue;
+    private readonly List<ResolutionResult> _resolutionResults;
 
     public SolverState(
         Tableau tableau,
@@ -73,6 +73,9 @@ public class SolverState : INotifier
 
     public bool Solve(int maxRuleInvocations, out int ruleInvocations)
     {
+        var priorResolutionResultsCount = 0;
+        EnqueueRules(Tableau);
+
         ruleInvocations = 0;
 
         while (!Tableau.IsSolved() && ruleInvocations < maxRuleInvocations)
@@ -82,10 +85,16 @@ public class SolverState : INotifier
                 ruleInvocations += 1;
                 item.Rule.Invoke(item.Component, this);
             }
-            else if (_priorityQueue.Count == 0)
+            else if (_resolutionResults.Count > priorResolutionResultsCount)
             {
+                // Try enqueuing Tableau rules if some progress has been made since the prior attempt
+                priorResolutionResultsCount = _resolutionResults.Count;
                 EnqueueRules(Tableau);
-                EnqueueRules(Tableau.Thalweg);
+            }
+            else
+            {
+                // Try hypotheticals
+                break;
             }
         }
 

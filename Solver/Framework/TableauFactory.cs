@@ -4,9 +4,9 @@ using static Solver.Framework.LinqExtensions;
 
 namespace Solver.Framework;
 
-public class TableauFactory
+public static class TableauFactory
 {
-    public Tableau Create(SolverGrid grid, IEnumerable<int> counts)
+    public static Tableau Create(SolverGrid grid, IEnumerable<int> counts)
     {
         ArgumentNullException.ThrowIfNull(grid);
         ArgumentNullException.ThrowIfNull(counts);

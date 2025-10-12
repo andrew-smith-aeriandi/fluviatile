@@ -15,6 +15,11 @@ public class AisleCountIntersectionRule : IRule
         _grid = grid;
     }
 
+    public override string ToString()
+    {
+        return nameof(AisleCountIntersectionRule);
+    }
+
     public IEnumerable<Type> GetPertinentComponents()
     {
         yield return typeof(Tableau);
@@ -26,15 +31,15 @@ public class AisleCountIntersectionRule : IRule
     {
         switch (component)
         {
-            case Aisle aisle:
-                InvokeInternal(aisle, notifier);
-                break;
-
             case Tableau tableau:
                 foreach (var aisle in tableau.GetAisles())
                 {
                     InvokeInternal(aisle, notifier);
                 }
+                break;
+
+            case Aisle aisle:
+                InvokeInternal(aisle, notifier);
                 break;
 
             case Tile tile:
@@ -85,10 +90,5 @@ public class AisleCountIntersectionRule : IRule
                 }
             }
         }
-    }
-
-    public override string ToString()
-    {
-        return nameof(AisleCountIntersectionRule);
     }
 }

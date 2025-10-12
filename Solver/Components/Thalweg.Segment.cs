@@ -6,7 +6,7 @@ namespace Solver.Components;
 
 public partial class Thalweg
 {
-    public class Segment : ISegment
+    public class Segment : ISegment, IComponent
     {
         private readonly LinkedList<ILinkable> _links;
         private readonly Thalweg _thalweg;
@@ -62,6 +62,11 @@ public partial class Thalweg
                     yield return last;
                 }
             }
+        }
+
+        public bool IsTermination(ILinkable link)
+        {
+            return link is not null && (link == _links.First?.Value || link == _links.Last?.Value);
         }
 
         internal void AddToFirst(ILinkable link)

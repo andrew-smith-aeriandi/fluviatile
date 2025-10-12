@@ -357,7 +357,7 @@ public class ThalwegTests
         var factory = new TableauFactory();
         var grid = new SolverGrid(3);
 
-        var tableau = factory.Create(
+        var tableau = TableauFactory.Create(
             grid,
             [2, 5, 5, 5, 8, 4, 4, 6, 5, 7, 7, 0, 3, 6, 4, 8, 7, 1]);
 

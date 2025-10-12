@@ -23,7 +23,7 @@ public class TileEdgeRule : IRule
         switch (component)
         {
             case Tableau tableau:
-                foreach (var tile in tableau.Tiles.Values)
+                foreach (var tile in tableau.GetTiles())
                 {
                     InvokeInternal(tile, notifier);
                 }
@@ -111,11 +111,24 @@ public class TileEdgeRule : IRule
                             componentsToResolve.TryAdd(tile, Resolution.Empty);
                         }
 
-                        if (aisle.UnresolvedEmptyTileCount <= 1)
+                        if (aisle.UnresolvedEmptyTileCount < 2)
                         {
                             foreach (var unresolvedAdjacentTile in unresolvedAdjacentTiles)
                             {
                                 componentsToResolve.TryAdd(unresolvedAdjacentTile, Resolution.Channel);
+                            }
+                        }
+                        else if (aisle.UnresolvedEmptyTileCount == 2)
+                        {
+                            foreach (var unresolvedAdjacentTile in unresolvedAdjacentTiles)
+                            {
+                                var nextTile = unresolvedAdjacentTile.GetPotentiallyLinkableTiles(aisle.Axis)
+                                    .SingleOrDefault(t => !t.IsResolved && t != tile);
+
+                                if (nextTile is not null && nextTile.GetEdge(aisle.Axis).Resolution == Resolution.Empty)
+                                {
+                                    componentsToResolve.TryAdd(unresolvedAdjacentTile, Resolution.Channel);
+                                }
                             }
                         }
                     }

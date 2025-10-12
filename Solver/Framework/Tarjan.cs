@@ -26,6 +26,22 @@ public static class Tarjan
             .Select(s => s.Value);
     }
 
+    public static IEnumerable<T> GetArticulationPoints<T>(
+        IEnumerable<T> vertices,
+        IEnumerable<(T Vertex1, T Vertex2)> adjacency)
+        where T : notnull
+    {
+        var lookup = adjacency
+            .GroupBy(item => item.Vertex1)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Select(item => item.Vertex2).ToArray());
+
+        return GetArticulationPoints(
+            vertices,
+            vertex => lookup.TryGetValue(vertex, out var adjacentVertices) ? adjacentVertices : []);
+    }
+
     private static List<VertexState<T>> InitialiseState<T>(
         IEnumerable<T> vertices,
         Func<T, IEnumerable<T>> adjacency)

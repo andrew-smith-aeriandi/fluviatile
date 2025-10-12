@@ -132,6 +132,26 @@ public record SolverGrid
         return (coordinate >= 0 ? coordinate : coordinate - TwoThird) / Scale + Size;
     }
 
+    public int AisleCountOrdinal(Axis axis, int index)
+    {
+        if (index < 0 || index >= AisleCountPerAxis)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(index),
+                $"Value must be in range [0..{AisleCountPerAxis - 1}]");
+        }
+
+        var axisIndex = axis switch
+        {
+            Axis.X => 0,
+            Axis.Y => 1,
+            Axis.Z => 2,
+            _ => throw new ArgumentException("Unexpected axis", nameof(axis))
+        };
+
+        return axisIndex * AisleCountPerAxis + index;
+    }
+
     public static Orientation GetTileOrientation(Coordinates centre)
     {
         return Maths.Mod(centre.X, Scale) switch

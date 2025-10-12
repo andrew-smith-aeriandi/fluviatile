@@ -152,7 +152,7 @@ public static class TileExtensions
             .SelectMany(e => e.Tiles.Where(t => t != tile));
     }
 
-    public static IEnumerable<(Edge, Tile)> GetAdjacentComponents(this Tile tile)
+    public static IEnumerable<(Edge Edge, Tile Tile)> GetAdjacentComponents(this Tile tile)
     {
         return tile.Edges
             .SelectMany(e => e.Tiles.Where(t => t != tile).Select(t => (e, t)));
@@ -164,7 +164,7 @@ public static class TileExtensions
             .SelectMany(e => e.Tiles.Where(t => t != tile));
     }
 
-    public static IEnumerable<(Edge, Tile)> GetAdjacentComponents(this Tile tile, Axis normalAxis)
+    public static IEnumerable<(Edge Edge, Tile Tile)> GetAdjacentComponents(this Tile tile, Axis normalAxis)
     {
         return tile.GetEdges(normalAxis)
             .SelectMany(e => e.Tiles.Where(t => t != tile).Select(t => (e, t)));
@@ -176,7 +176,7 @@ public static class TileExtensions
             .SelectMany(e => e.Tiles.Where(t => t != tile));
     }
 
-    public static IEnumerable<(Edge, Tile)> GetPotentiallyLinkableComponents(this Tile tile)
+    public static IEnumerable<(Edge Edge, Tile Tile)> GetPotentiallyLinkableComponents(this Tile tile)
     {
         return tile.GetPotentiallyLinkableEdges()
             .SelectMany(e => e.Tiles.Where(t => t != tile).Select(t => (e, t)));
@@ -188,7 +188,7 @@ public static class TileExtensions
             .SelectMany(e => e.Tiles.Where(t => t != tile));
     }
 
-    public static IEnumerable<(Edge, Tile)> GetPotentiallyLinkableComponents(this Tile tile, Axis normalAxis)
+    public static IEnumerable<(Edge Edge, Tile Tile)> GetPotentiallyLinkableComponents(this Tile tile, Axis normalAxis)
     {
         return tile.GetPotentiallyLinkableEdges(normalAxis)
             .SelectMany(e => e.Tiles.Where(t => t != tile).Select(t => (e, t)));

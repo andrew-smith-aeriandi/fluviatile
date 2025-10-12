@@ -5,6 +5,11 @@ namespace Solver.Rules;
 
 public class AisleCountRule : IRule
 {
+    public override string ToString()
+    {
+        return nameof(AisleCountRule);
+    }
+
     public IEnumerable<Type> GetPertinentComponents()
     {
         yield return typeof(Tableau);
@@ -17,7 +22,7 @@ public class AisleCountRule : IRule
         switch (component)
         {
             case Tableau tableau:
-                foreach (var (_, aisle) in tableau.Aisles)
+                foreach (var aisle in tableau.GetAisles())
                 {
                     InvokeInternal(aisle, notifier);
                 }
@@ -48,10 +53,5 @@ public class AisleCountRule : IRule
             // Any unresolved tiles must be channels
             aisle.Tiles.TryResolve(Resolution.Channel, notifier, ResolutionReason.AisleCount);
         }
-    }
-
-    public override string ToString()
-    {
-        return nameof(AisleCountRule);
     }
 }

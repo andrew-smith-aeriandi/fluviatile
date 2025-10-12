@@ -6,7 +6,7 @@ namespace Solver.Components;
 
 public partial class Thalweg : IComponent
 {
-    private readonly SolverGrid _grid;
+    private SolverGrid _grid;
     private readonly int _tileCount;
     private int _linkedTileCount;
 
@@ -14,9 +14,15 @@ public partial class Thalweg : IComponent
     private readonly List<Termination> _terminations;
     private readonly List<Segment> _segments;
 
+    public Thalweg(SolverGrid grid, int tileCount)
+        : this(grid, tileCount, [])
+    {
+    }
+
     public Thalweg(
         SolverGrid grid,
-        int tileCount)
+        int tileCount,
+        IEnumerable<IEnumerable<ILinkable>> segmentLinks)
     {
         ArgumentNullException.ThrowIfNull(grid);
 
@@ -35,7 +41,20 @@ public partial class Thalweg : IComponent
         _membership = new(linkCount, LocationComparer.Default);
         _segments = new(linkCount / 2);
         _terminations = new List<Termination>(SolverGrid.ExitCount);
+
+        foreach (var links in segmentLinks)
+        {
+            CreateSegment(links);
+        }
     }
+
+    private void CreateSegment(params IEnumerable<ILinkable> links)
+    {
+        var segment = new Segment(this, links);
+        _linkedTileCount += segment.TileCount;
+    }
+
+    public SolverGrid Grid => _grid;
 
     public IReadOnlyList<Segment> Segments => _segments;
 
@@ -176,8 +195,7 @@ public partial class Thalweg : IComponent
         else if (tile is not null && otherTile is not null)
         {
             // Create a new channel segment linking the two tiles
-            var newSegment = new Segment(this, tile, otherTile);
-            _linkedTileCount += newSegment.TileCount;
+            CreateSegment(tile, otherTile);
             isLinked = true;
         }
         else if (edge.IsBorder && (segment is not null || otherSegment is not null))
@@ -226,9 +244,7 @@ public partial class Thalweg : IComponent
                         throw new InvalidOperationException($"Number of exits cannot exceed {SolverGrid.ExitCount}");
                     }
 
-                    var newSegment = new Segment(this, tile, termination);
-                    _linkedTileCount += newSegment.TileCount;
-
+                    CreateSegment(tile, termination);
                     notifier.NotifyResolution(termination, reason);
                     isLinked = true;
                 }

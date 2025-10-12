@@ -24,12 +24,15 @@ public class Tableau : IComponent
         Tiles = tiles.ToFrozenDictionary(tile => tile.GetDefaultKey());
         Edges = edges.ToFrozenDictionary(edge => edge.GetDefaultKey());
 
+        ChannelCounts = aisles.OrderBy(a => a.Axis).ThenBy(a => a.Index).Select(a => a.ChannelTileCount).ToArray();
         ChannelCount = aisles.Where(aisle => aisle.Axis == Axis.X).Sum(aisle => aisle.ChannelTileCount);
         EmptyCount = TileCount - ChannelCount;
         UnresolvedTileCount = TileCount;
         UnresolvedChannelCount = ChannelCount;
         UnresolvedEmptyCount = EmptyCount;
     }
+
+    public IReadOnlyList<int> ChannelCounts { get; }
 
     public int TileCount => Grid.TileCount;
 
@@ -87,6 +90,6 @@ public class Tableau : IComponent
 
     public override string ToString()
     {
-        return $"Tableau (Size: {Grid.Size})";
+        return $"Tableau:[{string.Join(',', ChannelCounts.Select(count => count.ToString()))}]";
     }
 }

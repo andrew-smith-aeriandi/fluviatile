@@ -86,6 +86,10 @@ public static class LinqExtensions
         return !source.Any(value => predicate(value));
     }
 
+
+    /// <summary>
+    /// Get all possible pairs of items in a collection.
+    /// </summary>
     public static IEnumerable<UnorderedPair<T>> GetAllPairs<T>(
         this IEnumerable<T> source)
     {

@@ -81,7 +81,7 @@ public class GridTests
             expectedVertices,
             instance.Vertices.OrderBy(v => v.X).ThenBy(v => v.Y));
 
-        Assert.Equal("Grid, Size:3, Scale:3", instance.ToString());
+        Assert.Equal("SolverGrid, Size:3, Scale:3", instance.ToString());
     }
 
     [Theory]

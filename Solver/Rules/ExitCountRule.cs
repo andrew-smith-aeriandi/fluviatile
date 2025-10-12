@@ -62,7 +62,7 @@ public class ExitCountRule : IRule
     {
         var exitSets = new List<ExitSet>();
 
-        // Add single-element set for any already-resolved exit (either zwro or one).
+        // Add single-element set for any already-resolved exit (either zero or one).
         foreach (var termination in tableau.Thalweg.Exits)
         {
             exitSets.Add(new ExitSet(1, 1, [termination.Border]));
@@ -73,16 +73,113 @@ public class ExitCountRule : IRule
         {
             if (aisle.IsMargin)
             {
-                // If the channel tile count is 1, 2 or 4 there must be at least one exit.
+                var proximalAisleChannelTileCount = aisle.ProximalAisle(tableau)!.ChannelTileCount;
+
                 switch (aisle.ChannelTileCount)
                 {
                     case 1:
-                        exitSets.Add(new ExitSet(1, 1, [.. aisle.Borders.Where(e => e.NormalAxis != aisle.Axis)]));
+                        if (proximalAisleChannelTileCount >= 2)
+                        {
+                            exitSets.Add(new ExitSet(1, 1, [aisle.Borders[0], aisle.Borders[^1]]));
+                        }
                         break;
 
                     case 2:
+                        if (proximalAisleChannelTileCount == 0)
+                        {
+                            exitSets.Add(new ExitSet(2, 2, [aisle.Borders[0], aisle.Borders[1]]));
+                            exitSets.Add(new ExitSet(2, 2, [aisle.Borders[^1], aisle.Borders[^2]]));
+                        }
+                        else if (proximalAisleChannelTileCount == 2 || proximalAisleChannelTileCount == 3)
+                        {
+                            exitSets.Add(new ExitSet(1, 1, [.. aisle.Borders.Where(e => e.NormalAxis == aisle.Axis)]));
+                        }
+                        else if (proximalAisleChannelTileCount >= 4)
+                        {
+                            exitSets.Add(new ExitSet(1, 2, [.. aisle.Borders]));
+                        }
+                        break;
+
+                    case 3:
+                        if (proximalAisleChannelTileCount == 0)
+                        {
+                            if (aisle.Borders.Count == aisle.ChannelTileCount)
+                            {
+                                exitSets.Add(new ExitSet(2, 2, [aisle.Borders[0], aisle.Borders[^1]]));
+                            }
+                            else
+                            {
+                                exitSets.Add(new ExitSet(2, 2, [.. aisle.Borders.Where(e => e.NormalAxis == aisle.Axis)]));
+                            }
+                        }
+                        else if (proximalAisleChannelTileCount == 2 || proximalAisleChannelTileCount == 3)
+                        {
+                            exitSets.Add(new ExitSet(1, 1, [aisle.Borders[0], aisle.Borders[^1]]));
+                        }
+                        break;
+
                     case 4:
-                        exitSets.Add(new ExitSet(1, 2, [.. aisle.Borders]));
+                        if (proximalAisleChannelTileCount == 0)
+                        {
+                            exitSets.Add(new ExitSet(2, 2, [aisle.Borders[0], aisle.Borders[3]]));
+                            exitSets.Add(new ExitSet(2, 2, [aisle.Borders[^1], aisle.Borders[^4]]));
+                        }
+                        else if (proximalAisleChannelTileCount == 2 || proximalAisleChannelTileCount == 3)
+                        {
+                            exitSets.Add(new ExitSet(1, 1, [.. aisle.Borders.Where(e => e.NormalAxis == aisle.Axis)]));
+                        }
+                        else if (proximalAisleChannelTileCount >= 4)
+                        {
+                            exitSets.Add(new ExitSet(1, 2, [.. aisle.Borders]));
+                        }
+                        break;
+
+                    case 5:
+                        if (proximalAisleChannelTileCount == 0)
+                        {
+                            if (aisle.Borders.Count == aisle.ChannelTileCount)
+                            {
+                                exitSets.Add(new ExitSet(2, 2, [aisle.Borders[0], aisle.Borders[^1]]));
+                            }
+                            else
+                            {
+                                exitSets.Add(new ExitSet(2, 2, [.. aisle.Borders.Where(e => e.NormalAxis == aisle.Axis)]));
+                            }
+                        }
+                        else if (proximalAisleChannelTileCount == 2 || proximalAisleChannelTileCount == 3)
+                        {
+                            exitSets.Add(new ExitSet(1, 1, [aisle.Borders[0], aisle.Borders[^1]]));
+                        }
+                        break;
+
+                    case 6:
+                        if (proximalAisleChannelTileCount == 0)
+                        {
+                            exitSets.Add(new ExitSet(2, 2, [aisle.Borders[0], aisle.Borders[5]]));
+                            exitSets.Add(new ExitSet(2, 2, [aisle.Borders[^1], aisle.Borders[^6]]));
+                        }
+                        else if (proximalAisleChannelTileCount == 2 || proximalAisleChannelTileCount == 3)
+                        {
+                            exitSets.Add(new ExitSet(1, 1, [.. aisle.Borders.Where(e => e.NormalAxis == aisle.Axis)]));
+                        }
+                        break;
+
+                    case 7:
+                        if (proximalAisleChannelTileCount == 0)
+                        {
+                            if (aisle.Borders.Count == aisle.ChannelTileCount)
+                            {
+                                exitSets.Add(new ExitSet(2, 2, [aisle.Borders[0], aisle.Borders[^1]]));
+                            }
+                            else
+                            {
+                                exitSets.Add(new ExitSet(2, 2, [.. aisle.Borders.Where(e => e.NormalAxis == aisle.Axis)]));
+                            }
+                        }
+                        else if (proximalAisleChannelTileCount == 2 || proximalAisleChannelTileCount == 3)
+                        {
+                            exitSets.Add(new ExitSet(1, 1, [aisle.Borders[0], aisle.Borders[^1]]));
+                        }
                         break;
                 }
             }
@@ -108,6 +205,7 @@ public class ExitCountRule : IRule
         // Add adjacent borders with 3 adjacent thalweg segment terminations since there must be a single exit.
         var borderTiles = new HashSet<Tile>();
         var interiorTiles = new HashSet<Tile>();
+
         foreach (var segment in tableau.Thalweg.Segments)
         {
             if (segment.First is Tile firstTile)
@@ -169,6 +267,7 @@ public class ExitCountRule : IRule
         }
 
         var potentialExits = new Dictionary<Edge, Exit>();
+        var possibleExits = new HashSet<Edge>();
 
         foreach (var exitSet in exitSets)
         {
@@ -184,23 +283,28 @@ public class ExitCountRule : IRule
             }
         }
 
-        var possibleExits = new HashSet<Edge>();
-
-        foreach (var (exit1, exit2) in potentialExits.Values.GetAllPairs())
+        if (potentialExits.Count == 1)
         {
-            var commonExitSets = exit1.ExitSets.Intersect(exit2.ExitSets);
-            if (commonExitSets.Any(exitSet => exitSet.MaxExits < 2))
+            possibleExits.Add(potentialExits.First().Value.Border);
+        }
+        else if (potentialExits.Count >= 2)
+        {
+            foreach (var (exit1, exit2) in potentialExits.Values.GetAllPairs())
             {
-                continue;
-            }
+                var commonExitSets = exit1.ExitSets.Intersect(exit2.ExitSets);
+                if (commonExitSets.Any(exitSet => exitSet.MaxExits < 2))
+                {
+                    continue;
+                }
 
-            if (exitSets.Except(exit1.ExitSets).Except(exit2.ExitSets).Any())
-            {
-                continue;
-            }
+                if (exitSets.Except(exit1.ExitSets).Except(exit2.ExitSets).Any())
+                {
+                    continue;
+                }
 
-            possibleExits.Add(exit1.Border);
-            possibleExits.Add(exit2.Border);
+                possibleExits.Add(exit1.Border);
+                possibleExits.Add(exit2.Border);
+            }
         }
 
         if (possibleExits.Count == 2)

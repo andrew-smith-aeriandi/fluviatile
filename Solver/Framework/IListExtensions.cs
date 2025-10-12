@@ -2,8 +2,15 @@
 
 public static class IListExtensions
 {
-    public static IEnumerable<T> GetRange<T>(this IEnumerable<T> source, Range range)
+    public static IEnumerable<T> GetRange<T>(this ICollection<T> source, Range range)
     {
-        return source.Skip(range.Start.Value - 1).Take(range.End.Value - range.Start.Value);
+        var (offset, count) = range.GetOffsetAndLength(source.Count);
+        return source.Skip(offset).Take(count);
+    }
+
+    public static IEnumerable<T> GetRange<T>(this IReadOnlyCollection<T> source, Range range)
+    {
+        var (offset, count) = range.GetOffsetAndLength(source.Count);
+        return source.Skip(offset).Take(count);
     }
 }

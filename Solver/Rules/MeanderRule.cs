@@ -18,7 +18,7 @@ public class MeanderRule : IRule
         switch (component)
         {
             case Tableau tableau:
-                foreach (var (_, edge) in tableau.Edges)
+                foreach (var edge in tableau.GetEdges())
                 {
                     InvokeInternal(edge, notifier);
                 }

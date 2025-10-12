@@ -14,6 +14,11 @@ public class AisleResolutionPatternRule : IRule
         _tilePatterns = GetPatterns(grid);
     }
 
+    public override string ToString()
+    {
+        return nameof(AisleResolutionPatternRule);
+    }
+
     public IEnumerable<Type> GetPertinentComponents()
     {
         yield return typeof(Tableau);
@@ -30,17 +35,6 @@ public class AisleResolutionPatternRule : IRule
 
         switch (component)
         {
-            case Aisle aisle:
-                if (aisle.IsMargin)
-                {
-                    InvokeForMarginAisleInternal(aisle, notifier);
-                }
-                else
-                {
-                    InvokeForInternalAisleInternal(aisle, notifier);
-                }
-                break;
-
             case Tableau tableau:
                 foreach (var aisle in tableau.GetAisles())
                 {
@@ -52,6 +46,17 @@ public class AisleResolutionPatternRule : IRule
                     {
                         InvokeForInternalAisleInternal(aisle, notifier);
                     }
+                }
+                break;
+
+            case Aisle aisle:
+                if (aisle.IsMargin)
+                {
+                    InvokeForMarginAisleInternal(aisle, notifier);
+                }
+                else
+                {
+                    InvokeForInternalAisleInternal(aisle, notifier);
                 }
                 break;
 
@@ -300,10 +305,5 @@ public class AisleResolutionPatternRule : IRule
         ]);
 
         return data;
-    }
-
-    public override string ToString()
-    {
-        return nameof(AisleResolutionPatternRule);
     }
 }
