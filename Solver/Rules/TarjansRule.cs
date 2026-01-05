@@ -4,19 +4,19 @@ using Tableau = Solver.Components.Tableau;
 
 namespace Solver.Rules;
 
-public class TarjansRule : IRule
+public class TarjansRule(Tableau tableau) : Rule(tableau)
 {
     public override string ToString()
     {
         return nameof(TarjansRule);
     }
 
-    public IEnumerable<Type> GetPertinentComponents()
+    public override IEnumerable<Type> GetPertinentComponents()
     {
         yield return typeof(Tableau);
     }
 
-    public void Invoke(IComponent component, INotifier notifier)
+    public override void Invoke(IComponent component, INotifier notifier)
     {
         switch (component)
         {
@@ -57,7 +57,7 @@ public class TarjansRule : IRule
                         {
                             adjacency.Add((tile, otherTile));
                         }
-   
+
                         foreach (var linkableTile in tile.Edges
                             .Where(e => !e.IsResolved)
                             .SelectMany(e => e.Tiles.Where(t => t != tile && t.Resolution != Resolution.Empty)))

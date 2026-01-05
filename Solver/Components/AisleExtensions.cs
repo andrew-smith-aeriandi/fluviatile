@@ -6,6 +6,20 @@ namespace Solver.Components;
 
 public static class AisleExtensions
 {
+    public static Aisle Clone(this Aisle source)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        return new Aisle(
+            source.Axis,
+            source.Index,
+            source.IsMargin,
+            source.TileCount,
+            source.ChannelTileCount,
+            source.ResolvedChannelTileCount,
+            source.ResolvedEmptyTileCount);
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (Axis, int) GetDefaultKey(this Aisle aisle) => (aisle.Axis, aisle.Index);
 

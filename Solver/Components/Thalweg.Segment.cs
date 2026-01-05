@@ -34,7 +34,7 @@ public partial class Thalweg
 
         public int Count => _links.Count;
 
-        public int TileCount => _links.Count - _terminationCount;
+        public int ChannelTileCount => _links.Count - _terminationCount;
 
         public int TerminationCount => _terminationCount;
 
@@ -47,6 +47,22 @@ public partial class Thalweg
         public IEnumerable<ILinkable> Links => _links;
 
         public IEnumerable<Tile> Tiles => _links.OfType<Tile>();
+
+        public IEnumerable<ILinkable> Ends
+        {
+            get
+            {
+                if (_links.Count >= 1 && _links.First!.Value is ILinkable first)
+                {
+                    yield return first;
+                }
+
+                if (_links.Count >= 2 && _links.Last!.Value is ILinkable last)
+                {
+                    yield return last;
+                }
+            }
+        }
 
         public IEnumerable<Termination> Terminations
         {
@@ -92,7 +108,7 @@ public partial class Thalweg
             if (link is Termination termination)
             {
                 _terminationCount += 1;
-                _thalweg._terminations.Add(termination);
+                _thalweg.TryAddTermination(termination);
             }
 
             InvalidateStringRepresention();
@@ -201,7 +217,7 @@ public partial class Thalweg
             if (link is Termination termination)
             {
                 _terminationCount += 1;
-                _thalweg._terminations.Add(termination);
+                _thalweg.TryAddTermination(termination);
             }
 
             InvalidateStringRepresention();

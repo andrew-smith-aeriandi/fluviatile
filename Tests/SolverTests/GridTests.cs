@@ -235,18 +235,18 @@ public class GridTests
         // Assert
         Assert.Equal(3, result.Count);
 
-        Assert.Equal(vertices[0], result[0].Vertices[0]);
-        Assert.Equal(vertices[1], result[0].Vertices[1]);
+        Assert.Equal(vertices[0], result[0].Vertices[1]);
+        Assert.Equal(vertices[1], result[0].Vertices[0]);
         Assert.Equal(Axis.Z, result[0].NormalAxis);
         Assert.False(result[0].IsFrozen);
 
-        Assert.Equal(vertices[1], result[1].Vertices[0]);
-        Assert.Equal(vertices[2], result[1].Vertices[1]);
+        Assert.Equal(vertices[1], result[1].Vertices[1]);
+        Assert.Equal(vertices[2], result[1].Vertices[0]);
         Assert.Equal(Axis.X, result[1].NormalAxis);
         Assert.False(result[1].IsFrozen);
 
-        Assert.Equal(vertices[2], result[2].Vertices[0]);
-        Assert.Equal(vertices[0], result[2].Vertices[1]);
+        Assert.Equal(vertices[2], result[2].Vertices[1]);
+        Assert.Equal(vertices[0], result[2].Vertices[0]);
         Assert.Equal(Axis.Y, result[2].NormalAxis);
         Assert.False(result[2].IsFrozen);
     }

@@ -2,6 +2,13 @@
 
 public static class CoordinatesExtensions
 {
+    public static int Radius(this Coordinates coordinates)
+    {
+        return Math.Max(
+            Math.Max(Math.Abs(coordinates.X), Math.Abs(coordinates.Y)),
+            Math.Abs(coordinates.Z));
+    }
+
     public static Coordinates Add(this Coordinates coordinates, int x, int y)
     {
         return new Coordinates(coordinates.X + x, coordinates.Y + y);

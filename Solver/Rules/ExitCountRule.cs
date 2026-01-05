@@ -3,18 +3,14 @@ using Solver.Framework;
 
 namespace Solver.Rules;
 
-public class ExitCountRule : IRule
+public class ExitCountRule : Rule
 {
-    private readonly SolverGrid _grid;
     private readonly IReadOnlyList<UnorderedPair<Coordinates>> _cornerRadialCoordinates;
 
-    public ExitCountRule(SolverGrid grid)
+    public ExitCountRule(Tableau tableau) : base(tableau)
     {
-        ArgumentNullException.ThrowIfNull(grid);
-
-        _grid = grid;
-        var radius1 = grid.Radius;
-        var radius2 = grid.CoordinateLength(^1);
+        var radius1 = tableau.Grid.Radius;
+        var radius2 = tableau.Grid.CoordinateLength(^1);
 
         _cornerRadialCoordinates =
         [
@@ -27,17 +23,22 @@ public class ExitCountRule : IRule
         ];
     }
 
-    public IEnumerable<Type> GetPertinentComponents()
+    public override string ToString()
+    {
+        return nameof(ExitCountRule);
+    }
+
+    public override IEnumerable<Type> GetPertinentComponents()
     {
         yield return typeof(Tableau);
     }
 
-    public void Invoke(IComponent component, INotifier notifier)
+    public override void Invoke(IComponent component, INotifier notifier)
     {
         switch (component)
         {
             case Tableau tableau:
-                if (tableau.Thalweg.UnresolvedExitCount == 0)
+                if (tableau.Thalweg.UnresolvedTerminationCount == 0)
                 {
                     InvokeWithAllExitsResolved(tableau, notifier);
                 }
@@ -49,7 +50,7 @@ public class ExitCountRule : IRule
         }
     }
 
-    private void InvokeWithAllExitsResolved(Tableau tableau, INotifier notifier)
+    private static void InvokeWithAllExitsResolved(Tableau tableau, INotifier notifier)
     {
         // No unresolved border can be an exit
         foreach (var border in tableau.GetBorders())
@@ -63,7 +64,7 @@ public class ExitCountRule : IRule
         var exitSets = new List<ExitSet>();
 
         // Add single-element set for any already-resolved exit (either zero or one).
-        foreach (var termination in tableau.Thalweg.Exits)
+        foreach (var termination in tableau.Thalweg.Terminations)
         {
             exitSets.Add(new ExitSet(1, 1, [termination.Border]));
         }
@@ -243,7 +244,7 @@ public class ExitCountRule : IRule
             if (adjacentBorderTiles.Length == 2)
             {
                 var adjacentBorders = adjacentBorderTiles.SelectMany(t => t.Edges.Where(e => e.IsBorder));
-                exitSets.Add(new ExitSet(1, 1, [..adjacentBorders]));
+                exitSets.Add(new ExitSet(1, 1, [.. adjacentBorders]));
             }
         }
 
@@ -403,10 +404,5 @@ public class ExitCountRule : IRule
         public int MinExits { get; } = minExits;
 
         public int MaxExits { get; } = maxExits;
-    }
-
-    public override string ToString()
-    {
-        return nameof(ExitCountRule);
     }
 }

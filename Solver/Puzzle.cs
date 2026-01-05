@@ -1,17 +1,24 @@
-﻿namespace Solver;
+﻿using Solver.Framework;
+
+namespace Solver;
 
 public record Puzzle
 {
-    public Puzzle(IEnumerable<int> channelCounts, bool solved, string comment)
+    public Puzzle(IEnumerable<int> channelCounts, SolverResult solverResult, string comment)
     {
         ChannelCounts = [.. channelCounts];
-        Solved = solved;
+        SolverResult = solverResult;
         Comment = comment;
     }
 
     public int[] ChannelCounts { get; }
 
-    public bool Solved { get; }
+    public SolverResult SolverResult { get; }
 
     public string Comment { get; }
+
+    public override string ToString()
+    {
+        return $"{SolverResult}, {Comment}";
+    }
 }

@@ -1,28 +1,84 @@
 ﻿using Fluviatile.Grid;
 using Solver.Framework;
+using System.Diagnostics;
+using Coordinates = Solver.Framework.Coordinates;
 
 namespace Solver.Components;
 
 public static class TableauExtensions
 {
-    public static Tableau Clone(this Tableau tableau)
+    public static IComponent GetEquivalentComponent(
+        this Tableau tableau,
+        IComponent alienComponent)
+    {
+        ArgumentNullException.ThrowIfNull(tableau);
+        ArgumentNullException.ThrowIfNull(alienComponent);
+
+        return alienComponent switch
+        {
+            Tableau => tableau,
+            Thalweg => tableau.Thalweg,
+            Aisle alienAisle => tableau.Aisles[alienAisle.GetDefaultKey()],
+            Tile alienTile => tableau.Tiles[alienTile.GetDefaultKey()],
+            Edge alienEdge => tableau.Edges[alienEdge.GetDefaultKey()],
+            _ => throw new UnreachableException($"Unexpected type: {alienComponent.GetType().Name}")
+        };
+    }
+
+    public static bool TryGetEquivalentComponent(
+        this Tableau tableau,
+        IComponent? alienComponent,
+        out IComponent? component)
     {
         ArgumentNullException.ThrowIfNull(tableau);
 
-        return new Tableau(
-            tableau.Grid,
-            tableau.Thalweg.Clone(),
-            tableau.GetAisles(),
-            tableau.GetTiles(),
-            tableau.GetEdges());
+        switch (alienComponent)
+        {
+            case Tableau:
+                component = tableau;
+                return true;
+
+            case Thalweg:
+                component = tableau.Thalweg;
+                return true;
+
+            case Aisle alienAisle:
+                if (tableau.Aisles.TryGetValue(alienAisle.GetDefaultKey(), out var aisle))
+                {
+                    component = aisle;
+                    return true;
+                }
+                break;
+
+            case Tile alienTile:
+                if (tableau.Tiles.TryGetValue(alienTile.GetDefaultKey(), out var tile))
+                {
+                    component = tile;
+                    return true;
+                }
+                break;
+
+            case Edge alienEdge:
+                if (tableau.Edges.TryGetValue(alienEdge.GetDefaultKey(), out var edge))
+                {
+                    component = edge;
+                    return true;
+                }
+                break;
+        }
+
+        component = default;
+        return false;
     }
 
     public static bool IsSolved(this Tableau tableau)
     {
         ArgumentNullException.ThrowIfNull(tableau);
 
-        return tableau.Thalweg.UnlinkedTileCount == 0 &&
-            tableau.Thalweg.UnresolvedExitCount == 0 &&
+        return tableau.UnresolvedTileCount == 0 &&
+            tableau.UnresolvedEdgeCount == 0 &&
+            tableau.Thalweg.UnlinkedChannelTileCount == 0 &&
+            tableau.Thalweg.UnresolvedTerminationCount == 0 &&
             tableau.Thalweg.SegmentCount == 1;
     }
 
@@ -86,7 +142,7 @@ public static class TableauExtensions
         }
     }
 
-    public static bool TryGetTile(this Tableau tableau, Framework.Coordinates coordinates, out Tile? tile)
+    public static bool TryGetTile(this Tableau tableau, Coordinates coordinates, out Tile? tile)
     {
         ArgumentNullException.ThrowIfNull(tableau);
 
@@ -123,6 +179,12 @@ public static class TableauExtensions
         return tableau.Edges.TryGetValue(tile.GetEdgeKey(axis), out edge);
     }
 
+    public static bool TryGetUnresolvedComponent(this Tableau tableau, out IComponent? component)
+    {
+        component = tableau.Tiles.Values.FirstOrDefault(tile => !tile.IsResolved);
+        return component is not null;
+    }
+
     public static IEnumerable<NodeState> GetNodeState(this Tableau tableau)
     {
         foreach (var (coordinates, tile) in tableau.Tiles)
@@ -155,5 +217,30 @@ public static class TableauExtensions
                     break;
             }
         }
+    }
+
+    public static IEnumerable<IResolvableComponent> GetThalwegHypotheticals(
+        this Tableau tableau)
+    {
+        foreach (var segment in tableau.Thalweg.Segments)
+        {
+            foreach (var tile in segment.Ends.OfType<Tile>())
+            {
+                if (tile.Edges.FirstOrDefault(edge => !edge.IsResolved) is Edge unresolvedEdge)
+                {
+                    yield return unresolvedEdge;
+                }
+            }
+        }
+    }
+
+    // TODO: implement properly
+    public static IEnumerable<IResolvableComponent> GetHypotheticals(
+        this Tableau tableau)
+    {
+        return tableau.GetThalwegHypotheticals()
+            .Concat(tableau.Tiles.Values.OfType<IResolvableComponent>())
+            .Concat(tableau.Edges.Values.OfType<IResolvableComponent>())
+            .Where(c => !c.IsResolved);
     }
 }

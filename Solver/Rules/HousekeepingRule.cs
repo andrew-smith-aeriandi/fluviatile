@@ -3,24 +3,20 @@ using Solver.Framework;
 
 namespace Solver.Rules;
 
-public class HousekeepingRule : IRule
+public class HousekeepingRule(Tableau tableau) : Rule(tableau)
 {
-    private readonly Tableau _tableau;
-
-    public HousekeepingRule(Tableau tableau)
+    public override string ToString()
     {
-        ArgumentNullException.ThrowIfNull(tableau);
-
-        _tableau = tableau;
+        return nameof(HousekeepingRule);
     }
 
-    public IEnumerable<Type> GetPertinentComponents()
+    public override IEnumerable<Type> GetPertinentComponents()
     {
         yield return typeof(Tile);
         yield return typeof(Edge);
     }
 
-    public void Invoke(IComponent component, INotifier notifier)
+    public override void Invoke(IComponent component, INotifier notifier)
     {
         switch (component)
         {
@@ -34,7 +30,7 @@ public class HousekeepingRule : IRule
         }
     }
 
-    private void InvokeInternal(Tile tile, INotifier notifier)
+    private static void InvokeInternal(Tile tile, INotifier notifier)
     {
         if (tile.Resolution == Resolution.Empty)
         {
@@ -58,10 +54,5 @@ public class HousekeepingRule : IRule
 
             _tableau.Thalweg.TryLink(edge, notifier, ResolutionReason.Housekeeping);
         }
-    }
-
-    public override string ToString()
-    {
-        return nameof(HousekeepingRule);
     }
 }

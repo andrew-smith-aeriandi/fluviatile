@@ -49,7 +49,7 @@ public class TileTests
         Assert.Null(instance.EdgeY);
         Assert.Null(instance.EdgeZ);
 
-        Assert.Equal(-196609, instance.GetHashCode());
+        Assert.Equal(-4, instance.GetHashCode());
         Assert.Equal("Tile:Up:(-1,-4,5)=>Unknown", instance.ToString());
     }
 
@@ -81,7 +81,7 @@ public class TileTests
         Assert.Null(instance.EdgeY);
         Assert.Null(instance.EdgeZ);
 
-        Assert.Equal(-131068, instance.GetHashCode());
+        Assert.Equal(327678, instance.GetHashCode());
         Assert.Equal("Tile:Down:(4,-2,-2)=>Unknown", instance.ToString());
     }
 

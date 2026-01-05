@@ -4,16 +4,21 @@ using System.Diagnostics;
 
 namespace Solver.Rules;
 
-public class MeanderRule : IRule
+public class MeanderRule(Tableau tableau) : Rule(tableau)
 {
-    public IEnumerable<Type> GetPertinentComponents()
+    public override string ToString()
+    {
+        return nameof(MeanderRule);
+    }
+
+    public override IEnumerable<Type> GetPertinentComponents()
     {
         yield return typeof(Tableau);
         yield return typeof(Tile);
         yield return typeof(Edge);
     }
 
-    public void Invoke(IComponent component, INotifier notifier)
+    public override void Invoke(IComponent component, INotifier notifier)
     {
         switch (component)
         {
@@ -37,7 +42,7 @@ public class MeanderRule : IRule
         }
     }
 
-    private void InvokeInternal(Edge edge, INotifier notifier)
+    private static void InvokeInternal(Edge edge, INotifier notifier)
     {
         if (edge.Resolution == Resolution.Empty)
         {
@@ -54,10 +59,5 @@ public class MeanderRule : IRule
                 }
             }
         }
-    }
-
-    public override string ToString()
-    {
-        return nameof(MeanderRule);
     }
 }

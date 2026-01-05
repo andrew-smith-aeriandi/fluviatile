@@ -3,30 +3,23 @@ using Solver.Framework;
 
 namespace Solver.Rules;
 
-public class AisleResolutionPatternRule : IRule
+public class AisleResolutionPatternRule(Tableau tableau) : Rule(tableau)
 {
-    private readonly List<List<Resolution[]>> _tilePatterns;
-
-    public AisleResolutionPatternRule(SolverGrid grid)
-    {
-        ArgumentNullException.ThrowIfNull(grid);
-
-        _tilePatterns = GetPatterns(grid);
-    }
+    private readonly List<List<Resolution[]>> _tilePatterns = GetPatterns(tableau.Grid);
 
     public override string ToString()
     {
         return nameof(AisleResolutionPatternRule);
     }
 
-    public IEnumerable<Type> GetPertinentComponents()
+    public override IEnumerable<Type> GetPertinentComponents()
     {
         yield return typeof(Tableau);
         yield return typeof(Aisle);
         yield return typeof(Tile);
     }
 
-    public void Invoke(IComponent component, INotifier notifier)
+    public override void Invoke(IComponent component, INotifier notifier)
     {
         if (_tilePatterns.Count == 0)
         {
@@ -161,7 +154,7 @@ public class AisleResolutionPatternRule : IRule
         }
     }
 
-    private void InvokeForInternalAisleInternal(Aisle aisle, INotifier notifier)
+    private static void InvokeForInternalAisleInternal(Aisle aisle, INotifier notifier)
     {
         if (aisle.UnresolvedTileCount == 0)
         {

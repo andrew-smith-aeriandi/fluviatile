@@ -15,7 +15,7 @@ public class CoordinatesTests
         Assert.Equal(-4, coordinates.Y);
         Assert.Equal(5, coordinates.Z);
 
-        Assert.Equal(-196609, coordinates.GetHashCode());
+        Assert.Equal(-4, coordinates.GetHashCode());
         Assert.Equal("(-1,-4,5)", coordinates.ToString());
     }
 
@@ -30,7 +30,7 @@ public class CoordinatesTests
         Assert.Equal(-4, coordinates.Y);
         Assert.Equal(5, coordinates.Z);
 
-        Assert.Equal(-196609, coordinates.GetHashCode());
+        Assert.Equal(-4, coordinates.GetHashCode());
         Assert.Equal("(-1,-4,5)", coordinates.ToString());
     }
 

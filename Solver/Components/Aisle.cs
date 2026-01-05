@@ -10,9 +10,11 @@ public class Aisle : IComponent, IFreezable
     public Aisle(
         Axis axis,
         int index,
-        bool isBorder,
+        bool isMargin,
         int tileCount,
-        int channelCount)
+        int channelCount,
+        int resolvedChannelCount = 0,
+        int resolvedEmptyCount = 0)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(index);
         ArgumentOutOfRangeException.ThrowIfNegative(tileCount);
@@ -21,14 +23,14 @@ public class Aisle : IComponent, IFreezable
 
         Axis = axis;
         Index = index;
-        IsMargin = isBorder;
+        IsMargin = isMargin;
         TileCount = tileCount;
         ChannelTileCount = channelCount;
         EmptyTileCount = tileCount - channelCount;
 
-        UnresolvedTileCount = TileCount;
-        UnresolvedChannelTileCount = ChannelTileCount;
-        UnresolvedEmptyTileCount = EmptyTileCount;
+        ResolvedChannelTileCount = resolvedChannelCount;
+        ResolvedEmptyTileCount = resolvedEmptyCount;
+        ResolvedTileCount = ResolvedChannelTileCount + ResolvedEmptyTileCount;
     }
 
     public bool IsFrozen => _frozen;
@@ -50,21 +52,21 @@ public class Aisle : IComponent, IFreezable
 
     public int TileCount { get; }
 
-    public int UnresolvedTileCount { get; private set; }
+    public int ResolvedTileCount { get; private set; }
 
-    public int ResolvedTileCount => TileCount - UnresolvedTileCount;
+    public int UnresolvedTileCount => TileCount - ResolvedTileCount;
 
     public int ChannelTileCount { get; }
 
-    public int UnresolvedChannelTileCount { get; private set; }
+    public int ResolvedChannelTileCount { get; private set; }
 
-    public int ResolvedChannelTileCount => ChannelTileCount - UnresolvedChannelTileCount;
+    public int UnresolvedChannelTileCount => ChannelTileCount - ResolvedChannelTileCount;
 
     public int EmptyTileCount { get; }
 
-    public int UnresolvedEmptyTileCount { get; private set; }
+    public int ResolvedEmptyTileCount { get; private set; }
 
-    public int ResolvedEmptyTileCount => EmptyTileCount - UnresolvedEmptyTileCount;
+    public int UnresolvedEmptyTileCount => EmptyTileCount - ResolvedEmptyTileCount;
 
     public void NotifyResolution(Tile tile)
     {
@@ -81,8 +83,8 @@ public class Aisle : IComponent, IFreezable
                     throw new UnreachableException($"{nameof(UnresolvedTileCount)} cannot be negative");
                 }
 
-                UnresolvedChannelTileCount -= 1;
-                UnresolvedTileCount -= 1;
+                ResolvedChannelTileCount += 1;
+                ResolvedTileCount += 1;
                 break;
 
             case Resolution.Empty:
@@ -96,8 +98,8 @@ public class Aisle : IComponent, IFreezable
                     throw new UnreachableException($"{nameof(UnresolvedTileCount)} cannot be negative");
                 }
 
-                UnresolvedEmptyTileCount -= 1;
-                UnresolvedTileCount -= 1;
+                ResolvedEmptyTileCount += 1;
+                ResolvedTileCount += 1;
                 break;
         }
     }

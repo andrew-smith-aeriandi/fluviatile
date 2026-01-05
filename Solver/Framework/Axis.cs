@@ -1,7 +1,5 @@
 ﻿namespace Solver.Framework;
 
-
-
 public enum Axis : int
 {
     X = 1,

@@ -6,23 +6,17 @@ namespace Solver.Components;
 
 public partial class Thalweg : IComponent
 {
-    private SolverGrid _grid;
-    private readonly int _tileCount;
-    private int _linkedTileCount;
+    private readonly SolverGrid _grid;
+    private readonly int _channelTileCount;
+    private int _linkedChannelTileCount;
 
     private readonly Dictionary<ILinkable, Segment> _membership;
     private readonly List<Termination> _terminations;
     private readonly List<Segment> _segments;
 
-    public Thalweg(SolverGrid grid, int tileCount)
-        : this(grid, tileCount, [])
-    {
-    }
-
     public Thalweg(
         SolverGrid grid,
-        int tileCount,
-        IEnumerable<IEnumerable<ILinkable>> segmentLinks)
+        int tileCount)
     {
         ArgumentNullException.ThrowIfNull(grid);
 
@@ -34,24 +28,34 @@ public partial class Thalweg : IComponent
         }
 
         _grid = grid;
-        _tileCount = tileCount;
-        _linkedTileCount = 0;
+        _channelTileCount = tileCount;
+        _linkedChannelTileCount = 0;
 
-        var linkCount = tileCount + SolverGrid.ExitCount;
+        var linkCount = tileCount + SolverGrid.TerminationCount;
         _membership = new(linkCount, LocationComparer.Default);
         _segments = new(linkCount / 2);
-        _terminations = new List<Termination>(SolverGrid.ExitCount);
 
-        foreach (var links in segmentLinks)
-        {
-            CreateSegment(links);
-        }
+        _terminations = new List<Termination>(SolverGrid.TerminationCount);
     }
 
-    private void CreateSegment(params IEnumerable<ILinkable> links)
+    public bool TryAddTermination(Termination termination)
+    {
+        ArgumentNullException.ThrowIfNull(termination);
+
+        if (_terminations.Contains(termination, LocationComparer.Default))
+        {
+            // Termination already exists
+            return false;
+        }
+
+        _terminations.Add(termination);
+        return true;
+    }
+
+    public void CreateSegment(params IEnumerable<ILinkable> links)
     {
         var segment = new Segment(this, links);
-        _linkedTileCount += segment.TileCount;
+        _linkedChannelTileCount += segment.ChannelTileCount;
     }
 
     public SolverGrid Grid => _grid;
@@ -60,19 +64,19 @@ public partial class Thalweg : IComponent
 
     public int SegmentCount => _segments.Count;
 
-    public int TileCount => _tileCount;
+    public int ChannelTileCount => _channelTileCount;
 
-    public int LinkedTileCount => _linkedTileCount;
+    public int LinkedChannelTileCount => _linkedChannelTileCount;
 
-    public int UnlinkedTileCount => _tileCount - _linkedTileCount;
+    public int UnlinkedChannelTileCount => _channelTileCount - _linkedChannelTileCount;
 
-    public IReadOnlyList<Termination> Exits => _terminations;
+    public IReadOnlyList<Termination> Terminations => _terminations;
 
-    public int ExitCount => SolverGrid.ExitCount;
+    public int TerminationCount => SolverGrid.TerminationCount;
 
-    public int ResolvedExitCount => _terminations.Count;
+    public int ResolvedTerminationCount => _terminations.Count;
 
-    public int UnresolvedExitCount => SolverGrid.ExitCount - _terminations.Count;
+    public int UnresolvedTerminationCount => SolverGrid.TerminationCount - _terminations.Count;
 
     public bool TryGetSegment(ILinkable link, out Segment? segment)
     {
@@ -83,6 +87,12 @@ public partial class Thalweg : IComponent
 
         segment = null;
         return false;
+    }
+
+    public bool TryGetTermination(Coordinates coordinates, out Termination? termination)
+    {
+        termination = _terminations.Find(t => t.Coordinates.Equals(coordinates));
+        return termination is not null;
     }
 
     public bool IsLinked(ILinkable component)
@@ -166,13 +176,13 @@ public partial class Thalweg : IComponent
             if (tile == segment.First)
             {
                 segment.AddToFirst(otherTile);
-                _linkedTileCount += 1;
+                _linkedChannelTileCount += 1;
                 isLinked = true;
             }
             else if (tile == segment.Last)
             {
                 segment.AddToLast(otherTile);
-                _linkedTileCount += 1;
+                _linkedChannelTileCount += 1;
                 isLinked = true;
             }
         }
@@ -182,13 +192,13 @@ public partial class Thalweg : IComponent
             if (otherTile == otherSegment.First)
             {
                 otherSegment.AddToFirst(tile);
-                _linkedTileCount += 1;
+                _linkedChannelTileCount += 1;
                 isLinked = true;
             }
             else if (otherTile == otherSegment.Last)
             {
                 otherSegment.AddToLast(tile);
-                _linkedTileCount += 1;
+                _linkedChannelTileCount += 1;
                 isLinked = true;
             }
         }
@@ -209,9 +219,9 @@ public partial class Thalweg : IComponent
                 var termination = new Termination(coordinates, edge);
                 if (!_membership.ContainsKey(termination))
                 {
-                    if (_terminations.Count >= SolverGrid.ExitCount)
+                    if (_terminations.Count >= SolverGrid.TerminationCount)
                     {
-                        throw new InvalidOperationException($"Number of exits cannot exceed {SolverGrid.ExitCount}");
+                        throw new InvalidOperationException($"Number of exits cannot exceed {SolverGrid.TerminationCount}");
                     }
 
                     if (tile == segment.First)
@@ -239,9 +249,9 @@ public partial class Thalweg : IComponent
                 var termination = new Termination(coordinates, edge);
                 if (!_membership.ContainsKey(termination))
                 {
-                    if (_terminations.Count >= SolverGrid.ExitCount)
+                    if (_terminations.Count >= SolverGrid.TerminationCount)
                     {
-                        throw new InvalidOperationException($"Number of exits cannot exceed {SolverGrid.ExitCount}");
+                        throw new InvalidOperationException($"Number of exits cannot exceed {SolverGrid.TerminationCount}");
                     }
 
                     CreateSegment(tile, termination);

@@ -3,13 +3,13 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Solver.Components;
 
-public class LocationComparer : IEqualityComparer<ILocatable>, IComparer<ILocatable>
+public class TerminationComparer : IEqualityComparer<Termination>, IComparer<Termination>
 {
-    public readonly static LocationComparer Default = new();
+    public readonly static TerminationComparer Default = new();
 
     private readonly CoordinatesComparer _coordinatesComparer = CoordinatesComparer.Default;
 
-    public int Compare(ILocatable? x, ILocatable? y)
+    public int Compare(Termination? x, Termination? y)
     {
         if (ReferenceEquals(x, y))
         {
@@ -27,7 +27,7 @@ public class LocationComparer : IEqualityComparer<ILocatable>, IComparer<ILocata
         return _coordinatesComparer.Compare(x.Coordinates, y.Coordinates);
     }
 
-    public bool Equals(ILocatable? x, ILocatable? y)
+    public bool Equals(Termination? x, Termination? y)
     {
         if (ReferenceEquals(x, y))
         {
@@ -42,7 +42,7 @@ public class LocationComparer : IEqualityComparer<ILocatable>, IComparer<ILocata
         return _coordinatesComparer.Equals(x.Coordinates, y.Coordinates);
     }
 
-    public int GetHashCode([DisallowNull] ILocatable obj)
+    public int GetHashCode([DisallowNull] Termination obj)
     {
         return obj.Coordinates.GetHashCode();
     }

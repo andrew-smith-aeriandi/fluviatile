@@ -4,21 +4,21 @@ using System.Diagnostics;
 
 namespace Solver.Rules;
 
-public class TileEdgeRule : IRule
+public class TileEdgeRule(Tableau tableau) : Rule(tableau)
 {
     public override string ToString()
     {
         return nameof(TileEdgeRule);
     }
 
-    public IEnumerable<Type> GetPertinentComponents()
+    public override IEnumerable<Type> GetPertinentComponents()
     {
         yield return typeof(Tableau);
         yield return typeof(Tile);
         yield return typeof(Edge);
     }
 
-    public void Invoke(IComponent component, INotifier notifier)
+    public override void Invoke(IComponent component, INotifier notifier)
     {
         switch (component)
         {

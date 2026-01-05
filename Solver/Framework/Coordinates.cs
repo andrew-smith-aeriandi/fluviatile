@@ -59,7 +59,7 @@ public readonly struct Coordinates : IEquatable<Coordinates>
 
     public override int GetHashCode()
     {
-        return (ushort)Y << 16 | (ushort)X;
+        return (ushort)X << 16 | (ushort)Y;
     }
 
     public override readonly string ToString()

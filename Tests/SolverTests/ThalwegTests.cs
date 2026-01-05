@@ -21,14 +21,14 @@ public class ThalwegTests
         Assert.Empty(thalweg.Segments);
         Assert.Equal(0, thalweg.SegmentCount);
 
-        Assert.Equal(29, thalweg.TileCount);
-        Assert.Equal(0, thalweg.LinkedTileCount);
-        Assert.Equal(29, thalweg.UnlinkedTileCount);
+        Assert.Equal(29, thalweg.ChannelTileCount);
+        Assert.Equal(0, thalweg.LinkedChannelTileCount);
+        Assert.Equal(29, thalweg.UnlinkedChannelTileCount);
 
-        Assert.Empty(thalweg.Exits);
-        Assert.Equal(2, thalweg.ExitCount);
-        Assert.Equal(0, thalweg.ResolvedExitCount);
-        Assert.Equal(2, thalweg.UnresolvedExitCount);
+        Assert.Empty(thalweg.Terminations);
+        Assert.Equal(2, thalweg.TerminationCount);
+        Assert.Equal(0, thalweg.ResolvedTerminationCount);
+        Assert.Equal(2, thalweg.UnresolvedTerminationCount);
 
         Assert.Equal("", thalweg.ToString());
     }
@@ -79,20 +79,20 @@ public class ThalwegTests
         // Assert
         Assert.True(result);
 
-        Assert.Equal(29, thalweg.TileCount);
-        Assert.Equal(2, thalweg.LinkedTileCount);
-        Assert.Equal(27, thalweg.UnlinkedTileCount);
+        Assert.Equal(29, thalweg.ChannelTileCount);
+        Assert.Equal(2, thalweg.LinkedChannelTileCount);
+        Assert.Equal(27, thalweg.UnlinkedChannelTileCount);
 
-        Assert.Equal(2, thalweg.ExitCount);
-        Assert.Equal(0, thalweg.ResolvedExitCount);
-        Assert.Equal(2, thalweg.UnresolvedExitCount);
+        Assert.Equal(2, thalweg.TerminationCount);
+        Assert.Equal(0, thalweg.ResolvedTerminationCount);
+        Assert.Equal(2, thalweg.UnresolvedTerminationCount);
 
         Assert.Equal(1, thalweg.SegmentCount);
         var segment = Assert.Single(thalweg.Segments);
 
         Assert.Same(thalweg, segment.Thalweg);
         Assert.Equal(2, segment.Count);
-        Assert.Equal(2, segment.TileCount);
+        Assert.Equal(2, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(0, segment.Rotation);
     }
@@ -114,20 +114,20 @@ public class ThalwegTests
         // Assert
         Assert.True(result);
 
-        Assert.Equal(29, thalweg.TileCount);
-        Assert.Equal(1, thalweg.LinkedTileCount);
-        Assert.Equal(28, thalweg.UnlinkedTileCount);
+        Assert.Equal(29, thalweg.ChannelTileCount);
+        Assert.Equal(1, thalweg.LinkedChannelTileCount);
+        Assert.Equal(28, thalweg.UnlinkedChannelTileCount);
 
-        Assert.Equal(2, thalweg.ExitCount);
-        Assert.Equal(1, thalweg.ResolvedExitCount);
-        Assert.Equal(1, thalweg.UnresolvedExitCount);
+        Assert.Equal(2, thalweg.TerminationCount);
+        Assert.Equal(1, thalweg.ResolvedTerminationCount);
+        Assert.Equal(1, thalweg.UnresolvedTerminationCount);
 
         Assert.Equal(1, thalweg.SegmentCount);
         var segment = Assert.Single(thalweg.Segments);
 
         Assert.Same(thalweg, segment.Thalweg);
         Assert.Equal(2, segment.Count);
-        Assert.Equal(1, segment.TileCount);
+        Assert.Equal(1, segment.ChannelTileCount);
         Assert.Equal(1, segment.TerminationCount);
         Assert.Equal(0, segment.Rotation);
     }
@@ -154,20 +154,20 @@ public class ThalwegTests
         // Assert
         Assert.True(result);
 
-        Assert.Equal(29, thalweg.TileCount);
-        Assert.Equal(3, thalweg.LinkedTileCount);
-        Assert.Equal(26, thalweg.UnlinkedTileCount);
+        Assert.Equal(29, thalweg.ChannelTileCount);
+        Assert.Equal(3, thalweg.LinkedChannelTileCount);
+        Assert.Equal(26, thalweg.UnlinkedChannelTileCount);
 
-        Assert.Equal(2, thalweg.ExitCount);
-        Assert.Equal(0, thalweg.ResolvedExitCount);
-        Assert.Equal(2, thalweg.UnresolvedExitCount);
+        Assert.Equal(2, thalweg.TerminationCount);
+        Assert.Equal(0, thalweg.ResolvedTerminationCount);
+        Assert.Equal(2, thalweg.UnresolvedTerminationCount);
 
         Assert.Equal(1, thalweg.SegmentCount);
         var segment = Assert.Single(thalweg.Segments);
 
         Assert.Same(thalweg, segment.Thalweg);
         Assert.Equal(3, segment.Count);
-        Assert.Equal(3, segment.TileCount);
+        Assert.Equal(3, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(1, segment.Rotation);
     }
@@ -198,20 +198,20 @@ public class ThalwegTests
         // Assert
         Assert.True(result);
 
-        Assert.Equal(29, thalweg.TileCount);
-        Assert.Equal(4, thalweg.LinkedTileCount);
-        Assert.Equal(25, thalweg.UnlinkedTileCount);
+        Assert.Equal(29, thalweg.ChannelTileCount);
+        Assert.Equal(4, thalweg.LinkedChannelTileCount);
+        Assert.Equal(25, thalweg.UnlinkedChannelTileCount);
 
-        Assert.Equal(2, thalweg.ExitCount);
-        Assert.Equal(0, thalweg.ResolvedExitCount);
-        Assert.Equal(2, thalweg.UnresolvedExitCount);
+        Assert.Equal(2, thalweg.TerminationCount);
+        Assert.Equal(0, thalweg.ResolvedTerminationCount);
+        Assert.Equal(2, thalweg.UnresolvedTerminationCount);
 
         Assert.Equal(1, thalweg.SegmentCount);
         var segment = Assert.Single(thalweg.Segments);
 
         Assert.Same(thalweg, segment.Thalweg);
         Assert.Equal(4, segment.Count);
-        Assert.Equal(4, segment.TileCount);
+        Assert.Equal(4, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(2, segment.Rotation);
     }
@@ -238,20 +238,20 @@ public class ThalwegTests
         // Assert
         Assert.True(result);
 
-        Assert.Equal(29, thalweg.TileCount);
-        Assert.Equal(3, thalweg.LinkedTileCount);
-        Assert.Equal(26, thalweg.UnlinkedTileCount);
+        Assert.Equal(29, thalweg.ChannelTileCount);
+        Assert.Equal(3, thalweg.LinkedChannelTileCount);
+        Assert.Equal(26, thalweg.UnlinkedChannelTileCount);
 
-        Assert.Equal(2, thalweg.ExitCount);
-        Assert.Equal(0, thalweg.ResolvedExitCount);
-        Assert.Equal(2, thalweg.UnresolvedExitCount);
+        Assert.Equal(2, thalweg.TerminationCount);
+        Assert.Equal(0, thalweg.ResolvedTerminationCount);
+        Assert.Equal(2, thalweg.UnresolvedTerminationCount);
 
         Assert.Equal(1, thalweg.SegmentCount);
         var segment = Assert.Single(thalweg.Segments);
 
         Assert.Same(thalweg, segment.Thalweg);
         Assert.Equal(3, segment.Count);
-        Assert.Equal(3, segment.TileCount);
+        Assert.Equal(3, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(1, segment.Rotation);
     }
@@ -286,20 +286,20 @@ public class ThalwegTests
         // Assert
         Assert.True(result);
 
-        Assert.Equal(29, thalweg.TileCount);
-        Assert.Equal(5, thalweg.LinkedTileCount);
-        Assert.Equal(24, thalweg.UnlinkedTileCount);
+        Assert.Equal(29, thalweg.ChannelTileCount);
+        Assert.Equal(5, thalweg.LinkedChannelTileCount);
+        Assert.Equal(24, thalweg.UnlinkedChannelTileCount);
 
-        Assert.Equal(2, thalweg.ExitCount);
-        Assert.Equal(0, thalweg.ResolvedExitCount);
-        Assert.Equal(2, thalweg.UnresolvedExitCount);
+        Assert.Equal(2, thalweg.TerminationCount);
+        Assert.Equal(0, thalweg.ResolvedTerminationCount);
+        Assert.Equal(2, thalweg.UnresolvedTerminationCount);
 
         Assert.Equal(1, thalweg.SegmentCount);
         var segment = Assert.Single(thalweg.Segments);
 
         Assert.Same(thalweg, segment.Thalweg);
         Assert.Equal(5, segment.Count);
-        Assert.Equal(5, segment.TileCount);
+        Assert.Equal(5, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(1, segment.Rotation);
     }
@@ -334,29 +334,27 @@ public class ThalwegTests
         // Assert
         Assert.True(result);
 
-        Assert.Equal(29, thalweg.TileCount);
-        Assert.Equal(4, thalweg.LinkedTileCount);
-        Assert.Equal(25, thalweg.UnlinkedTileCount);
+        Assert.Equal(29, thalweg.ChannelTileCount);
+        Assert.Equal(4, thalweg.LinkedChannelTileCount);
+        Assert.Equal(25, thalweg.UnlinkedChannelTileCount);
 
-        Assert.Equal(2, thalweg.ExitCount);
-        Assert.Equal(1, thalweg.ResolvedExitCount);
-        Assert.Equal(1, thalweg.UnresolvedExitCount);
+        Assert.Equal(2, thalweg.TerminationCount);
+        Assert.Equal(1, thalweg.ResolvedTerminationCount);
+        Assert.Equal(1, thalweg.UnresolvedTerminationCount);
 
         Assert.Equal(1, thalweg.SegmentCount);
         var segment = Assert.Single(thalweg.Segments);
 
         Assert.Same(thalweg, segment.Thalweg);
         Assert.Equal(5, segment.Count);
-        Assert.Equal(4, segment.TileCount);
+        Assert.Equal(4, segment.ChannelTileCount);
         Assert.Equal(1, segment.TerminationCount);
         Assert.Equal(1, segment.Rotation);
     }
 
     private static Tableau GetExampleTableau(INotifier notifier)
     {
-        var factory = new TableauFactory();
         var grid = new SolverGrid(3);
-
         var tableau = TableauFactory.Create(
             grid,
             [2, 5, 5, 5, 8, 4, 4, 6, 5, 7, 7, 0, 3, 6, 4, 8, 7, 1]);

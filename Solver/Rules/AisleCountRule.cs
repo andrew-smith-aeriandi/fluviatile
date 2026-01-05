@@ -3,21 +3,21 @@ using Solver.Framework;
 
 namespace Solver.Rules;
 
-public class AisleCountRule : IRule
+public class AisleCountRule(Tableau tableau) : Rule(tableau)
 {
     public override string ToString()
     {
         return nameof(AisleCountRule);
     }
 
-    public IEnumerable<Type> GetPertinentComponents()
+    public override IEnumerable<Type> GetPertinentComponents()
     {
         yield return typeof(Tableau);
         yield return typeof(Aisle);
         yield return typeof(Tile);
     }
 
-    public void Invoke(IComponent component, INotifier notifier)
+    public override void Invoke(IComponent component, INotifier notifier)
     {
         switch (component)
         {

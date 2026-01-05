@@ -13,13 +13,29 @@ public class Tile : IResolvableComponent, ILinkable, IFreezable
 
     public Tile(
         Coordinates coordinates,
-        Shape shape)
+        Shape shape,
+        Resolution resolution = Resolution.Unknown)
     {
         ArgumentNullException.ThrowIfNull(shape);
 
         Coordinates = coordinates;
         Orientation = shape.Orientation;
         Vertices = [.. shape.VertexOffsets.Select(offset => coordinates + offset)];
+        Resolution = resolution;
+    }
+
+    public Tile(
+        Coordinates coordinates,
+        Orientation orientation,
+        IEnumerable<Coordinates> vertices,
+        Resolution resolution = Resolution.Unknown)
+    {
+        ArgumentNullException.ThrowIfNull(vertices);
+
+        Coordinates = coordinates;
+        Orientation = orientation;
+        Vertices = [.. vertices];
+        Resolution = resolution;
     }
 
     public bool IsFrozen => _frozen;

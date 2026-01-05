@@ -4,16 +4,21 @@ using System.Diagnostics;
 
 namespace Solver.Rules;
 
-public class ChannelContinuityRule : IRule
+public class ChannelContinuityRule(Tableau tableau) : Rule(tableau)
 {
-    public IEnumerable<Type> GetPertinentComponents()
+    public override string ToString()
+    {
+        return nameof(ChannelContinuityRule);
+    }
+
+    public override IEnumerable<Type> GetPertinentComponents()
     {
         yield return typeof(Tableau);
         yield return typeof(Thalweg);
         yield return typeof(Thalweg.Segment);
     }
 
-    public void Invoke(IComponent component, INotifier notifier)
+    public override void Invoke(IComponent component, INotifier notifier)
     {
         switch (component)
         {
@@ -31,7 +36,7 @@ public class ChannelContinuityRule : IRule
         }
     }
 
-    private void InvokeInternal(Thalweg.Segment segment, INotifier notifier)
+    private static void InvokeInternal(Thalweg.Segment segment, INotifier notifier)
     {
         if (segment.First is Tile first && segment.Last is Tile last && first != last)
         {
@@ -51,12 +56,12 @@ public class ChannelContinuityRule : IRule
         }
     }
 
-    private void InvokeInternal(Thalweg thalweg, INotifier notifier)
+    private static void InvokeInternal(Thalweg thalweg, INotifier notifier)
     {
         if (thalweg.Segments.Count == 1)
         {
             var segment = thalweg.Segments[0];
-            if (segment.TileCount == thalweg.TileCount)
+            if (segment.ChannelTileCount == thalweg.ChannelTileCount)
             {
                 // Add any missing terminations since all channel tiles have been accounted for
                 if (segment.First is Tile tile1 && tile1.Edges.SingleOrDefault(e => e.IsBorder) is Edge edge1)
@@ -85,18 +90,18 @@ public class ChannelContinuityRule : IRule
             switch (segment.First, segment.Last)
             {
                 case (Tile tile1, Termination _):
-                    segmentsWithOneTermination.Add((tile1, segment.TileCount));
+                    segmentsWithOneTermination.Add((tile1, segment.ChannelTileCount));
                     break;
 
                 case (Termination _, Tile tile2):
-                    segmentsWithOneTermination.Add((tile2, segment.TileCount));
+                    segmentsWithOneTermination.Add((tile2, segment.ChannelTileCount));
                     break;
             }
         }
 
         foreach (var (tile, tileCount) in segmentsWithOneTermination)
         {
-            if (tileCount < thalweg.TileCount)
+            if (tileCount < thalweg.ChannelTileCount)
             {
                 // Cannot terminate from this tile as not all channel tiles are accounted for
                 foreach (var border in tile.Edges.Where(e => e.IsBorder))
@@ -115,19 +120,19 @@ public class ChannelContinuityRule : IRule
             if (commonEdge is not null)
             {
                 var combinedTileCount = segmentsWithOneTermination.Sum(t => t.TileCount);
-                if (combinedTileCount < thalweg.TileCount)
+                if (combinedTileCount < thalweg.ChannelTileCount)
                 {
                     // Cannot link terminating segments until all channel tiles are included
                     commonEdge.TryResolve(Resolution.Empty, notifier, ResolutionReason.SingleChannel);
                 }
-                else if (combinedTileCount == thalweg.TileCount)
+                else if (combinedTileCount == thalweg.ChannelTileCount)
                 {
                     // Get common edge to link segments
                     commonEdge.TryResolve(Resolution.Channel, notifier, ResolutionReason.SingleChannel);
                 }
                 else
                 {
-                    throw new UnreachableException($"Combined channel segment tile count cannot exceed {thalweg.TileCount}.");
+                    throw new UnreachableException($"Combined channel segment tile count cannot exceed {thalweg.ChannelTileCount}.");
                 }
             }
         }
@@ -214,9 +219,4 @@ public class ChannelContinuityRule : IRule
         }
     }
     */
-
-    public override string ToString()
-    {
-        return nameof(ChannelContinuityRule);
-    }
 }

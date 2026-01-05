@@ -20,7 +20,7 @@ public record SolverGrid
     public const int OneThird = 1;
     public const int TwoThird = 2;
 
-    public const int ExitCount = 2;
+    public const int TerminationCount = 2;
 
     private readonly int[] _aisleTileCounts;
 

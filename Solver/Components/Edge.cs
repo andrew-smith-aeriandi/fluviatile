@@ -10,7 +10,8 @@ public class Edge : IResolvableComponent, IFreezable
     public Edge(
         Coordinates v1,
         Coordinates v2,
-        SolverGrid grid)
+        SolverGrid grid,
+        Resolution resolution = Resolution.Unknown)
     {
         ArgumentNullException.ThrowIfNull(grid);
 
@@ -23,24 +24,26 @@ public class Edge : IResolvableComponent, IFreezable
         {
             NormalAxis = Axis.X;
             IsBorder = Math.Abs(v1.X) == grid.Radius;
+            Vertices = v1.Y > v2.Y ? new(v2, v1) : new(v1, v2);
         }
         else if (v1.Y == v2.Y)
         {
             NormalAxis = Axis.Y;
             IsBorder = Math.Abs(v1.Y) == grid.Radius;
+            Vertices = v1.Z > v2.Z ? new(v2, v1) : new(v1, v2);
         }
         else if (v1.Z == v2.Z)
         {
             NormalAxis = Axis.Z;
             IsBorder = Math.Abs(v1.Z) == grid.Radius;
+            Vertices = v1.X > v2.X ? new(v2, v1) : new(v1, v2);
         }
         else
         {
             throw new ArgumentException($"Unable to determine normal axis from coordinate pair.");
         }
 
-        Vertices = new(v1, v2);
-        Resolution = Resolution.Unknown;
+        Resolution = resolution;
     }
 
     public bool IsFrozen => _frozen;

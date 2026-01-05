@@ -4,30 +4,21 @@ using static Solver.Framework.LinqExtensions;
 
 namespace Solver.Rules;
 
-public class AisleCountIntersectionRule : IRule
+public class AisleCountIntersectionRule(Tableau tableau) : Rule(tableau)
 {
-    private readonly SolverGrid _grid;
-
-    public AisleCountIntersectionRule(SolverGrid grid)
-    {
-        ArgumentNullException.ThrowIfNull(grid);
-
-        _grid = grid;
-    }
-
     public override string ToString()
     {
         return nameof(AisleCountIntersectionRule);
     }
 
-    public IEnumerable<Type> GetPertinentComponents()
+    public override IEnumerable<Type> GetPertinentComponents()
     {
         yield return typeof(Tableau);
         yield return typeof(Aisle);
         yield return typeof(Tile);
     }
 
-    public void Invoke(IComponent component, INotifier notifier)
+    public override void Invoke(IComponent component, INotifier notifier)
     {
         switch (component)
         {
@@ -51,18 +42,18 @@ public class AisleCountIntersectionRule : IRule
         }
     }
 
-    private void InvokeInternal(Aisle aisle, INotifier notifier)
+    private static void InvokeInternal(Aisle aisle, INotifier notifier)
     {
-        //if (aisle.IsMargin)
-        //{
-        //    return;
-        //}
-
         if (aisle.UnresolvedChannelTileCount == 2)
         {
             foreach (var (tile1, tile2) in aisle.Tiles.SelectWithNext(SelectWithNextOption.Pairs))
             {
                 if (tile1.IsResolved || tile2.IsResolved)
+                {
+                    continue;
+                }
+
+                if (tile1.HasBorder && tile2.HasBorder)
                 {
                     continue;
                 }

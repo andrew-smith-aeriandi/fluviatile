@@ -2,8 +2,15 @@
 
 namespace Solver.Components;
 
-public class Termination : IComponent, ILinkable
+public class Termination : IComponent, ILinkable, IFreezable
 {
+    private bool _frozen = false;
+
+    public Termination(Coordinates coordinates)
+    {
+        Coordinates = coordinates;
+    }
+
     public Termination(
         Coordinates coordinates,
         Edge edge)
@@ -12,16 +19,24 @@ public class Termination : IComponent, ILinkable
 
         if (!edge.IsBorder)
         {
-            throw new ArgumentException($"Edge must on border: {edge}", nameof(edge));
+            throw new ArgumentException("Edge must be on the border of the grid", nameof(edge));
         }
 
         Coordinates = coordinates;
         Border = edge;
+        _frozen = true;
+    }
+
+    public bool IsFrozen => _frozen;
+
+    public void Freeze()
+    {
+        _frozen = true;
     }
 
     public Coordinates Coordinates { get; }
 
-    public Edge Border { get; }
+    public Edge Border { get; private set; }
 
     public bool IsTerminal => true;
 

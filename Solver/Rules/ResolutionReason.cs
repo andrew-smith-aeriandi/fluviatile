@@ -4,6 +4,7 @@ public enum ResolutionReason
 {
     Unspecified = 0,
     Housekeeping,
+    Hypothetical,
     AisleCount,
     AisleCountWithSingleExit,
     BorderAisleCount,

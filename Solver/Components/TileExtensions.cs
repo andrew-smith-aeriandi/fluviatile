@@ -6,6 +6,15 @@ namespace Solver.Components;
 
 public static class TileExtensions
 {
+    public static Tile Clone(this Tile source)
+    {
+        return new Tile(
+            source.Coordinates,
+            source.Orientation,
+            source.Vertices,
+            source.Resolution);
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Coordinates GetDefaultKey(this Tile tile) => tile.Coordinates;
 

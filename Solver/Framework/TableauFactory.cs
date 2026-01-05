@@ -6,7 +6,10 @@ namespace Solver.Framework;
 
 public static class TableauFactory
 {
-    public static Tableau Create(SolverGrid grid, IEnumerable<int> counts)
+    public static Tableau Create(
+        SolverGrid grid,
+        IEnumerable<int> counts,
+        string? tag = null)
     {
         ArgumentNullException.ThrowIfNull(grid);
         ArgumentNullException.ThrowIfNull(counts);
@@ -63,7 +66,11 @@ public static class TableauFactory
                     aisleYIndex,
                     out var centreDown))
                 {
-                    var tileDown = new Tile(centreDown, SolverGrid.ShapeDown);
+                    var tileDown = new Tile(
+                        centreDown,
+                        Orientation.Down,
+                        SolverGrid.ShapeDown.VertexOffsets.Select(offset => centreDown + offset));
+
                     edges.UnionWith(grid.CreateEdgesFromVertices(tileDown.Vertices));
                     tiles.Add(tileDown);
                 }
@@ -74,15 +81,24 @@ public static class TableauFactory
                     aisleYIndex,
                     out var centreUp))
                 {
-                    var tileUp = new Tile(centreUp, SolverGrid.ShapeUp);
+                    var tileUp = new Tile(
+                        centreUp,
+                        Orientation.Up,
+                        SolverGrid.ShapeUp.VertexOffsets.Select(offset => centreUp + offset));
+
                     edges.UnionWith(grid.CreateEdgesFromVertices(tileUp.Vertices));
                     tiles.Add(tileUp);
                 }
             }
         }
 
+        if (string.IsNullOrEmpty(tag))
+        {
+            tag = "tableau";
+        }
+
         var thalweg = new Thalweg(grid, channelTileCount);
-        var tableau = new Tableau(grid, thalweg, aisles, tiles, edges);
+        var tableau = new Tableau(tag, grid, thalweg, aisles, tiles, edges);
 
         foreach (var tile in tiles)
         {
@@ -134,6 +150,93 @@ public static class TableauFactory
             aisle.SetTiles(aisleTiles);
             aisle.Freeze();
         }
+
+        return tableau;
+    }
+
+    public static Tableau Clone(Tableau source)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        var tag = source.Tag;
+        var grid = source.Grid;
+        var aisles = new HashSet<Aisle>(AisleComparer.Default);
+        var tiles = new HashSet<Tile>(TileComparer.Default);
+        var edges = new HashSet<Edge>(EdgeComparer.Default);
+
+        foreach (var sourceAisle in source.Aisles.Values)
+        {
+            aisles.Add(sourceAisle.Clone());
+        }
+
+        foreach (var sourceTile in source.Tiles.Values)
+        {
+            tiles.Add(sourceTile.Clone());
+        }
+
+        foreach (var sourceEdge in source.Edges.Values)
+        {
+            edges.Add(sourceEdge.Clone(source.Grid));
+        }
+
+        var thalweg = new Thalweg(
+            source.Thalweg.Grid,
+            source.Thalweg.ChannelTileCount);
+
+        var tableau = new Tableau(tag, grid, thalweg, aisles, tiles, edges);
+
+        foreach (var tile in tiles)
+        {
+            var tileAisles = grid.GetAisleKeys(tile)
+                .Select(key => tableau.Aisles.GetValueOrDefault(key))
+                .OfType<Aisle>();
+
+            var tileEdges = tile.Vertices
+                .SelectWithNext((v1, v2) => new UnorderedPair<Coordinates>(v1, v2), SelectWithNextOption.LoopBackToStart)
+                .Select(pair => tableau.Edges.GetValueOrDefault(pair))
+                .OfType<Edge>();
+
+            tile.SetAisles(tileAisles);
+            tile.SetEdges(tileEdges);
+            tile.Freeze();
+        }
+
+        foreach (var edge in edges)
+        {
+            var (v0, v1) = edge.Vertices;
+
+            var (keyMinus, keyPlus) = edge.NormalAxis switch
+            {
+                Axis.X => (
+                    (v0.Y <= v1.Y ? v0 : v1).Add(-SolverGrid.OneThird, SolverGrid.TwoThird),
+                    (v1.Y >= v0.Y ? v1 : v0).Add(SolverGrid.OneThird, -SolverGrid.TwoThird)),
+                Axis.Y => (
+                    (v0.Z <= v1.Z ? v0 : v1).Add(-SolverGrid.OneThird, -SolverGrid.OneThird),
+                    (v1.Z >= v0.Z ? v1 : v0).Add(SolverGrid.OneThird, SolverGrid.OneThird)),
+                Axis.Z => (
+                    (v0.X <= v1.X ? v0 : v1).Add(SolverGrid.TwoThird, -SolverGrid.OneThird),
+                    (v1.X >= v0.X ? v1 : v0).Add(-SolverGrid.TwoThird, SolverGrid.OneThird)),
+                _ => throw new UnreachableException($"Unsupported axis: {edge.NormalAxis}")
+            };
+
+            var tileMinus = tableau.Tiles.GetValueOrDefault(keyMinus);
+            var tilePlus = tableau.Tiles.GetValueOrDefault(keyPlus);
+
+            edge.SetTiles(tileMinus, tilePlus);
+            edge.Freeze();
+        }
+
+        foreach (var aisle in aisles)
+        {
+            var aisleTiles = tableau.Tiles.Values
+                .Where(tile => tile.Aisles.Contains(aisle));
+
+            aisle.SetTiles(aisleTiles);
+            aisle.Freeze();
+        }
+
+        source.Thalweg.CopyTerminations(tableau);
+        source.Thalweg.CopySegments(tableau);
 
         return tableau;
     }

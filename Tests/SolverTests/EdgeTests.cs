@@ -58,8 +58,8 @@ public class EdgeTests
         Assert.Equal(Axis.X, instance.NormalAxis);
         Assert.False(instance.IsBorder);
 
-        Assert.Equal(coordinates1, instance.Vertices[0]);
-        Assert.Equal(coordinates2, instance.Vertices[1]);
+        Assert.Equal(coordinates1, instance.Vertices[1]);
+        Assert.Equal(coordinates2, instance.Vertices[0]);
 
         Assert.Null(instance.TileMinus);
         Assert.Null(instance.TilePlus);
@@ -67,8 +67,8 @@ public class EdgeTests
         Assert.Equal(Resolution.Unknown, instance.Resolution);
         Assert.False(instance.IsResolved);
 
-        Assert.Equal(33750656, instance.GetHashCode());
-        Assert.Equal("Edge:{(-3,6,-3),(-3,3,0)}=>Unknown", instance.ToString());
+        Assert.Equal(-25165437, instance.GetHashCode());
+        Assert.Equal("Edge:{(-3,3,0),(-3,6,-3)}=>Unknown", instance.ToString());
     }
 
     [Fact]
@@ -89,8 +89,8 @@ public class EdgeTests
         Assert.Equal(Axis.Y, instance.NormalAxis);
         Assert.False(instance.IsBorder);
 
-        Assert.Equal(coordinates1, instance.Vertices[0]);
-        Assert.Equal(coordinates2, instance.Vertices[1]);
+        Assert.Equal(coordinates1, instance.Vertices[1]);
+        Assert.Equal(coordinates2, instance.Vertices[0]);
 
         Assert.Null(instance.TileMinus);
         Assert.Null(instance.TilePlus);
@@ -98,8 +98,8 @@ public class EdgeTests
         Assert.Equal(Resolution.Unknown, instance.Resolution);
         Assert.False(instance.IsResolved);
 
-        Assert.Equal(58719491, instance.GetHashCode());
-        Assert.Equal("Edge:{(-6,6,0),(-3,6,-3)}=>Unknown", instance.ToString());
+        Assert.Equal(-50134272, instance.GetHashCode());
+        Assert.Equal("Edge:{(-3,6,-3),(-6,6,0)}=>Unknown", instance.ToString());
     }
 
     [Fact]
@@ -120,8 +120,8 @@ public class EdgeTests
         Assert.Equal(Axis.Z, instance.NormalAxis);
         Assert.False(instance.IsBorder);
 
-        Assert.Equal(coordinates1, instance.Vertices[0]);
-        Assert.Equal(coordinates2, instance.Vertices[1]);
+        Assert.Equal(coordinates1, instance.Vertices[1]);
+        Assert.Equal(coordinates2, instance.Vertices[0]);
 
         Assert.Null(instance.TileMinus);
         Assert.Null(instance.TilePlus);
@@ -129,8 +129,8 @@ public class EdgeTests
         Assert.Equal(Resolution.Unknown, instance.Resolution);
         Assert.False(instance.IsResolved);
 
-        Assert.Equal(33750653, instance.GetHashCode());
-        Assert.Equal("Edge:{(-3,3,0),(-6,6,0)}=>Unknown", instance.ToString());
+        Assert.Equal(-50134275, instance.GetHashCode());
+        Assert.Equal("Edge:{(-6,6,0),(-3,3,0)}=>Unknown", instance.ToString());
     }
 
     [Fact]
@@ -157,7 +157,7 @@ public class EdgeTests
         Assert.Null(instance.TileMinus);
         Assert.Null(instance.TilePlus);
 
-        Assert.Equal(33750653, instance.GetHashCode());
+        Assert.Equal(-50134275, instance.GetHashCode());
         Assert.Equal("Edge:{(-6,6,0),(-3,3,0)}=>Unknown", instance.ToString());
     }
 
@@ -179,14 +179,14 @@ public class EdgeTests
         Assert.Equal(Axis.X, instance.NormalAxis);
         Assert.True(instance.IsBorder);
 
-        Assert.Equal(coordinates1, instance.Vertices[0]);
-        Assert.Equal(coordinates2, instance.Vertices[1]);
+        Assert.Equal(coordinates1, instance.Vertices[1]);
+        Assert.Equal(coordinates2, instance.Vertices[0]);
 
         Assert.Null(instance.TileMinus);
         Assert.Null(instance.TilePlus);
 
-        Assert.Equal(33749888, instance.GetHashCode());
-        Assert.Equal("Border:{(-9,6,3),(-9,3,6)}=>Unknown", instance.ToString());
+        Assert.Equal(-75497085, instance.GetHashCode());
+        Assert.Equal("Border:{(-9,3,6),(-9,6,3)}=>Unknown", instance.ToString());
     }
 
     [Fact]
@@ -327,7 +327,7 @@ public class EdgeTests
         Assert.Equal(Resolution.Empty, instance.Resolution);
 
         Assert.Equal(hashCodeBefore, hashCodeAfter);
-        Assert.Equal("Edge:{(-6,0,6),(-3,0,3)}=>Empty", instance.ToString());
+        Assert.Equal("Edge:{(-3,0,3),(-6,0,6)}=>Empty", instance.ToString());
     }
 
     [Fact]
@@ -360,7 +360,7 @@ public class EdgeTests
         Assert.Equal(Resolution.Channel, instance.Resolution);
 
         Assert.Equal(hashCodeBefore, hashCodeAfter);
-        Assert.Equal("Edge:{(-6,0,6),(-3,0,3)}=>Channel", instance.ToString());
+        Assert.Equal("Edge:{(-3,0,3),(-6,0,6)}=>Channel", instance.ToString());
     }
 
     [Fact]

@@ -1,56 +1,69 @@
 ﻿using Solver.Framework;
 using System.Collections.Frozen;
+using System.Text;
 
 namespace Solver.Components;
 
 public class Tableau : IComponent
 {
     public Tableau(
+        string tag,
         SolverGrid grid,
         Thalweg thalweg,
         IEnumerable<Aisle> aisles,
         IEnumerable<Tile> tiles,
         IEnumerable<Edge> edges)
     {
+        ArgumentNullException.ThrowIfNull(tag);
         ArgumentNullException.ThrowIfNull(grid);
         ArgumentNullException.ThrowIfNull(thalweg);
         ArgumentNullException.ThrowIfNull(aisles);
         ArgumentNullException.ThrowIfNull(tiles);
         ArgumentNullException.ThrowIfNull(edges);
 
+        Tag = tag;
         Grid = grid;
         Thalweg = thalweg;
         Aisles = aisles.ToFrozenDictionary(aisle => aisle.GetDefaultKey());
         Tiles = tiles.ToFrozenDictionary(tile => tile.GetDefaultKey());
         Edges = edges.ToFrozenDictionary(edge => edge.GetDefaultKey());
 
-        ChannelCounts = aisles.OrderBy(a => a.Axis).ThenBy(a => a.Index).Select(a => a.ChannelTileCount).ToArray();
-        ChannelCount = aisles.Where(aisle => aisle.Axis == Axis.X).Sum(aisle => aisle.ChannelTileCount);
-        EmptyCount = TileCount - ChannelCount;
-        UnresolvedTileCount = TileCount;
-        UnresolvedChannelCount = ChannelCount;
-        UnresolvedEmptyCount = EmptyCount;
+        ChannelTileCounts = [.. aisles.Order(AisleComparer.Default).Select(a => a.ChannelTileCount)];
+        ChannelTileCount = aisles.Where(aisle => aisle.Axis == Axis.X).Sum(aisle => aisle.ChannelTileCount);
+        EmptyTileCount = TileCount - ChannelTileCount;
+        ResolvedTileCount = tiles.Count(tile => tile.IsResolved);
+        ResolvedChannelTileCount = tiles.Count(tile => tile.Resolution == Resolution.Channel);
+        ResolvedEmptyTileCount = tiles.Count(tile => tile.Resolution == Resolution.Empty);
+        ResolvedEdgeCount = edges.Count(edge => edge.IsResolved);
     }
 
-    public IReadOnlyList<int> ChannelCounts { get; }
+    public string Tag { get; }
+
+    public IReadOnlyList<int> ChannelTileCounts { get; }
 
     public int TileCount => Grid.TileCount;
 
-    public int UnresolvedTileCount { get; private set; }
+    public int ResolvedTileCount { get; private set; }
 
-    public int ResolvedTileCount => Grid.TileCount - UnresolvedTileCount;
+    public int UnresolvedTileCount => Grid.TileCount - ResolvedTileCount;
 
-    public int ChannelCount { get; }
+    public int ChannelTileCount { get; }
 
-    public int UnresolvedChannelCount { get; private set; }
+    public int ResolvedChannelTileCount { get; private set; }
 
-    public int ResolvedChannelCount => ChannelCount - UnresolvedChannelCount;
+    public int UnresolvedChannelTileCount => ChannelTileCount - ResolvedChannelTileCount;
 
-    public int EmptyCount { get; }
+    public int EmptyTileCount { get; }
 
-    public int UnresolvedEmptyCount { get; private set; }
+    public int ResolvedEmptyTileCount { get; private set; }
 
-    public int ResolvedEmptyCount => EmptyCount - UnresolvedEmptyCount;
+    public int UnresolvedEmptyTileCount => EmptyTileCount - ResolvedEmptyTileCount;
+
+    public int EdgeCount => Grid.EdgeCount;
+
+    public int ResolvedEdgeCount { get; private set; }
+
+    public int UnresolvedEdgeCount => Grid.EdgeCount - ResolvedEdgeCount;
 
     public SolverGrid Grid { get; }
 
@@ -75,21 +88,87 @@ public class Tableau : IComponent
                 switch (tile.Resolution)
                 {
                     case Resolution.Channel:
-                        UnresolvedChannelCount -= 1;
-                        UnresolvedTileCount -= 1;
+                        ResolvedChannelTileCount += 1;
+                        ResolvedTileCount += 1;
                         break;
 
                     case Resolution.Empty:
-                        UnresolvedEmptyCount -= 1;
-                        UnresolvedTileCount -= 1;
+                        ResolvedEmptyTileCount += 1;
+                        ResolvedTileCount += 1;
                         break;
                 }
+                break;
+
+            case Edge:
+                ResolvedEdgeCount += 1;
                 break;
         }
     }
 
+    public string OutputState()
+    {
+        var builder = new StringBuilder();
+
+        builder.AppendLine($"{Grid}");
+        builder.AppendLine($"{nameof(ChannelTileCounts)}: [{string.Join(',', ChannelTileCounts)}]");
+        builder.AppendLine($"{nameof(TileCount)}: {TileCount}");
+        builder.AppendLine($"{nameof(UnresolvedTileCount)}: {UnresolvedTileCount}");
+        builder.AppendLine($"{nameof(ResolvedTileCount)}: {ResolvedTileCount}");
+        builder.AppendLine($"{nameof(ChannelTileCount)}: {ChannelTileCount}");
+        builder.AppendLine($"{nameof(UnresolvedChannelTileCount)}: {UnresolvedChannelTileCount}");
+        builder.AppendLine($"{nameof(ResolvedChannelTileCount)}: {ResolvedChannelTileCount}");
+        builder.AppendLine($"{nameof(EmptyTileCount)}: {EmptyTileCount}");
+        builder.AppendLine($"{nameof(UnresolvedEmptyTileCount)}: {UnresolvedEmptyTileCount}");
+        builder.AppendLine($"{nameof(ResolvedEmptyTileCount)}: {ResolvedEmptyTileCount}");
+
+        builder.AppendLine("Tiles");
+        foreach (var tile in Tiles.Values.Order(TileComparer.Default))
+        {
+            builder.AppendLine(tile.ToString());
+        }
+
+        builder.AppendLine("Edges");
+        foreach (var edge in Edges.Values.Order(EdgeComparer.Default))
+        {
+            builder.AppendLine(edge.ToString());
+        }
+
+        builder.AppendLine("Aisles");
+        foreach (var aisle in Aisles.Values.Order(AisleComparer.Default))
+        {
+            builder.AppendLine(aisle.ToString());
+            builder.AppendLine($"{nameof(aisle.TileCount)}: {aisle.TileCount}");
+            builder.AppendLine($"{nameof(aisle.ResolvedTileCount)}: {aisle.ResolvedTileCount}");
+            builder.AppendLine($"{nameof(aisle.UnresolvedTileCount)}: {aisle.UnresolvedTileCount}");
+            builder.AppendLine($"{nameof(aisle.EmptyTileCount)}: {aisle.EmptyTileCount}");
+            builder.AppendLine($"{nameof(aisle.ResolvedEmptyTileCount)}: {aisle.ResolvedEmptyTileCount}");
+            builder.AppendLine($"{nameof(aisle.UnresolvedEmptyTileCount)}: {aisle.UnresolvedEmptyTileCount}");
+        }
+
+        builder.AppendLine("Thalweg");
+        builder.AppendLine($"{nameof(Thalweg.ChannelTileCount)}: {Thalweg.ChannelTileCount}");
+        builder.AppendLine($"{nameof(Thalweg.LinkedChannelTileCount)}: {Thalweg.LinkedChannelTileCount}");
+        builder.AppendLine($"{nameof(Thalweg.UnlinkedChannelTileCount)}: {Thalweg.UnlinkedChannelTileCount}");
+        builder.AppendLine("Exits");
+        builder.AppendLine($"{nameof(Thalweg.TerminationCount)}: {Thalweg.TerminationCount}");
+        builder.AppendLine($"{nameof(Thalweg.ResolvedTerminationCount)}: {Thalweg.ResolvedTerminationCount}");
+        builder.AppendLine($"{nameof(Thalweg.UnresolvedTerminationCount)}: {Thalweg.UnresolvedTerminationCount}");
+        foreach (var exit in Thalweg.Terminations)
+        {
+            builder.AppendLine(exit.ToString());
+        }
+        builder.AppendLine("Thalweg Segments");
+        builder.AppendLine($"{nameof(Thalweg.SegmentCount)}: {Thalweg.SegmentCount}");
+        foreach (var segment in Thalweg.Segments)
+        {
+            builder.AppendLine(segment.ToString());
+        }
+
+        return builder.ToString();
+    }
+
     public override string ToString()
     {
-        return $"Tableau:[{string.Join(',', ChannelCounts.Select(count => count.ToString()))}]";
+        return $"{Tag}:[{string.Join(',', ChannelTileCounts.Select(count => count.ToString()))}]";
     }
 }

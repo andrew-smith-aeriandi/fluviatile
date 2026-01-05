@@ -20,7 +20,7 @@ public class ThalwegSegmentTests
         Assert.Same(thalweg, instance.Thalweg);
 
         Assert.Equal(0, instance.Count);
-        Assert.Equal(0, instance.TileCount);
+        Assert.Equal(0, instance.ChannelTileCount);
         Assert.Equal(0, instance.TerminationCount);
         Assert.Equal(0, instance.Rotation);
 
@@ -51,7 +51,7 @@ public class ThalwegSegmentTests
         Assert.Same(thalweg, instance.Thalweg);
 
         Assert.Equal(1, instance.Count);
-        Assert.Equal(1, instance.TileCount);
+        Assert.Equal(1, instance.ChannelTileCount);
         Assert.Equal(0, instance.TerminationCount);
         Assert.Equal(0, instance.Rotation);
 
@@ -84,7 +84,7 @@ public class ThalwegSegmentTests
         Assert.Same(thalweg, instance.Thalweg);
 
         Assert.Equal(1, instance.Count);
-        Assert.Equal(0, instance.TileCount);
+        Assert.Equal(0, instance.ChannelTileCount);
         Assert.Equal(1, instance.TerminationCount);
         Assert.Equal(0, instance.Rotation);
 
@@ -116,7 +116,7 @@ public class ThalwegSegmentTests
         Assert.Same(thalweg, instance.Thalweg);
 
         Assert.Equal(2, instance.Count);
-        Assert.Equal(2, instance.TileCount);
+        Assert.Equal(2, instance.ChannelTileCount);
         Assert.Equal(0, instance.TerminationCount);
         Assert.Equal(0, instance.Rotation);
 
@@ -149,7 +149,7 @@ public class ThalwegSegmentTests
         Assert.Same(thalweg, instance.Thalweg);
 
         Assert.Equal(3, instance.Count);
-        Assert.Equal(3, instance.TileCount);
+        Assert.Equal(3, instance.ChannelTileCount);
         Assert.Equal(0, instance.TerminationCount);
         Assert.Equal(1, instance.Rotation);
 
@@ -184,7 +184,7 @@ public class ThalwegSegmentTests
         Assert.Same(thalweg, instance.Thalweg);
 
         Assert.Equal(2, instance.Count);
-        Assert.Equal(1, instance.TileCount);
+        Assert.Equal(1, instance.ChannelTileCount);
         Assert.Equal(1, instance.TerminationCount);
         Assert.Equal(0, instance.Rotation);
 
@@ -219,7 +219,7 @@ public class ThalwegSegmentTests
         Assert.Same(thalweg, instance.Thalweg);
 
         Assert.Equal(2, instance.Count);
-        Assert.Equal(1, instance.TileCount);
+        Assert.Equal(1, instance.ChannelTileCount);
         Assert.Equal(1, instance.TerminationCount);
         Assert.Equal(0, instance.Rotation);
 
@@ -289,7 +289,7 @@ public class ThalwegSegmentTests
         Assert.Same(thalweg, instance.Thalweg);
 
         Assert.Equal(31, instance.Count);
-        Assert.Equal(29, instance.TileCount);
+        Assert.Equal(29, instance.ChannelTileCount);
         Assert.Equal(2, instance.TerminationCount);
         Assert.Equal(1, instance.Rotation);
 
@@ -380,7 +380,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(1, segment.Count);
-        Assert.Equal(1, segment.TileCount);
+        Assert.Equal(1, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(0, segment.Rotation);
 
@@ -409,7 +409,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(1, segment.Count);
-        Assert.Equal(0, segment.TileCount);
+        Assert.Equal(0, segment.ChannelTileCount);
         Assert.Equal(1, segment.TerminationCount);
         Assert.Equal(0, segment.Rotation);
 
@@ -438,7 +438,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(2, segment.Count);
-        Assert.Equal(2, segment.TileCount);
+        Assert.Equal(2, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(0, segment.Rotation);
 
@@ -468,7 +468,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(3, segment.Count);
-        Assert.Equal(3, segment.TileCount);
+        Assert.Equal(3, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(-1, segment.Rotation);
 
@@ -555,7 +555,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(1, segment.Count);
-        Assert.Equal(1, segment.TileCount);
+        Assert.Equal(1, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(0, segment.Rotation);
 
@@ -584,7 +584,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(1, segment.Count);
-        Assert.Equal(0, segment.TileCount);
+        Assert.Equal(0, segment.ChannelTileCount);
         Assert.Equal(1, segment.TerminationCount);
         Assert.Equal(0, segment.Rotation);
 
@@ -613,7 +613,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(2, segment.Count);
-        Assert.Equal(2, segment.TileCount);
+        Assert.Equal(2, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(0, segment.Rotation);
 
@@ -643,7 +643,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(3, segment.Count);
-        Assert.Equal(3, segment.TileCount);
+        Assert.Equal(3, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(1, segment.Rotation);
 
@@ -741,7 +741,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(2, segment.Count);
-        Assert.Equal(2, segment.TileCount);
+        Assert.Equal(2, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(0, segment.Rotation);
 
@@ -775,7 +775,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(3, segment.Count);
-        Assert.Equal(3, segment.TileCount);
+        Assert.Equal(3, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(1, segment.Rotation);
 
@@ -810,7 +810,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(4, segment.Count);
-        Assert.Equal(4, segment.TileCount);
+        Assert.Equal(4, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(-2, segment.Rotation);
 
@@ -910,7 +910,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(2, segment.Count);
-        Assert.Equal(2, segment.TileCount);
+        Assert.Equal(2, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(0, segment.Rotation);
 
@@ -944,7 +944,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(3, segment.Count);
-        Assert.Equal(3, segment.TileCount);
+        Assert.Equal(3, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(-1, segment.Rotation);
 
@@ -979,7 +979,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(4, segment.Count);
-        Assert.Equal(4, segment.TileCount);
+        Assert.Equal(4, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(-2, segment.Rotation);
 
@@ -1079,7 +1079,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(2, segment.Count);
-        Assert.Equal(2, segment.TileCount);
+        Assert.Equal(2, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(0, segment.Rotation);
 
@@ -1113,7 +1113,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(3, segment.Count);
-        Assert.Equal(3, segment.TileCount);
+        Assert.Equal(3, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(1, segment.Rotation);
 
@@ -1148,7 +1148,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(4, segment.Count);
-        Assert.Equal(4, segment.TileCount);
+        Assert.Equal(4, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(-2, segment.Rotation);
 
@@ -1248,7 +1248,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(2, segment.Count);
-        Assert.Equal(2, segment.TileCount);
+        Assert.Equal(2, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(0, segment.Rotation);
 
@@ -1282,7 +1282,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(3, segment.Count);
-        Assert.Equal(3, segment.TileCount);
+        Assert.Equal(3, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(-1, segment.Rotation);
 
@@ -1317,7 +1317,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(4, segment.Count);
-        Assert.Equal(4, segment.TileCount);
+        Assert.Equal(4, segment.ChannelTileCount);
         Assert.Equal(0, segment.TerminationCount);
         Assert.Equal(-2, segment.Rotation);
 
@@ -1392,7 +1392,7 @@ public class ThalwegSegmentTests
 
         // Assert
         Assert.Equal(31, segment.Count);
-        Assert.Equal(29, segment.TileCount);
+        Assert.Equal(29, segment.ChannelTileCount);
         Assert.Equal(2, segment.TerminationCount);
         Assert.Equal(1, segment.Rotation);
 

@@ -4,7 +4,7 @@ public interface ISegment
 {
     public int Count { get; }
 
-    public int TileCount { get; }
+    public int ChannelTileCount { get; }
 
     public int TerminationCount { get; }
 
