@@ -7,6 +7,10 @@ namespace Solver.Components;
 
 public static class TableauExtensions
 {
+    /// <summary>
+    /// Returns the component in the tableau that is of the same type and in the same relative
+    /// position as the specified component (typically from a distinct copy of the tableau)
+    /// </summary>
     public static IComponent GetEquivalentComponent(
         this Tableau tableau,
         IComponent alienComponent)
@@ -25,6 +29,10 @@ public static class TableauExtensions
         };
     }
 
+    /// <summary>
+    /// Attempts to return the component in the tableau that is of the same type and in the same relative
+    /// position as the specified component (typically from a distinct copy of the tableau)
+    /// </summary>
     public static bool TryGetEquivalentComponent(
         this Tableau tableau,
         IComponent? alienComponent,
@@ -71,6 +79,9 @@ public static class TableauExtensions
         return false;
     }
 
+    /// <summary>
+    /// Indicates whether the grid is considered to be solved
+    /// </summary>
     public static bool IsSolved(this Tableau tableau)
     {
         ArgumentNullException.ThrowIfNull(tableau);
@@ -82,6 +93,9 @@ public static class TableauExtensions
             tableau.Thalweg.SegmentCount == 1;
     }
 
+    /// <summary>
+    /// Return all the aisles in the grid
+    /// </summary>
     public static IEnumerable<Aisle> GetAisles(this Tableau tableau)
     {
         ArgumentNullException.ThrowIfNull(tableau);
@@ -92,6 +106,9 @@ public static class TableauExtensions
         }
     }
 
+    /// <summary>
+    /// Return all the aisles in the grid that are normal to the specified axis
+    /// </summary>
     public static IEnumerable<Aisle> GetAisles(this Tableau tableau, Axis axis)
     {
         ArgumentNullException.ThrowIfNull(tableau);
@@ -102,6 +119,9 @@ public static class TableauExtensions
         }
     }
 
+    /// <summary>
+    /// Return collection of aisles that comprise the tiles along the margin of the grid
+    /// </summary>
     public static IEnumerable<Aisle> GetMarginAisles(this Tableau tableau)
     {
         ArgumentNullException.ThrowIfNull(tableau);
@@ -115,6 +135,9 @@ public static class TableauExtensions
         }
     }
 
+    /// <summary>
+    /// Return the pair of aisles on the margin of the grid normal to the specified axis
+    /// </summary>
     public static IEnumerable<Aisle> GetMarginAisles(this Tableau tableau, Axis axis)
     {
         ArgumentNullException.ThrowIfNull(tableau);
@@ -132,6 +155,47 @@ public static class TableauExtensions
         return tableau.Aisles.TryGetValue((axis, index), out aisle);
     }
 
+    public static bool TryGetProximalAisle(this Tableau tableau, Aisle aisle, out Aisle? proximalAisle)
+    {
+        ArgumentNullException.ThrowIfNull(tableau);
+
+        if (aisle.Index.IsInRangeExclusiveUpper(0, tableau.Grid.Size - 1))
+        {
+            proximalAisle = tableau.Aisles[(aisle.Axis, aisle.Index + 1)];
+            return true;
+        }
+        else if (aisle.Index.IsInRangeExclusive(tableau.Grid.Size, tableau.Grid.AisleCountPerAxis))
+        {
+            proximalAisle = tableau.Aisles[(aisle.Axis, aisle.Index - 1)];
+            return true;
+        }
+
+        proximalAisle = null;
+        return false;
+    }
+
+    public static bool TryGetDistalAisle(this Tableau tableau, Aisle aisle, out Aisle? distalAisle)
+    {
+        ArgumentNullException.ThrowIfNull(tableau);
+
+        if (aisle.Index.IsInRangeExclusive(0, tableau.Grid.Size))
+        {
+            distalAisle = tableau.Aisles[(aisle.Axis, aisle.Index - 1)];
+            return true;
+        }
+        else if (aisle.Index.IsInRangeExclusiveUpper(tableau.Grid.Size, tableau.Grid.AisleCountPerAxis - 1))
+        {
+            distalAisle = tableau.Aisles[(aisle.Axis, aisle.Index + 1)];
+            return true;
+        }
+
+        distalAisle = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Enumerates all tiles in the tableau
+    /// </summary>
     public static IEnumerable<Tile> GetTiles(this Tableau tableau)
     {
         ArgumentNullException.ThrowIfNull(tableau);
@@ -142,6 +206,9 @@ public static class TableauExtensions
         }
     }
 
+    /// <summary>
+    /// Attempts to return a tile in the tableau based on its coordinates
+    /// </summary>
     public static bool TryGetTile(this Tableau tableau, Coordinates coordinates, out Tile? tile)
     {
         ArgumentNullException.ThrowIfNull(tableau);
@@ -149,6 +216,9 @@ public static class TableauExtensions
         return tableau.Tiles.TryGetValue(coordinates, out tile);
     }
 
+    /// <summary>
+    /// Enumerates all edges in the tableau
+    /// </summary>
     public static IEnumerable<Edge> GetEdges(this Tableau tableau)
     {
         ArgumentNullException.ThrowIfNull(tableau);
@@ -159,6 +229,9 @@ public static class TableauExtensions
         }
     }
 
+    /// <summary>
+    /// Enumerates all border edges in the tableau
+    /// </summary>
     public static IEnumerable<Edge> GetBorders(this Tableau tableau)
     {
         ArgumentNullException.ThrowIfNull(tableau);

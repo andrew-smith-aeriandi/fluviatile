@@ -17,7 +17,7 @@ public class SolverState : INotifier
     private readonly FragmentedList<ResolutionResult> _resolutionResults;
     private int _ruleInvocationCount;
 
-    private SolverResult _result;
+    private SolverStatus _status;
     private string _resultDescription;
     private Exception? _exception;
 
@@ -40,7 +40,7 @@ public class SolverState : INotifier
         _currentHypotheticalComponent = null;
         _hypotheticalComponents = [];
 
-        _result = SolverResult.Unsolved;
+        _status = SolverStatus.Unsolved;
         _resultDescription = string.Empty;
         _exception = null;
 
@@ -80,7 +80,7 @@ public class SolverState : INotifier
             .Select(item => (IResolvableComponent)tableau.GetEquivalentComponent(item))
             .ToList();
 
-        _result = parent.Result;
+        _status = parent.Status;
         _resultDescription = parent.ResultDescription;
         _exception = parent.Exception;
 
@@ -105,9 +105,9 @@ public class SolverState : INotifier
 
     public Resolution CurrentHypotheticalResolution => _currentHypotheticalResolution;
 
-    public SolverResult Result => _result;
+    public SolverStatus Status => _status;
 
-    public bool IsComplete => _result != SolverResult.Unsolved;
+    public bool IsComplete => _status != SolverStatus.Unsolved;
 
     public string ResultDescription => _resultDescription;
 
@@ -115,7 +115,7 @@ public class SolverState : INotifier
 
     public void NotifyError(string description)
     {
-        _result = SolverResult.Error;
+        _status = SolverStatus.Error;
         _resultDescription = description;
     }
 
@@ -138,7 +138,7 @@ public class SolverState : INotifier
 
     public void Solve()
     {
-        if (_result != SolverResult.Unsolved)
+        if (_status != SolverStatus.Unsolved)
         {
             return;
         }
@@ -167,7 +167,7 @@ public class SolverState : INotifier
                 }
                 else
                 {
-                    _result = SolverResult.Error;
+                    _status = SolverStatus.Error;
                     _resultDescription = "Failed to resolve hypothetical";
                     return;
                 }
@@ -205,17 +205,17 @@ public class SolverState : INotifier
 
             if (_tableau.IsSolved())
             {
-                _result = SolverResult.Solved;
+                _status = SolverStatus.Solved;
             }
             else if (_ruleInvocationCount >= _options.MaxRuleInvocations)
             {
-                _result = SolverResult.Error;
+                _status = SolverStatus.Error;
                 _resultDescription = $"Maximum rule invocation limit ({_options.MaxRuleInvocations}) reached.";
             }
         }
         catch (Exception ex)
         {
-            _result = SolverResult.Error;
+            _status = SolverStatus.Error;
             _resultDescription = ex.Message;
             _exception = ex;
         }

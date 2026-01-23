@@ -167,7 +167,7 @@ public class AisleResolutionPatternRule(Tableau tableau) : Rule(tableau)
             {
                 foreach (var tile in aisle.Tiles.Where(t => !t.HasBorder))
                 {
-                    tile.TryResolve(Resolution.Empty, notifier, ResolutionReason.AisleCountWithSingleExit);
+                    tile.TryResolve(Resolution.Empty, notifier, ResolutionReason.AisleCountWithSingleChannel);
                 }
             }
             else

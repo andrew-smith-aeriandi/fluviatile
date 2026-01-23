@@ -70,30 +70,30 @@ public class SolverRunner
             var state2 = new SolverState(state, _rulesetFactory, hypothetical, Resolution.Empty);
             state2.Solve();
 
-            switch (state1.Result, state2.Result)
+            switch (state1.Status, state2.Status)
             {
-                case (SolverResult.Unsolved, SolverResult.Unsolved):
+                case (SolverStatus.Unsolved, SolverStatus.Unsolved):
                     if (state1.IsProgress || state2.IsProgress)
                     {
                         return [state1, state2];
                     }
                     break;
 
-                case (SolverResult.Solved, SolverResult.Solved):
-                case (SolverResult.Solved, SolverResult.Unsolved):
-                case (SolverResult.Unsolved, SolverResult.Solved):
+                case (SolverStatus.Solved, SolverStatus.Solved):
+                case (SolverStatus.Solved, SolverStatus.Unsolved):
+                case (SolverStatus.Unsolved, SolverStatus.Solved):
                     return [state1, state2];
 
-                case (SolverResult.Error, SolverResult.Error):
+                case (SolverStatus.Error, SolverStatus.Error):
                     state.NotifyError("Hypothetical resulted in errors.");
                     return [state];
 
-                case (SolverResult.Solved, SolverResult.Error):
-                case (SolverResult.Unsolved, SolverResult.Error):
+                case (SolverStatus.Solved, SolverStatus.Error):
+                case (SolverStatus.Unsolved, SolverStatus.Error):
                     return [state1];
 
-                case (SolverResult.Error, SolverResult.Solved):
-                case (SolverResult.Error, SolverResult.Unsolved):
+                case (SolverStatus.Error, SolverStatus.Solved):
+                case (SolverStatus.Error, SolverStatus.Unsolved):
                     return [state2];
             }
         }

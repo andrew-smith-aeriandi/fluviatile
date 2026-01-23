@@ -1,4 +1,5 @@
 ﻿using Fluviatile.Grid;
+using Fluviatile.Grid.Random;
 using GridWriter;
 using GridWriter.Settings;
 using Solver.Components;
@@ -26,7 +27,7 @@ internal class Program
         typeof(TarjansRule)
     ];
 
-    internal static void Main(string[] args)
+    internal async static Task Main(string[] args)
     {
         var options = new SolverOptions
         {
@@ -34,50 +35,67 @@ internal class Program
             MaxRuleInvocations = args.GetInteger("--max-rules", SolverOptions.Default.MaxRuleInvocations)
         };
 
-        var galleryString = args.GetString("--gallery", "all");
-        var gallery = galleryString;
-        var index = Index.FromEnd(1);
-        var useIndex = false;
-
-        var separator = gallery.IndexOf(':');
-        if (separator >= 0)
+        var useGallery = args.GetFlag("--gallery");
+        if (useGallery)
         {
-            gallery = galleryString[..separator];
+            var galleryString = args.GetString("--gallery", "all");
+            var gallery = galleryString;
+            var index = Index.FromEnd(1);
+            var useIndex = false;
 
-            var indexString = galleryString[(separator + 1)..];
-            if (indexString.StartsWith('^') || indexString.StartsWith('-'))
+            var separator = gallery.IndexOf(':');
+            if (separator >= 0)
             {
-                if (int.TryParse(indexString.AsSpan(1), out var value))
+                gallery = galleryString[..separator];
+
+                var indexString = galleryString[(separator + 1)..];
+                if (indexString.StartsWith('^') || indexString.StartsWith('-'))
                 {
-                    index = Index.FromEnd(value);
-                    useIndex = true;
+                    if (int.TryParse(indexString.AsSpan(1), out var value))
+                    {
+                        index = Index.FromEnd(value);
+                        useIndex = true;
+                    }
                 }
+                else
+                {
+                    if (int.TryParse(indexString, out var value))
+                    {
+                        index = Index.FromStart(value);
+                        useIndex = true;
+                    }
+                }
+            }
+
+            var puzzles = gallery switch
+            {
+                "solved" => Gallery.GetAllSolved(),
+                "unsolved" => Gallery.GetAllUnsolved(),
+                _ => Gallery.GetAll()
+            };
+
+            if (useIndex)
+            {
+                var puzzle = puzzles.ElementAt(index);
+                Solve(puzzle, options);
             }
             else
             {
-                if (int.TryParse(indexString, out var value))
-                {
-                    index = Index.FromStart(value);
-                    useIndex = true;
-                }
+                Solve(puzzles, options);
             }
-        }
-
-        var puzzles = gallery switch
-        {
-            "solved" => Gallery.GetAllSolved(),
-            "unsolved" => Gallery.GetAllUnsolved(),
-            _ => Gallery.GetAll()
-        };
-
-        if (useIndex)
-        {
-            var puzzle = puzzles.ElementAt(index);
-            Solve(puzzle, options);
         }
         else
         {
-            Solve(puzzles, options);
+            var random = new Pseudorandom(Environment.TickCount);
+            var shape = new Hexagon(Size);
+            var routeFinder = new RouteFinder(random, shape);
+
+            await routeFinder.Initiate(Configuration.NodeCountsFilename(shape));
+            var nodeCounts = NodeCountHelper.MapNodeCountsForSolver(routeFinder.SelectRandomNodeCount());
+
+            Solve(
+                new Puzzle(nodeCounts, SolverStatus.Unsolved, "Random"),
+                options);
         }
     }
 
@@ -118,20 +136,20 @@ internal class Program
                 runner: runner,
                 tableau: state.Tableau,
                 outputState: false,
-                generateSvg: true);
+                generateSvg: false);
 
             Console.WriteLine($"{index}: {state.Tableau}=>{result}");
             index += 1;
 
-            switch (result)
+            switch (result.Status)
             {
-                case SolverResult.Solved:
+                case SolverStatus.Solved:
                     solvedCount++;
                     break;
-                case SolverResult.Unsolved:
+                case SolverStatus.Unsolved:
                     unsolvedCount++;
                     break;
-                case SolverResult.Error:
+                case SolverStatus.Error:
                     errorCount++;
                     break;
             }
@@ -147,6 +165,7 @@ internal class Program
         bool generateSvg = false)
     {
         var states = runner.Solve(tableau).ToList();
+        var result = GetSolverResult(states);
 
         if (outputState)
         {
@@ -190,7 +209,7 @@ internal class Program
                 }
                 Console.WriteLine();
 
-                if (state.Result == SolverResult.Error)
+                if (state.Status == SolverStatus.Error)
                 {
                     Console.WriteLine($"[{string.Join(", ", state.Tableau.ChannelTileCounts.Select(n => n.ToString()))}]");
 
@@ -204,16 +223,17 @@ internal class Program
                     Console.WriteLine();
                 }
 
-                Console.WriteLine($"{state.Result}: Rule Invocations: {state.RuleInvocationCount}, Reasons: {reasons.Length}, Hypotheticals: {state.HypotheticalComponentsCount}");
+                var difficulty = GetDifficulty(state);
+
+                Console.WriteLine($"{state.Status}: Rule Invocations: {state.RuleInvocationCount}, Reasons: {reasons.Length}, Hypotheticals: {state.HypotheticalComponentsCount}, Difficulty: {difficulty:0.000}");
                 Console.WriteLine();
             }
         }
 
-
         if (generateSvg)
         {
             var count = 0;
-            foreach (var state in states.Where(state => state.Result != SolverResult.Unsolved))
+            foreach (var state in states.Where(state => state.Status != SolverStatus.Unsolved))
             {
                 count += 1;
                 var grid = new HexGrid(state.Tableau.Grid.Size);
@@ -230,10 +250,55 @@ internal class Program
             }
         }
 
-        var solvedCount = states.Count(state => state.Result == SolverResult.Solved);
+        return result;
+    }
 
-        return solvedCount > 0
-            ? SolverResult.Solved
-            : SolverResult.Unsolved;
+    private static double GetDifficulty(SolverState state)
+    {
+        var reasons = state.ResolutionResults
+            .GroupBy(result => result.Reason)
+            .ToDictionary(group => group.Key, group => group.Count());
+
+        return reasons.Sum(reason => reason.Key.GetResolutionDifficulty() * reason.Value) / state.ResolutionResults.Count;
+    }
+
+    private static SolverResult GetSolverResult(IReadOnlyList<SolverState> states)
+    {
+        var solvedCount = states.Count(state => state.Status == SolverStatus.Solved);
+        var unsolvedCount = states.Count(state => state.Status == SolverStatus.Unsolved);
+        var errorCount = states.Count(state => state.Status == SolverStatus.Error);
+
+        var hypotheticalsCount = states
+            .Where(state => state.Status == SolverStatus.Solved)
+            .Max(state => state.HypotheticalComponentsCount);
+
+        var difficulty = states
+            .Where(state => state.Status == SolverStatus.Solved)
+            .Max(state => GetDifficulty(state));
+
+        var status = SolverStatus.Unsolved;
+        if (states.Count == 1)
+        {
+            status = states[0].Status;
+        }
+        else if (states.Count > 1 && unsolvedCount == 0)
+        {
+            if (solvedCount > 0)
+            {
+                status = SolverStatus.Solved;
+            }
+            else if (errorCount > 0)
+            {
+                status = SolverStatus.Error;
+            }
+        }
+
+        return new SolverResult
+        {
+            Status = status,
+            SolvedCount = solvedCount,
+            HypotheticalsCount = hypotheticalsCount,
+            Difficulty = difficulty
+        };
     }
 }

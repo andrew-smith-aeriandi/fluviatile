@@ -54,11 +54,11 @@ public class TileEdgeRule(Tableau tableau) : Rule(tableau)
         switch (counts)
         {
             case (2, 1, 0):
-                tile.TryResolve(Resolution.Channel, notifier, ResolutionReason.TileEdgesResolution);
+                tile.TryResolve(Resolution.Channel, notifier, ResolutionReason.Housekeeping);
                 break;
 
             case (0, 3, 0):
-                tile.TryResolve(Resolution.Empty, notifier, ResolutionReason.TileEdgesResolution);
+                tile.TryResolve(Resolution.Empty, notifier, ResolutionReason.Housekeeping);
                 break;
 
             case (2, 0, 1):
@@ -89,10 +89,7 @@ public class TileEdgeRule(Tableau tableau) : Rule(tableau)
                 else if (tile.Resolution == Resolution.Channel)
                 {
                     // This should be picked up by Meander rule, but is included here for completeness
-                    foreach (var edge in tile.Edges)
-                    {
-                        edge.TryResolve(Resolution.Channel, notifier, ResolutionReason.MeanderRule);
-                    }
+                    tile.Edges.TryResolve(Resolution.Channel, notifier, ResolutionReason.MeanderRule);
                 }
                 else if (tile.Resolution == Resolution.Unknown)
                 {

@@ -1,3 +1,4 @@
+using NSubstitute;
 using Solver.Components;
 using Solver.Framework;
 
@@ -5,73 +6,99 @@ namespace SolverTests;
 
 public class TableauExtensionsTests
 {
-    private static Tableau GetExampleTableau(INotifier notifier)
+    [Theory]
+    [InlineData(Axis.X, 0, true, 1)]
+    [InlineData(Axis.X, 1, true, 2)]
+    [InlineData(Axis.X, 2, false, -1)]
+    [InlineData(Axis.X, 3, false, -1)]
+    [InlineData(Axis.X, 4, true, 3)]
+    [InlineData(Axis.X, 5, true, 4)]
+    [InlineData(Axis.Y, 0, true, 1)]
+    [InlineData(Axis.Y, 1, true, 2)]
+    [InlineData(Axis.Y, 2, false, -1)]
+    [InlineData(Axis.Y, 3, false, -1)]
+    [InlineData(Axis.Y, 4, true, 3)]
+    [InlineData(Axis.Y, 5, true, 4)]
+    [InlineData(Axis.Z, 0, true, 1)]
+    [InlineData(Axis.Z, 1, true, 2)]
+    [InlineData(Axis.Z, 2, false, -1)]
+    [InlineData(Axis.Z, 3, false, -1)]
+    [InlineData(Axis.Z, 4, true, 3)]
+    [InlineData(Axis.Z, 5, true, 4)]
+    public void ProximalAisle_WithEachAisle_ReturnsExpectedValue(
+        Axis axis,
+        int index,
+        bool expectedResult,
+        int expectedIndex)
     {
-        var grid = new SolverGrid(3);
-        var tableau = TableauFactory.Create(
-            grid,
-            [2, 5, 5, 5, 8, 4, 4, 6, 5, 7, 7, 0, 3, 6, 4, 8, 7, 1]);
+        // Arrange
+        var notifier = Substitute.For<INotifier>();
+        var tableau = TableauProvider.GetExampleTableau(notifier);
+        var aisle = tableau.Aisles[(axis, index)];
 
-        var coordinates = new List<Coordinates>
-        {
-            new(7, -8),
-            new(5, -7),
-            new(4, -8),
-            new(2, -7),
-            new(1, -5),
-            new(2, -4),
-            new(4, -5),
-            new(5, -4),
-            new(7, -5),
-            new(8, -4),
-            new(7, -2),
-            new(5, -1),
-            new(4, 1),
-            new(5, 2),
-            new(4, 4),
-            new(2, 5),
-            new(1, 4),
-            new(-1, 5),
-            new(-2, 4),
-            new(-4, 5),
-            new(-5, 4),
-            new(-4, 2),
-            new(-2, 1),
-            new(-1, -1),
-            new(-2, -2),
-            new(-4, -1),
-            new(-5, 1),
-            new(-7, 2),
-            new(-8, 1)
-        };
+        // Act
+        var result = tableau.TryGetProximalAisle(aisle, out var proximalAisle);
 
-        foreach (var coordinate in coordinates)
+        // Assert
+        Assert.Equal(expectedResult, result);
+
+        if (result)
         {
-            if (tableau.Tiles.TryGetValue(coordinate, out var tile))
-            {
-                tile.TryResolve(Resolution.Channel, notifier);
-            }
+            Assert.NotNull(proximalAisle);
+            Assert.Equal(aisle.Axis, proximalAisle.Axis);
+            Assert.Equal(expectedIndex, proximalAisle.Index);
         }
+        else
+        {
+            Assert.Null(proximalAisle);
+        }
+    }
 
-        var thalweg = tableau.Thalweg;
+    [Theory]
+    [InlineData(Axis.X, 0, false, -1)]
+    [InlineData(Axis.X, 1, true, 0)]
+    [InlineData(Axis.X, 2, true, 1)]
+    [InlineData(Axis.X, 3, true, 4)]
+    [InlineData(Axis.X, 4, true, 5)]
+    [InlineData(Axis.X, 5, false, -1)]
+    [InlineData(Axis.Y, 0, false, -1)]
+    [InlineData(Axis.Y, 1, true, 0)]
+    [InlineData(Axis.Y, 2, true, 1)]
+    [InlineData(Axis.Y, 3, true, 4)]
+    [InlineData(Axis.Y, 4, true, 5)]
+    [InlineData(Axis.Y, 5, false, -1)]
+    [InlineData(Axis.Z, 0, false, -1)]
+    [InlineData(Axis.Z, 1, true, 0)]
+    [InlineData(Axis.Z, 2, true, 1)]
+    [InlineData(Axis.Z, 3, true, 4)]
+    [InlineData(Axis.Z, 4, true, 5)]
+    [InlineData(Axis.Z, 5, false, -1)]
+    public void DistalAisle_WithEachAisle_ReturnsExpectedValue(
+        Axis axis,
+        int index,
+        bool expectedResult,
+        int expectedIndex)
+    {
+        // Arrange
+        var notifier = Substitute.For<INotifier>();
+        var tableau = TableauProvider.GetExampleTableau(notifier);
+        var aisle = tableau.Aisles[(axis, index)];
 
-        var edge1 = tableau.Edges[(new Coordinates(-3, 0), new Coordinates(-6, 0))];
-        edge1.TryResolve(Resolution.Channel, notifier);
+        // Act
+        var result = tableau.TryGetDistalAisle(aisle, out var distalAisle);
 
-        var edge2 = tableau.Edges[(new Coordinates(-6, 0), new Coordinates(-9, 3))];
-        edge2.TryResolve(Resolution.Channel, notifier);
+        // Assert
+        Assert.Equal(expectedResult, result);
 
-        var edge3 = tableau.Edges[(new Coordinates(-6, 0), new Coordinates(-6, 3))];
-        edge3.TryResolve(Resolution.Channel, notifier);
-
-        var edge4 = tableau.Edges[(new Coordinates(-9, 0), new Coordinates(-9, 3))];
-        edge4.TryResolve(Resolution.Channel, notifier);
-
-        Assert.True(thalweg.TryLink(edge1, notifier));
-        Assert.True(thalweg.TryLink(edge2, notifier));
-        Assert.True(thalweg.TryLink(edge3, notifier));
-        Assert.True(thalweg.TryLink(edge4, notifier));
-
-        return tableau;
+        if (result)
+        {
+            Assert.NotNull(distalAisle);
+            Assert.Equal(aisle.Axis, distalAisle.Axis);
+            Assert.Equal(expectedIndex, distalAisle.Index);
+        }
+        else
+        {
+            Assert.Null(distalAisle);
+        }
     }
 }

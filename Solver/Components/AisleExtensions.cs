@@ -36,32 +36,15 @@ public static class AisleExtensions
         return tile == aisle.Tiles[0] || tile == aisle.Tiles[^1];
     }
 
-    public static Aisle? ProximalAisle(this Aisle aisle, Tableau tableau)
+    public static IEnumerable<Edge> NormalBorders(this Aisle aisle)
     {
-        if (aisle.Index.IsInRangeExclusiveUpper(0, tableau.Grid.Size - 1))
-        {
-            return tableau.Aisles[(aisle.Axis, aisle.Index + 1)];
-        }
-        else if (aisle.Index.IsInRangeExclusive(tableau.Grid.Size, tableau.Grid.AisleCountPerAxis))
-        {
-            return tableau.Aisles[(aisle.Axis, aisle.Index - 1)];
-        }
-
-        return null;
+        return aisle.Borders.Where(edge => edge.NormalAxis == aisle.Axis);
     }
 
-    public static Aisle? DistalAisle(this Aisle aisle, Tableau tableau)
+    public static IEnumerable<Edge> LateralBorders(this Aisle aisle)
     {
-        if (aisle.Index.IsInRangeExclusive(0, tableau.Grid.Size))
-        {
-            return tableau.Aisles[(aisle.Axis, aisle.Index - 1)];
-        }
-        else if (aisle.Index.IsInRangeExclusiveUpper(tableau.Grid.Size, tableau.Grid.AisleCountPerAxis - 1))
-        {
-            return tableau.Aisles[(aisle.Axis, aisle.Index + 1)];
-        }
-
-        return null;
+        yield return aisle.Borders[0];
+        yield return aisle.Borders[^1];
     }
 
     public static (int Exits, int Unresolved) ExitCount(this Aisle aisle, Tableau tableau)

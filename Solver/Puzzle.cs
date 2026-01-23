@@ -4,7 +4,7 @@ namespace Solver;
 
 public record Puzzle
 {
-    public Puzzle(IEnumerable<int> channelCounts, SolverResult solverResult, string comment)
+    public Puzzle(IEnumerable<int> channelCounts, SolverStatus solverResult, string comment)
     {
         ChannelCounts = [.. channelCounts];
         SolverResult = solverResult;
@@ -13,7 +13,7 @@ public record Puzzle
 
     public int[] ChannelCounts { get; }
 
-    public SolverResult SolverResult { get; }
+    public SolverStatus SolverResult { get; }
 
     public string Comment { get; }
 
