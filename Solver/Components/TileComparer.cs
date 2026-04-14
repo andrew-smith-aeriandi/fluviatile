@@ -33,7 +33,7 @@ public class TileComparer : IEqualityComparer<Tile>, IComparer<Tile>
         {
             return true;
         }
-        
+
         if (x is null || y is null)
         {
             return false;

@@ -11,7 +11,7 @@ public class CoordinatesComparer : IEqualityComparer<Coordinates>, IComparer<Coo
 
     public CoordinatesComparer(Axis primaryAxis)
     {
-        PrimaryAxis = primaryAxis;  
+        PrimaryAxis = primaryAxis;
     }
 
     public Axis PrimaryAxis { get; }
@@ -22,7 +22,7 @@ public class CoordinatesComparer : IEqualityComparer<Coordinates>, IComparer<Coo
         {
             Axis.Z => x.Z == y.Z ? x.X - y.X : x.Z - y.Z,
             Axis.Y => x.Y == y.Y ? x.Z - y.Z : x.Y - y.Y,
-                 _ => x.X == y.X ? x.Y - y.Y : x.X - y.X,
+            _ => x.X == y.X ? x.Y - y.Y : x.X - y.X,
         };
     }
 

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Solver;
+﻿namespace Solver;
 
 public static class NodeCountHelper
 {

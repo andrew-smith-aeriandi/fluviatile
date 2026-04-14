@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Solver.Framework;
+﻿namespace Solver.Framework;
 
 public record SolverResults
 {

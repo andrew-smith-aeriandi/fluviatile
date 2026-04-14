@@ -6,7 +6,8 @@ public static class ResolutionReasonExtensions
 {
     public static double GetResolutionDifficulty(this ResolutionReason reason)
     {
-        return reason switch {
+        return reason switch
+        {
             ResolutionReason.Housekeeping => 0.1,
             ResolutionReason.MeanderRule => 1.0,
             ResolutionReason.TileEdgesResolution => 1.0,

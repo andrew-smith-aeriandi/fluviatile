@@ -5,7 +5,6 @@ using GridWriter.Settings;
 using Solver.Components;
 using Solver.Framework;
 using Solver.Rules;
-using System.Text.RegularExpressions;
 using Tableau = Solver.Components.Tableau;
 
 namespace Solver;
@@ -254,7 +253,7 @@ internal partial class Program
                 ExecutionResults = []
             };
         }
-        
+
         if (states.Count == 1)
         {
             var state = states[0];

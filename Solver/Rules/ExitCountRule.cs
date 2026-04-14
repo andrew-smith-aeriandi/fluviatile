@@ -290,7 +290,7 @@ public class ExitCountRule : Rule
         }
         else if (potentialExits.Count >= 2)
         {
-            if (exitSets.All(exitSet => exitSet.MinExits < 2) && 
+            if (exitSets.All(exitSet => exitSet.MinExits < 2) &&
                 potentialExits.Values.Any(exit => exit.ExitSets.Count == exitSets.Count))
             {
                 // A single potential exit can account for all of the exit sets and no exit set must include both exits
