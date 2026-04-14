@@ -1,6 +1,6 @@
 ﻿using Solver.Components;
 
-namespace Solver.Rules;
+namespace Solver.Framework;
 
 public record ResolutionResult(
     IComponent Component,

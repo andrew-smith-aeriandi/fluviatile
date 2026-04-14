@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Solver.Rules;
+namespace Solver.Framework;
 
 public static class ResolutionReasonExtensions
 {

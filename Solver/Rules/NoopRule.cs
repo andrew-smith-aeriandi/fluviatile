@@ -3,6 +3,7 @@ using Solver.Framework;
 
 namespace Solver.Rules;
 
+[RulePrioriry(QueuePriority.VeryLow)]
 public class NoopRule(Tableau tableau) : Rule(tableau)
 {
     public override string ToString()

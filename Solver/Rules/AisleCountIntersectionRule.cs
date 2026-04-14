@@ -4,6 +4,7 @@ using static Solver.Framework.LinqExtensions;
 
 namespace Solver.Rules;
 
+[RulePrioriry(QueuePriority.Default)]
 public class AisleCountIntersectionRule(Tableau tableau) : Rule(tableau)
 {
     public override string ToString()
@@ -53,7 +54,7 @@ public class AisleCountIntersectionRule(Tableau tableau) : Rule(tableau)
                     continue;
                 }
 
-                if (tile1.HasBorder && tile2.HasBorder)
+                if (tile1.HasBorder || tile2.HasBorder)
                 {
                     continue;
                 }

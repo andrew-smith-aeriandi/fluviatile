@@ -37,12 +37,12 @@ public static class ThalwegExtensions
                 Tile sourceTile => tableau.TryGetTile(
                     sourceTile.Coordinates,
                     out var tile)
-                        ? (ILinkable)tile!
+                        ? (ILinkable)tile
                         : throw new UnreachableException(),
                 Termination sourceTermination => tableau.Thalweg.TryGetTermination(
                     sourceTermination.Coordinates,
                     out var termination)
-                        ? (ILinkable)termination!
+                        ? (ILinkable)termination
                         : throw new UnreachableException(),
                 _ => throw new UnreachableException()
             });

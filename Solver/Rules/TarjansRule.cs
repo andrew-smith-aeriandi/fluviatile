@@ -4,6 +4,7 @@ using Tableau = Solver.Components.Tableau;
 
 namespace Solver.Rules;
 
+[RulePrioriry(QueuePriority.Default)]
 public class TarjansRule(Tableau tableau) : Rule(tableau)
 {
     public override string ToString()
@@ -31,6 +32,29 @@ public class TarjansRule(Tableau tableau) : Rule(tableau)
         var tiles = new List<Tile>();
         var adjacency = new List<(Tile, Tile)>();
 
+        var linkableTiles = new HashSet<Tile>();
+        foreach (var tile in tableau.GetTiles())
+        {
+            switch (tile.Resolution)
+            {
+                case Resolution.Unknown:
+                case Resolution.Channel:
+                    linkableTiles.Add(tile);
+                    break;
+            }
+        }
+
+        foreach (var segment in tableau.Thalweg.Segments)
+        {
+            foreach (var link in segment.Links)
+            {
+                if (link != segment.First && link != segment.Last && link is Tile tile)
+                {
+                    linkableTiles.Remove(tile);
+                }
+            }
+        }
+
         foreach (var tile in tableau.GetTiles())
         {
             switch (tile.Resolution)
@@ -39,12 +63,15 @@ public class TarjansRule(Tableau tableau) : Rule(tableau)
                     tiles.Add(tile);
                     foreach (var linkableTile in tile.GetPotentiallyLinkableTiles())
                     {
-                        adjacency.Add((tile, linkableTile));
+                        if (linkableTiles.Contains(linkableTile))
+                        {
+                            adjacency.Add((tile, linkableTile));
+                        }
                     }
                     break;
 
                 case Resolution.Channel:
-                    if (tableau.Thalweg.TryGetSegment(tile, out var segment) && segment is not null)
+                    if (tableau.Thalweg.TryGetSegment(tile, out var segment))
                     {
                         if (!segment.IsTermination(tile))
                         {
@@ -62,7 +89,10 @@ public class TarjansRule(Tableau tableau) : Rule(tableau)
                             .Where(e => !e.IsResolved)
                             .SelectMany(e => e.Tiles.Where(t => t != tile && t.Resolution != Resolution.Empty)))
                         {
-                            adjacency.Add((tile, linkableTile));
+                            if (linkableTiles.Contains(linkableTile))
+                            {
+                                adjacency.Add((tile, linkableTile));
+                            }
                         }
                     }
                     else
@@ -70,7 +100,10 @@ public class TarjansRule(Tableau tableau) : Rule(tableau)
                         tiles.Add(tile);
                         foreach (var linkableTile in tile.GetPotentiallyLinkableTiles())
                         {
-                            adjacency.Add((tile, linkableTile));
+                            if (linkableTiles.Contains(linkableTile))
+                            {
+                                adjacency.Add((tile, linkableTile));
+                            }
                         }
                     }
                     break;

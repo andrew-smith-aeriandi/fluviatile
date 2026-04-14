@@ -1,6 +1,7 @@
 ﻿using Fluviatile.Grid;
 using Solver.Framework;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Coordinates = Solver.Framework.Coordinates;
 
 namespace Solver.Components;
@@ -36,7 +37,7 @@ public static class TableauExtensions
     public static bool TryGetEquivalentComponent(
         this Tableau tableau,
         IComponent? alienComponent,
-        out IComponent? component)
+        [MaybeNullWhen(false)] out IComponent component)
     {
         ArgumentNullException.ThrowIfNull(tableau);
 
@@ -148,14 +149,20 @@ public static class TableauExtensions
         yield return tableau.Aisles[(axis, maxIndex)];
     }
 
-    public static bool TryGetAisle(this Tableau tableau, Axis axis, int index, out Aisle? aisle)
+    public static bool TryGetAisle(
+        this Tableau tableau,
+        Axis axis, int index,
+        [MaybeNullWhen(false)] out Aisle aisle)
     {
         ArgumentNullException.ThrowIfNull(tableau);
 
         return tableau.Aisles.TryGetValue((axis, index), out aisle);
     }
 
-    public static bool TryGetProximalAisle(this Tableau tableau, Aisle aisle, out Aisle? proximalAisle)
+    public static bool TryGetProximalAisle(
+        this Tableau tableau,
+        Aisle aisle,
+        [MaybeNullWhen(false)] out Aisle proximalAisle)
     {
         ArgumentNullException.ThrowIfNull(tableau);
 
@@ -174,7 +181,10 @@ public static class TableauExtensions
         return false;
     }
 
-    public static bool TryGetDistalAisle(this Tableau tableau, Aisle aisle, out Aisle? distalAisle)
+    public static bool TryGetDistalAisle(
+        this Tableau tableau,
+        Aisle aisle,
+        [MaybeNullWhen(false)] out Aisle distalAisle)
     {
         ArgumentNullException.ThrowIfNull(tableau);
 
@@ -209,7 +219,10 @@ public static class TableauExtensions
     /// <summary>
     /// Attempts to return a tile in the tableau based on its coordinates
     /// </summary>
-    public static bool TryGetTile(this Tableau tableau, Coordinates coordinates, out Tile? tile)
+    public static bool TryGetTile(
+        this Tableau tableau,
+        Coordinates coordinates,
+        [MaybeNullWhen(false)] out Tile tile)
     {
         ArgumentNullException.ThrowIfNull(tableau);
 
@@ -245,14 +258,20 @@ public static class TableauExtensions
         }
     }
 
-    public static bool TryGetEdge(this Tableau tableau, Tile tile, Axis axis, out Edge? edge)
+    public static bool TryGetEdge(
+        this Tableau tableau,
+        Tile tile,
+        Axis axis,
+        [MaybeNullWhen(false)] out Edge edge)
     {
         ArgumentNullException.ThrowIfNull(tableau);
 
         return tableau.Edges.TryGetValue(tile.GetEdgeKey(axis), out edge);
     }
 
-    public static bool TryGetUnresolvedComponent(this Tableau tableau, out IComponent? component)
+    public static bool TryGetUnresolvedComponent(
+        this Tableau tableau,
+        [MaybeNullWhen(false)] out IComponent component)
     {
         component = tableau.Tiles.Values.FirstOrDefault(tile => !tile.IsResolved);
         return component is not null;

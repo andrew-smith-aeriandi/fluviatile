@@ -1,5 +1,4 @@
 ﻿using Solver.Framework;
-using Solver.Rules;
 
 namespace Solver.Components;
 

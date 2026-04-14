@@ -5,11 +5,12 @@ using GridWriter.Settings;
 using Solver.Components;
 using Solver.Framework;
 using Solver.Rules;
+using System.Text.RegularExpressions;
 using Tableau = Solver.Components.Tableau;
 
 namespace Solver;
 
-internal class Program
+internal partial class Program
 {
     private const int Size = 3;
     private readonly static SolverGrid SolverGrid = new(Size);
@@ -43,7 +44,7 @@ internal class Program
             var index = Index.FromEnd(1);
             var useIndex = false;
 
-            var separator = gallery.IndexOf(':');
+            var separator = gallery.IndexOf('#');
             if (separator >= 0)
             {
                 gallery = galleryString[..separator];
@@ -101,71 +102,61 @@ internal class Program
 
     private static void Solve(Puzzle puzzle, SolverOptions options)
     {
-        var runner = new SolverRunner(
-            RulesetFactory.Create(HousekeepingRule, Rules),
-            options);
+        var rulesetFactory = RulesetFactory.Create(HousekeepingRule, Rules);
+        var runner = new SolverRunner(rulesetFactory, options);
+        var tableau = TableauFactory.Create(SolverGrid, puzzle.ChannelCounts);
 
         Solve(
             runner: runner,
-            tableau: TableauFactory.Create(SolverGrid, puzzle.ChannelCounts),
+            tableau: tableau,
             outputState: true,
             generateSvg: true);
     }
 
     private static void Solve(IEnumerable<Puzzle> puzzles, SolverOptions options)
     {
-        var solvedCount = 0;
-        var unsolvedCount = 0;
-        var errorCount = 0;
+        var rulesetFactory = RulesetFactory.Create(HousekeepingRule, Rules);
+        var runner = new SolverRunner(rulesetFactory, options);
 
-        var runner = new SolverRunner(
-            RulesetFactory.Create(HousekeepingRule, Rules),
-            options);
-
+        var solverCounts = new SolverCounts();
         var index = 0;
 
         foreach (var puzzle in puzzles)
         {
             var tag = $"tableau-{index}";
+            var tableau = TableauFactory.Create(SolverGrid, puzzle.ChannelCounts, tag);
 
-            var state = new SolverState(
-                TableauFactory.Create(SolverGrid, puzzle.ChannelCounts, tag),
-                RulesetFactory.Create(HousekeepingRule, Rules));
+            var state = new SolverState(tableau, rulesetFactory);
 
-            var result = Solve(
+            var results = Solve(
                 runner: runner,
-                tableau: state.Tableau,
+                tableau: tableau,
                 outputState: false,
                 generateSvg: false);
 
-            Console.WriteLine($"{index}: {state.Tableau}=>{result}");
-            index += 1;
-
-            switch (result.Status)
+            if (results.TryGetUniqueSolution(out var uniqueResult))
             {
-                case SolverStatus.Solved:
-                    solvedCount++;
-                    break;
-                case SolverStatus.Unsolved:
-                    unsolvedCount++;
-                    break;
-                case SolverStatus.Error:
-                    errorCount++;
-                    break;
+                Console.WriteLine($"{index}: {tableau} => {uniqueResult}");
             }
+            else
+            {
+                Console.WriteLine($"{index}: {tableau} => {results}");
+            }
+
+            solverCounts.NotifyStatus(results.Status);
+            index += 1;
         }
 
-        Console.WriteLine($"Solved: {solvedCount}, Unsolved: {unsolvedCount}, Error: {errorCount}");
+        Console.WriteLine(solverCounts.ToString());
     }
 
-    private static SolverResult Solve(
+    private static SolverResults Solve(
         SolverRunner runner,
         Tableau tableau,
         bool outputState = false,
         bool generateSvg = false)
     {
         var states = runner.Solve(tableau).ToList();
-        var result = GetSolverResult(states);
 
         if (outputState)
         {
@@ -223,9 +214,9 @@ internal class Program
                     Console.WriteLine();
                 }
 
-                var difficulty = GetDifficulty(state);
+                var executionResult = state.ToSolverExecutionResult();
 
-                Console.WriteLine($"{state.Status}: Rule Invocations: {state.RuleInvocationCount}, Reasons: {reasons.Length}, Hypotheticals: {state.HypotheticalComponentsCount}, Difficulty: {difficulty:0.000}");
+                Console.WriteLine(executionResult.ToString());
                 Console.WriteLine();
             }
         }
@@ -233,7 +224,7 @@ internal class Program
         if (generateSvg)
         {
             var count = 0;
-            foreach (var state in states.Where(state => state.Status != SolverStatus.Unsolved))
+            foreach (var state in states.Where(state => states.Count == 1 || state.Status != SolverStatus.Error))
             {
                 count += 1;
                 var grid = new HexGrid(state.Tableau.Grid.Size);
@@ -250,55 +241,54 @@ internal class Program
             }
         }
 
-        return result;
+        return GetSolverResults(states);
     }
 
-    private static double GetDifficulty(SolverState state)
+    private static SolverResults GetSolverResults(List<SolverState> states)
     {
-        var reasons = state.ResolutionResults
-            .GroupBy(result => result.Reason)
-            .ToDictionary(group => group.Key, group => group.Count());
-
-        return reasons.Sum(reason => reason.Key.GetResolutionDifficulty() * reason.Value) / state.ResolutionResults.Count;
-    }
-
-    private static SolverResult GetSolverResult(IReadOnlyList<SolverState> states)
-    {
-        var solvedCount = states.Count(state => state.Status == SolverStatus.Solved);
-        var unsolvedCount = states.Count(state => state.Status == SolverStatus.Unsolved);
-        var errorCount = states.Count(state => state.Status == SolverStatus.Error);
-
-        var hypotheticalsCount = states
-            .Where(state => state.Status == SolverStatus.Solved)
-            .Max(state => state.HypotheticalComponentsCount);
-
-        var difficulty = states
-            .Where(state => state.Status == SolverStatus.Solved)
-            .Max(state => GetDifficulty(state));
-
-        var status = SolverStatus.Unsolved;
+        if (states.Count == 0)
+        {
+            return new SolverResults
+            {
+                Status = SolverStatus.Unsolved,
+                ExecutionResults = []
+            };
+        }
+        
         if (states.Count == 1)
         {
-            status = states[0].Status;
-        }
-        else if (states.Count > 1 && unsolvedCount == 0)
-        {
-            if (solvedCount > 0)
+            var state = states[0];
+
+            return new SolverResults
             {
-                status = SolverStatus.Solved;
-            }
-            else if (errorCount > 0)
-            {
-                status = SolverStatus.Error;
-            }
+                Status = state.Status,
+                ExecutionResults = [state.ToSolverExecutionResult()]
+            };
         }
 
-        return new SolverResult
+        var solverCounts = states.Aggregate(
+            new SolverCounts(),
+            (counts, state) => counts.NotifyStatus(state.Status));
+
+        var status = SolverStatus.Error;
+        var statesToReturn = (IEnumerable<SolverState>)states;
+
+        if (solverCounts.Unsolved > 0)
+        {
+            status = SolverStatus.Unsolved;
+        }
+        else if (solverCounts.Solved > 0)
+        {
+            status = SolverStatus.Solved;
+
+            // Omit any results with Error status
+            statesToReturn = states.Where(state => state.Status == SolverStatus.Solved);
+        }
+
+        return new SolverResults
         {
             Status = status,
-            SolvedCount = solvedCount,
-            HypotheticalsCount = hypotheticalsCount,
-            Difficulty = difficulty
+            ExecutionResults = [.. statesToReturn.Select(state => state.ToSolverExecutionResult())]
         };
     }
 }

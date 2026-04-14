@@ -1,5 +1,4 @@
 ﻿using Solver.Framework;
-using Solver.Rules;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 

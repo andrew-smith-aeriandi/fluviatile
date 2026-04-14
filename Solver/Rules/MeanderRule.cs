@@ -4,6 +4,7 @@ using System.Diagnostics;
 
 namespace Solver.Rules;
 
+[RulePrioriry(QueuePriority.High)]
 public class MeanderRule(Tableau tableau) : Rule(tableau)
 {
     public override string ToString()

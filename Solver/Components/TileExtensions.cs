@@ -1,5 +1,6 @@
 ﻿using Solver.Framework;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace Solver.Components;
@@ -18,7 +19,10 @@ public static class TileExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Coordinates GetDefaultKey(this Tile tile) => tile.Coordinates;
 
-    public static bool TryGetCommonEdge(this Tile tile, Tile other, out Edge? edge)
+    public static bool TryGetCommonEdge(
+        this Tile tile,
+        Tile other,
+        [MaybeNullWhen(false)] out Edge edge)
     {
         edge = tile.Edges.Intersect(other.Edges).SingleOrDefault();
         return edge is not null;
@@ -143,6 +147,11 @@ public static class TileExtensions
     public static IEnumerable<Edge> GetEdges(this Tile tile, Axis normalAxis)
     {
         return tile.Edges.Where(e => e.NormalAxis != normalAxis);
+    }
+
+    public static bool TryGetBorder(this Tile tile, [MaybeNullWhen(false)] out Edge border)
+    {
+        return tile.Edges.Where(edge => edge.IsBorder).TryGetSingle(out border);
     }
 
     public static IEnumerable<Edge> GetPotentiallyLinkableEdges(this Tile tile)

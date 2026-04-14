@@ -4,6 +4,7 @@ using System.Diagnostics;
 
 namespace Solver.Rules;
 
+[RulePrioriry(QueuePriority.Default)]
 public class ChannelContinuityRule(Tableau tableau) : Rule(tableau)
 {
     public override string ToString()
@@ -40,17 +41,40 @@ public class ChannelContinuityRule(Tableau tableau) : Rule(tableau)
     {
         if (segment.First is Tile first && segment.Last is Tile last && first != last)
         {
-            if (first.TryGetCommonEdge(last, out var edge) && edge is not null)
+            if (first.TryGetCommonEdge(last, out var edge))
             {
                 // Cannot be a closed loop
                 edge.TryResolve(Resolution.Empty, notifier, ResolutionReason.NoClosedLoop);
             }
-            else if (Math.Abs(segment.Rotation) == 5)
+            else
             {
-                // Cannot be a closed loop
                 foreach (var tile in first.GetPotentiallyLinkableTiles().Intersect(last.GetPotentiallyLinkableTiles()))
                 {
-                    tile.TryResolve(Resolution.Empty, notifier, ResolutionReason.NoClosedLoop);
+                    if (Math.Abs(segment.Rotation) == 5)
+                    {
+                        tile.TryResolve(Resolution.Empty, notifier, ResolutionReason.NoClosedLoop);
+                    }
+                    else if (tile.GetAdjacentTiles().Except([first, last]).TryGetSingle(out var otherTile))
+                    {
+                        if (tile.Resolution == Resolution.Channel)
+                        {
+                            otherTile.TryResolve(Resolution.Channel, notifier, ResolutionReason.NoClosedLoop);
+                        }
+                        else if (tile.Resolution == Resolution.Unknown)
+                        {
+                            if (tile.Aisles.Intersect(otherTile.Aisles).Any(aisle => aisle.UnresolvedEmptyTileCount == 1))
+                            {
+                                otherTile.TryResolve(Resolution.Channel, notifier, ResolutionReason.NoClosedLoop);
+                            }
+                        }
+                    }
+                    else if (tile.TryGetBorder(out var border))
+                    {
+                        if (border.Resolution == Resolution.Empty)
+                        {
+                            tile.TryResolve(Resolution.Empty, notifier, ResolutionReason.NoClosedLoop);
+                        }
+                    }
                 }
             }
         }
@@ -155,7 +179,7 @@ public class ChannelContinuityRule(Tableau tableau) : Rule(tableau)
             switch (segment.First, segment.Last)
             {
                 case (Tile tile1, Tile tile2):
-                    if (tile1.TryGetCommonEdge(tile2, out var edge) && edge is not null)
+                    if (tile1.TryGetCommonEdge(tile2, out var edge))
                     {
                         // Cannot be a closed loop
                         edge.TryResolve(Resolution.Empty, notifier, ResolutionReason.NoClosedLoop);

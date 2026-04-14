@@ -1,5 +1,4 @@
 ﻿using Solver.Components;
-using Solver.Rules;
 
 namespace Solver.Framework;
 
@@ -14,6 +13,7 @@ public class SolverState : INotifier
     private readonly Resolution _currentHypotheticalResolution;
 
     private readonly PriorityQueue<RuleInvocation, int> _priorityQueue;
+    private readonly HashSet<ResolutionReason> _resolutionReasons;
     private readonly FragmentedList<ResolutionResult> _resolutionResults;
     private int _ruleInvocationCount;
 
@@ -33,6 +33,7 @@ public class SolverState : INotifier
         _ruleset = rulesetFactory.Create(tableau);
         _options = options ?? SolverOptions.Default;
 
+        _resolutionReasons = [];
         _resolutionResults = [];
         _ruleInvocationCount = 0;
 
@@ -71,6 +72,7 @@ public class SolverState : INotifier
         _ruleset = rulesetFactory.Create(tableau);
         _options = options ?? parent.Options;
 
+        _resolutionReasons = [.. parent.ResolutionReasons];
         _resolutionResults = [.. parent.ResolutionResults];
         _ruleInvocationCount = parent.RuleInvocationCount;
 
@@ -90,6 +92,10 @@ public class SolverState : INotifier
     public SolverOptions Options => _options;
 
     public Tableau Tableau => _tableau;
+
+    public HashSet<ResolutionReason> ResolutionReasons => _resolutionReasons;
+
+    public int ResolutionReasonCount => _resolutionReasons.Count;
 
     public FragmentedList<ResolutionResult> ResolutionResults => _resolutionResults;
 
@@ -124,6 +130,7 @@ public class SolverState : INotifier
         ResolutionReason reason = ResolutionReason.Unspecified)
     {
         // Log resolution reason
+        _resolutionReasons.Add(reason);
         _resolutionResults.Add(new ResolutionResult(component, reason));
 
         // Fix up tableau and aisle counts

@@ -1,5 +1,6 @@
 ﻿using Solver.Components;
 using Solver.Rules;
+using System.Reflection;
 
 namespace Solver.Framework;
 
@@ -16,6 +17,10 @@ public class Ruleset
             new Dictionary<Type, List<(IRule, int)>>(),
             (registry, rule) =>
             {
+                var attribute = rule.GetType().GetCustomAttribute<RulePrioriryAttribute>();
+                var priority = attribute?.Value ?? QueuePriority.Default;
+                //var priority = QueuePriority.Default;
+
                 foreach (var componentType in rule.GetPertinentComponents())
                 {
                     if (!registry.TryGetValue(componentType, out var registeredActions))
@@ -24,7 +29,7 @@ public class Ruleset
                         registry.Add(componentType, registeredActions);
                     }
 
-                    registeredActions.Add((rule, QueuePriority.Default));
+                    registeredActions.Add((rule, priority));
                 }
 
                 return registry;

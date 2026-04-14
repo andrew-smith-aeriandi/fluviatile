@@ -1,7 +1,6 @@
 using NSubstitute;
 using Solver.Components;
 using Solver.Framework;
-using Solver.Rules;
 
 namespace SolverTests;
 

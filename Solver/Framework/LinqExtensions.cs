@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Solver.Framework;
 
@@ -45,7 +46,7 @@ public static class LinqExtensions
         }
     }
 
-    public static bool TryGetSingle<T>(this IEnumerable<T> source, out T? result)
+    public static bool TryGetSingle<T>(this IEnumerable<T> source, [MaybeNullWhen(false)] out T result)
     {
         if (source is IList<T> list)
         {

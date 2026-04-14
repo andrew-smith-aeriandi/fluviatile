@@ -3,6 +3,7 @@ using Solver.Framework;
 
 namespace Solver.Rules;
 
+[RulePrioriry(QueuePriority.Default)]
 public class AisleResolutionPatternRule(Tableau tableau) : Rule(tableau)
 {
     private readonly List<List<Resolution[]>> _tilePatterns = GetPatterns(tableau.Grid);

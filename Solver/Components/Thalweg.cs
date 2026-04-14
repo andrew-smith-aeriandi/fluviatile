@@ -1,6 +1,6 @@
 ﻿using Solver.Framework;
-using Solver.Rules;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Solver.Components;
 
@@ -78,7 +78,7 @@ public partial class Thalweg : IComponent
 
     public int UnresolvedTerminationCount => SolverGrid.TerminationCount - _terminations.Count;
 
-    public bool TryGetSegment(ILinkable link, out Segment? segment)
+    public bool TryGetSegment(ILinkable link, [MaybeNullWhen(false)] out Segment segment)
     {
         if (link is not null && _membership.TryGetValue(link, out segment))
         {
@@ -89,7 +89,9 @@ public partial class Thalweg : IComponent
         return false;
     }
 
-    public bool TryGetTermination(Coordinates coordinates, out Termination? termination)
+    public bool TryGetTermination(
+        Coordinates coordinates,
+        [MaybeNullWhen(false)] out Termination termination)
     {
         termination = _terminations.Find(t => t.Coordinates.Equals(coordinates));
         return termination is not null;

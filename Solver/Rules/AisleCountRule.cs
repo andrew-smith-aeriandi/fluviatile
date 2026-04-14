@@ -3,6 +3,7 @@ using Solver.Framework;
 
 namespace Solver.Rules;
 
+[RulePrioriry(QueuePriority.High)]
 public class AisleCountRule(Tableau tableau) : Rule(tableau)
 {
     public override string ToString()

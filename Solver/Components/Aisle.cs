@@ -40,32 +40,80 @@ public class Aisle : IComponent, IFreezable
         _frozen = true;
     }
 
+    /// <summary>
+    /// Aisle axis: X, Y or Z
+    /// </summary>
     public Axis Axis { get; }
 
+    /// <summary>
+    /// Aisle index: zero-based
+    /// </summary>
     public int Index { get; }
 
+    /// <summary>
+    /// Indicates whether the aisle is on the margin of the grid
+    /// </summary>
     public bool IsMargin { get; }
 
+    /// <summary>
+    /// List of all the edges of tiles in the aisle that are borders of the grid
+    /// </summary>
     public IReadOnlyList<Edge> Borders { get; private set; }
 
+    /// <summary>
+    /// List of all the tiles in the aisle
+    /// </summary>
     public IReadOnlyList<Tile> Tiles { get; private set; }
 
+    /// <summary>
+    /// Number of tiles in aisle
+    /// </summary>
     public int TileCount { get; }
 
+    /// <summary>
+    /// Number of resolved tiles in aisle 
+    /// </summary>
     public int ResolvedTileCount { get; private set; }
 
+    /// <summary>
+    /// Number of unresolved tiles in aisle 
+    /// </summary>
     public int UnresolvedTileCount => TileCount - ResolvedTileCount;
 
+    /// <summary>
+    /// Number of channel tiles in aisle regardless of their current resolution 
+    /// </summary>
     public int ChannelTileCount { get; }
 
+    /// <summary>
+    /// Number of resolved channel tiles in aisle 
+    /// </summary>
     public int ResolvedChannelTileCount { get; private set; }
 
+    /// <summary>
+    /// Number of unresolved channel tiles in aisle 
+    /// </summary>
+    /// <remarks>
+    /// If this value is zero, all other unresolved tiles must be empty
+    /// </remarks>
     public int UnresolvedChannelTileCount => ChannelTileCount - ResolvedChannelTileCount;
 
+    /// <summary>
+    /// Number of empty tiles in aisle regardless of their current resolution 
+    /// </summary>
     public int EmptyTileCount { get; }
 
+    /// <summary>
+    /// Number of resolved empty tiles in aisle 
+    /// </summary>
     public int ResolvedEmptyTileCount { get; private set; }
 
+    /// <summary>
+    /// Number of unresolved empty tiles in aisle 
+    /// </summary>
+    /// <remarks>
+    /// If this value is zero, all other unresolved tiles must be channels
+    /// </remarks>
     public int UnresolvedEmptyTileCount => EmptyTileCount - ResolvedEmptyTileCount;
 
     public void NotifyResolution(Tile tile)

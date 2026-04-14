@@ -3,6 +3,7 @@ using Solver.Framework;
 
 namespace Solver.Rules;
 
+[RulePrioriry(QueuePriority.Default)]
 public class ExitCountRule : Rule
 {
     private readonly IReadOnlyList<UnorderedPair<Coordinates>> _cornerRadialCoordinates;
@@ -38,32 +39,28 @@ public class ExitCountRule : Rule
         switch (component)
         {
             case Tableau tableau:
-                if (tableau.Thalweg.UnresolvedTerminationCount == 0)
-                {
-                    InvokeWithAllExitsResolved(tableau, notifier);
-                }
-                else
-                {
-                    InvokeWithUnresolvedExits(tableau, notifier);
-                }
+                InvokeInternal(tableau, notifier);
                 break;
         }
     }
 
-    private static void InvokeWithAllExitsResolved(Tableau tableau, INotifier notifier)
+    private void InvokeInternal(Tableau tableau, INotifier notifier)
     {
-        // No unresolved border can be an exit
-        foreach (var border in tableau.GetBorders())
+        if (tableau.Thalweg.UnresolvedTerminationCount == 0)
         {
-            border.TryResolve(Resolution.Empty, notifier, ResolutionReason.Housekeeping);
-        }
-    }
+            // All exits have already been resolved, so no unresolved border can be an exit.
+            foreach (var border in tableau.GetBorders())
+            {
+                border.TryResolve(Resolution.Empty, notifier, ResolutionReason.Housekeeping);
+            }
 
-    private void InvokeWithUnresolvedExits(Tableau tableau, INotifier notifier)
-    {
+            return;
+        }
+
         var exitSets = new List<ExitSet>();
 
-        // Add single-element set for any already-resolved exit (either zero or one).
+        // Add single-element set for any already-resolved exit.
+        // In practice, there will be either zero or one resolved exit.
         foreach (var termination in tableau.Thalweg.Terminations)
         {
             exitSets.Add(new ExitSet(1, 1, [termination.Border]));
@@ -75,7 +72,7 @@ public class ExitCountRule : Rule
             if (aisle.IsMargin)
             {
                 var proximalAisleChannelTileCount = tableau.TryGetProximalAisle(aisle, out var proximalAisle)
-                    ? proximalAisle!.ChannelTileCount
+                    ? proximalAisle.ChannelTileCount
                     : 0;
 
                 switch (aisle.ChannelTileCount)
@@ -92,8 +89,8 @@ public class ExitCountRule : Rule
                         if (proximalAisleChannelTileCount == 0)
                         {
                             // Both exits must be at one of the corners of the grid in this aisle
-                            exitSets.Add(new ExitSet(2, 2, [aisle.Borders[0], aisle.Borders[1]]));
-                            exitSets.Add(new ExitSet(2, 2, [aisle.Borders[^1], aisle.Borders[^2]]));
+                            exitSets.Add(new ExitSet(1, 1, aisle.LateralBorders()));
+                            exitSets.Add(new ExitSet(1, 1, [aisle.Borders[1], aisle.Borders[^2]]));
                         }
                         else if (proximalAisleChannelTileCount == 2 || proximalAisleChannelTileCount == 3)
                         {
@@ -111,7 +108,7 @@ public class ExitCountRule : Rule
                         if (proximalAisleChannelTileCount == 0)
                         {
                             // 2 normal exits
-                            exitSets.Add(new ExitSet(2, 2, [.. aisle.NormalBorders()]));
+                            exitSets.Add(new ExitSet(2, 2, aisle.NormalBorders()));
                         }
                         else if (proximalAisleChannelTileCount == 2 || proximalAisleChannelTileCount == 3)
                         {
@@ -123,9 +120,9 @@ public class ExitCountRule : Rule
                     case 4:
                         if (proximalAisleChannelTileCount == 0)
                         {
-                            // One lateral and one normal exit must be an exit
-                            exitSets.Add(new ExitSet(2, 2, [aisle.Borders[0], aisle.Borders[3]]));
-                            exitSets.Add(new ExitSet(2, 2, [aisle.Borders[^1], aisle.Borders[^4]]));
+                            // Normal exit is resolved and one of the lateral borders must be an exit
+                            exitSets.Add(new ExitSet(1, 1, [aisle.Borders[3]]));
+                            exitSets.Add(new ExitSet(1, 1, aisle.LateralBorders()));
                         }
                         else if (proximalAisleChannelTileCount == 2 || proximalAisleChannelTileCount == 3)
                         {
@@ -142,8 +139,9 @@ public class ExitCountRule : Rule
                     case 5:
                         if (proximalAisleChannelTileCount == 0)
                         {
-                            // 2 normal exits
-                            exitSets.Add(new ExitSet(2, 2, aisle.NormalBorders()));
+                            // Both exits are resolved
+                            exitSets.Add(new ExitSet(1, 1, [aisle.Borders[1]]));
+                            exitSets.Add(new ExitSet(1, 1, [aisle.Borders[^2]]));
                         }
                         else if (proximalAisleChannelTileCount == 2 || proximalAisleChannelTileCount == 3)
                         {
@@ -156,21 +154,22 @@ public class ExitCountRule : Rule
                         if (proximalAisleChannelTileCount == 0)
                         {
                             // One lateral and one normal exit must be an exit
-                            exitSets.Add(new ExitSet(2, 2, [aisle.Borders[0], aisle.Borders[5]]));
-                            exitSets.Add(new ExitSet(2, 2, [aisle.Borders[^1], aisle.Borders[^6]]));
+                            exitSets.Add(new ExitSet(1, 1, aisle.LateralBorders()));
+                            exitSets.Add(new ExitSet(1, 1, [aisle.Borders[1], aisle.Borders[^2]]));
                         }
                         else if (proximalAisleChannelTileCount == 2 || proximalAisleChannelTileCount == 3)
                         {
                             // One of the normal borders must be an exit
-                            exitSets.Add(new ExitSet(1, 1, aisle.NormalBorders()));
+                            exitSets.Add(new ExitSet(1, 1, [aisle.Borders[1], aisle.Borders[^2]]));
                         }
                         break;
 
                     case 7:
                         if (proximalAisleChannelTileCount == 0)
                         {
-                            // 2 lateral exits
-                            exitSets.Add(new ExitSet(2, 2, aisle.LateralBorders()));
+                            // Both exits are resolved to be the lateral borders
+                            exitSets.Add(new ExitSet(1, 1, [aisle.Borders[0]]));
+                            exitSets.Add(new ExitSet(1, 1, [aisle.Borders[^1]]));
                         }
                         else if (proximalAisleChannelTileCount == 2 || proximalAisleChannelTileCount == 3)
                         {
@@ -291,54 +290,69 @@ public class ExitCountRule : Rule
         }
         else if (potentialExits.Count >= 2)
         {
-            // Search for pairs of exits that can account for all of the exit sets
-            foreach (var (exit1, exit2) in potentialExits.Values.GetAllPairs())
+            if (exitSets.All(exitSet => exitSet.MinExits < 2) && 
+                potentialExits.Values.Any(exit => exit.ExitSets.Count == exitSets.Count))
             {
-                var commonExitSets = exit1.ExitSets.Intersect(exit2.ExitSets);
-                if (commonExitSets.Any(exitSet => exitSet.MaxExits < 2))
+                // A single potential exit can account for all of the exit sets and no exit set must include both exits
+                foreach (var exit in potentialExits.Values)
                 {
-                    // Ignore cases where the pair of potential exits are in an exit set that cannot have 2 exits
-                    continue;
+                    possibleExits.Add(exit.Border);
+                }
+            }
+            else
+            {
+                // Search for pairs of exits that can account for all of the exit sets
+                foreach (var (exit1, exit2) in potentialExits.Values.GetAllPairs())
+                {
+                    if (exitSets.Except(exit1.ExitSets).Except(exit2.ExitSets).Any())
+                    {
+                        // Ignore cases where there must be an exit that is not in this pair of exit sets
+                        continue;
+                    }
+
+                    var commonExitSets = exit1.ExitSets.Intersect(exit2.ExitSets);
+                    if (commonExitSets.Any(exitSet => exitSet.MaxExits < 2))
+                    {
+                        // Ignore cases where the pair of potential exits are in an exit set that cannot have 2 exits.
+                        continue;
+                    }
+
+                    possibleExits.Add(exit1.Border);
+                    possibleExits.Add(exit2.Border);
                 }
 
-                if (exitSets.Except(exit1.ExitSets).Except(exit2.ExitSets).Any())
+                if (possibleExits.Count == 2)
                 {
-                    // Ignore cases where there must be an exit that is not in this pair of exit sets
-                    continue;
+                    // Both exits are resolved.
+                    foreach (var border in possibleExits)
+                    {
+                        border.TryResolve(Resolution.Channel, notifier, ResolutionReason.ExitCount);
+                    }
+
+                    // No remaining unresolved border can be an exit.
+                    foreach (var border in tableau.GetBorders())
+                    {
+                        border.TryResolve(Resolution.Empty, notifier, ResolutionReason.Housekeeping);
+                    }
+
+                    return;
                 }
 
-                possibleExits.Add(exit1.Border);
-                possibleExits.Add(exit2.Border);
+                if (potentialExits.Values.None(exit => exit.ExitSets.Count == exitSets.Count))
+                {
+                    // No single potential exit can account for all the identified exit sets so both exits
+                    // must be in the possibleExits set and all borders not in this set can be marked as empty.
+                    foreach (var border in tableau.GetBorders().Except(possibleExits))
+                    {
+                        border.TryResolve(Resolution.Empty, notifier, ResolutionReason.ExitCount);
+                    }
+
+                    return;
+                }
             }
         }
 
-        if (possibleExits.Count == 2)
-        {
-            // Both exits are resolved
-            foreach (var border in possibleExits)
-            {
-                border.TryResolve(Resolution.Channel, notifier, ResolutionReason.ExitCount);
-            }
-
-            // No remaining unresolved border can be an exit
-            foreach (var border in tableau.GetBorders())
-            {
-                border.TryResolve(Resolution.Empty, notifier, ResolutionReason.ExitCount);
-            }
-
-            return;
-        }
-
-        if (potentialExits.Values.None(exit => exit.ExitSets.Count == exitSets.Count))
-        {
-            // No single potential exit can account for all the identified exit sets so both exits
-            // must be in the possibleExits set and all borders not in this set can be marked as empty.
-            foreach (var border in tableau.GetBorders().Except(possibleExits))
-            {
-                border.TryResolve(Resolution.Empty, notifier, ResolutionReason.ExitCount);
-            }
-        }
-        else
+        if (possibleExits.Count > 0)
         {
             // Corner exit rule
             var cornerRadialEdges = _cornerRadialCoordinates.Select(coords =>

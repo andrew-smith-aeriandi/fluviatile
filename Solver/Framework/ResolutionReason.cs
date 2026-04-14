@@ -1,4 +1,4 @@
-﻿namespace Solver.Rules;
+﻿namespace Solver.Framework;
 
 public enum ResolutionReason
 {

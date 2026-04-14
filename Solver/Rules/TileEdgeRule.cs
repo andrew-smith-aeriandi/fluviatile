@@ -4,6 +4,7 @@ using System.Diagnostics;
 
 namespace Solver.Rules;
 
+[RulePrioriry(QueuePriority.Default)]
 public class TileEdgeRule(Tableau tableau) : Rule(tableau)
 {
     public override string ToString()
@@ -150,7 +151,7 @@ public class TileEdgeRule(Tableau tableau) : Rule(tableau)
                         var aisles = tile.Aisles.Where(a => a.UnresolvedChannelTileCount >= 2);
                         if (aisles.TryGetSingle(out var aisle))
                         {
-                            tile.GetEdges(aisle!.Axis)
+                            tile.GetEdges(aisle.Axis)
                                 .TryResolve(Resolution.Channel, notifier, ResolutionReason.MeanderRuleConstrainedByAisleCounts);
                         }
                     }
