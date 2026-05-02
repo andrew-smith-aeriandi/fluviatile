@@ -3,21 +3,21 @@ using Solver.Framework;
 
 namespace Solver.Rules;
 
-[RulePrioriry(QueuePriority.Default)]
+/// <summary>
+/// Use all the possible permutations of channel and empty tiles in an aisle filtered by the currrently 
+/// resolved tiles in that aisle to identify other tiles in the same aisle that can be resolved.
+/// </summary>
 public class AisleResolutionPatternRule(Tableau tableau) : Rule(tableau)
 {
     private readonly List<List<Resolution[]>> _tilePatterns = GetPatterns(tableau.Grid);
 
-    public override string ToString()
-    {
-        return nameof(AisleResolutionPatternRule);
-    }
+    public override string Name => nameof(AisleResolutionPatternRule);
 
-    public override IEnumerable<Type> GetPertinentComponents()
+    public override IEnumerable<ComponentType> GetPertinentComponents()
     {
-        yield return typeof(Tableau);
-        yield return typeof(Aisle);
-        yield return typeof(Tile);
+        yield return ComponentTypes.Tableau;
+        yield return ComponentTypes.Aisle;
+        yield return ComponentTypes.Tile;
     }
 
     public override void Invoke(IComponent component, INotifier notifier)

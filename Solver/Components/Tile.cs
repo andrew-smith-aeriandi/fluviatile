@@ -44,22 +44,53 @@ public class Tile : IResolvableComponent, ILinkable, IFreezable
         _frozen = true;
     }
 
+    /// <summary>
+    /// Coordinates of the centre of the tile
+    /// </summary>
     public Coordinates Coordinates { get; }
 
+    /// <summary>
+    /// Orientation of the tile
+    /// </summary>
+    /// <remarks>
+    /// A tile with orientation Up is an upward-pointing equilateral triangle.
+    /// A tile with orientation Down is an downward-pointing equilateral triangle.
+    /// </remarks>
     public Orientation Orientation { get; }
 
+    /// <summary>
+    /// Indicates whether the tile has an edge that is a border of the grid
+    /// </summary>
     public bool HasBorder { get; private set; }
 
+    /// <summary>
+    /// Always returns false
+    /// </summary>
     public bool IsTerminal => false;
 
+    /// <summary>
+    /// List of the 3 coordinates that specify the vertices of the tile 
+    /// </summary>
     public IReadOnlyList<Coordinates> Vertices { get; }
 
+    /// <summary>
+    /// Reference to the aisle containing the tile that is normal to the X-axis 
+    /// </summary>
     public Aisle AisleX { get; private set; }
 
+    /// <summary>
+    /// Reference to the aisle containing the tile that is normal to the Y-axis 
+    /// </summary>
     public Aisle AisleY { get; private set; }
 
+    /// <summary>
+    /// Reference to the aisle containing the tile that is normal to the Z-axis 
+    /// </summary>
     public Aisle AisleZ { get; private set; }
 
+    /// <summary>
+    /// Returns the aisle containing the tile that is normal to the specified axis
+    /// </summary>
     public Aisle GetAisle(Axis axis)
     {
         return axis switch
@@ -71,6 +102,9 @@ public class Tile : IResolvableComponent, ILinkable, IFreezable
         };
     }
 
+    /// <summary>
+    /// Enumeration of the aisles containing this tile, ordered by the aisle normal axes (X, Y, Z) 
+    /// </summary>
     public IEnumerable<Aisle> Aisles
     {
         get
@@ -81,12 +115,36 @@ public class Tile : IResolvableComponent, ILinkable, IFreezable
         }
     }
 
+    /// <summary>
+    /// Reference to the tile edge that is normal to the X-axis 
+    /// </summary>
+    /// <remarks>
+    /// The lower edge for a tile with an Up orientation.
+    /// The upper edge for a tile with a Down orientation.
+    /// </remarks>
     public Edge EdgeX { get; private set; }
 
+    /// <summary>
+    /// Reference to the tile edge that is normal to the Y-axis 
+    /// </summary>
+    /// <remarks>
+    /// The top-right edge for a tile with an Up orientation.
+    /// The bottom-left edge for a tile with a Down orientation.
+    /// </remarks>
     public Edge EdgeY { get; private set; }
 
+    /// <summary>
+    /// Reference to the tile edge that is normal to the Z-axis 
+    /// </summary>
+    /// <remarks>
+    /// The top-left edge for a tile with an Up orientation.
+    /// The bottom-right edge for a tile with a Down orientation.
+    /// </remarks>
     public Edge EdgeZ { get; private set; }
 
+    /// <summary>
+    /// List of the 3 edges that form the boundary of the tile, ordered by the edge normal axes (X, Y, Z)
+    /// </summary>
     public IEnumerable<Edge> Edges
     {
         get
@@ -97,6 +155,9 @@ public class Tile : IResolvableComponent, ILinkable, IFreezable
         }
     }
 
+    /// <summary>
+    /// Returns the edge of this tile that is normal to the specified axis
+    /// </summary>
     public Edge GetEdge(Axis axis)
     {
         return axis switch
@@ -179,11 +240,26 @@ public class Tile : IResolvableComponent, ILinkable, IFreezable
         }
     }
 
+    /// <summary>
+    /// Returns the resolution state of the tile
+    /// </summary>
     public Resolution Resolution { get; private set; }
 
+    /// <summary>
+    /// Indicates whether the tile is resolved or not
+    /// </summary>
     public bool IsResolved => Resolution != Resolution.Unknown;
 
-    public bool TryResolve(Resolution resolution, INotifier notifier, ResolutionReason reason = ResolutionReason.Unspecified)
+    /// <summary>
+    /// Attempts to set the resolution state of this tile, returning true if the state was changed
+    /// </summary>
+    /// <remarks>
+    /// Invokes the notifier if the state changes from Unknown to a resolved state (Empty or Channel).
+    /// </remarks>
+    public bool TryResolve(
+        Resolution resolution,
+        INotifier notifier,
+        ResolutionReason reason = ResolutionReason.Unspecified)
     {
         if (Resolution != Resolution.Unknown || resolution == Resolution.Unknown)
         {

@@ -84,18 +84,39 @@ public record SolverGrid
             .ToArray();
     }
 
+    /// <summary>
+    /// Size of the hexagonal grid in terms of the number of triangular tiles that comprise each side of the grid
+    /// </summary>
     public int Size { get; }
 
+    /// <summary>
+    /// Total number of triagular tiles that comprise the hexagonal grid
+    /// </summary>
     public int TileCount { get; }
 
+    /// <summary>
+    /// Total number of tile vertices that comprise the hexagonal grid 
+    /// </summary>
     public int VertexCount { get; }
 
+    /// <summary>
+    /// Total number of tile edges that comprise the hexagonal grid 
+    /// </summary>
     public int EdgeCount { get; }
 
+    /// <summary>
+    /// Total number of aisles that comprise the hexagonal grid across all 3 axes
+    /// </summary>
     public int AisleCount { get; }
 
+    /// <summary>
+    /// Number of aisles per axis in tne hexagonal grid
+    /// </summary>
     public int AisleCountPerAxis { get; }
 
+    /// <summary>
+    /// Radius of the hexagonal grid in the coordinate system
+    /// </summary>
     public int Radius { get; }
 
     public FrozenSet<Coordinates> Vertices { get; }

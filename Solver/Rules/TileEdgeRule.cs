@@ -4,19 +4,21 @@ using System.Diagnostics;
 
 namespace Solver.Rules;
 
-[RulePrioriry(QueuePriority.Default)]
+/// <summary>
+/// Tile resolution rules based on the resolution state of the tile's edges
+/// </summary>
+/// <remarks>
+/// Some of the logic here is covered by other rules, e.g. <see cref="HousekeepingRule"/> or <see cref="MeanderRule"/>.
+/// </remarks>
 public class TileEdgeRule(Tableau tableau) : Rule(tableau)
 {
-    public override string ToString()
-    {
-        return nameof(TileEdgeRule);
-    }
+    public override string Name => nameof(TileEdgeRule);
 
-    public override IEnumerable<Type> GetPertinentComponents()
+    public override IEnumerable<ComponentType> GetPertinentComponents()
     {
-        yield return typeof(Tableau);
-        yield return typeof(Tile);
-        yield return typeof(Edge);
+        yield return ComponentTypes.Tableau;
+        yield return ComponentTypes.Tile;
+        yield return ComponentTypes.Edge;
     }
 
     public override void Invoke(IComponent component, INotifier notifier)
@@ -52,7 +54,8 @@ public class TileEdgeRule(Tableau tableau) : Rule(tableau)
     {
         var counts = tile.Edges.GetCounts();
 
-        switch (counts)
+        // (Channel, Empty, Unkown)
+        switch (counts) 
         {
             case (2, 1, 0):
                 tile.TryResolve(Resolution.Channel, notifier, ResolutionReason.Housekeeping);

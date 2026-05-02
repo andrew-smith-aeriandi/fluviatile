@@ -4,10 +4,12 @@ public record SolverResults
 {
     public SolverStatus Status { get; init; }
 
+    public TimeSpan Duration { get; init; }
+
     public required IReadOnlyList<SolverExecutionResult> ExecutionResults { get; init; }
 
     public override string ToString()
     {
-        return $"{Status}; Solver Execution Count: {ExecutionResults.Count}";
+        return $"{Status}; Solver Execution Count: {ExecutionResults.Count}, Duration: {Duration.TotalMilliseconds:0}ms";
     }
 }

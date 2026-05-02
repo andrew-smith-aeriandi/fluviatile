@@ -7,6 +7,9 @@ public class AisleComparer : IEqualityComparer<Aisle>, IComparer<Aisle>
 {
     public readonly static AisleComparer Default = new();
 
+    /// <summary>
+    /// Order by Axis (X, Y, Z) then by Index
+    /// </summary>
     public int Compare(Aisle? x, Aisle? y)
     {
         if (ReferenceEquals(x, y))

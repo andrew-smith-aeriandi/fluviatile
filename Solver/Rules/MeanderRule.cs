@@ -4,19 +4,18 @@ using System.Diagnostics;
 
 namespace Solver.Rules;
 
-[RulePrioriry(QueuePriority.High)]
+/// <summary>
+/// For tile that is resolved as a channel with one empty edge, the other 2 edges must have channels
+/// </summary>
 public class MeanderRule(Tableau tableau) : Rule(tableau)
 {
-    public override string ToString()
-    {
-        return nameof(MeanderRule);
-    }
+    public override string Name => nameof(MeanderRule);
 
-    public override IEnumerable<Type> GetPertinentComponents()
+    public override IEnumerable<ComponentType> GetPertinentComponents()
     {
-        yield return typeof(Tableau);
-        yield return typeof(Tile);
-        yield return typeof(Edge);
+        yield return ComponentTypes.Tableau;
+        yield return ComponentTypes.Tile;
+        yield return ComponentTypes.Edge;
     }
 
     public override void Invoke(IComponent component, INotifier notifier)

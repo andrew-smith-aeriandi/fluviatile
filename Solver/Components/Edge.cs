@@ -52,12 +52,27 @@ public class Edge : IResolvableComponent, IFreezable
         _frozen = true;
     }
 
+    /// <summary>
+    /// Unordered coordinate pair representing the two verices of the edge
+    /// </summary>
     public UnorderedPair<Coordinates> Vertices { get; }
 
     public Axis NormalAxis { get; }
 
+    /// <summary>
+    /// Indicates whether the edge is a border of the grid
+    /// </summary>
     public bool IsBorder { get; }
 
+    /// <summary>
+    /// Indicates whether the edge is an exit
+    /// </summary>
+    /// <remarks>
+    /// Returns false for all edges that are not borders, since exits must be on the border of the grid. 
+    /// Returns null if the edge is an unresolved border.
+    /// Returns false if the edge is an empty border.
+    /// Returns true if the edge is a border with a channel.
+    /// </remarks>
     public bool? IsExit => (IsBorder, Resolution) switch
     {
         (true, Resolution.Channel) => true,
@@ -66,10 +81,30 @@ public class Edge : IResolvableComponent, IFreezable
         (false, _) => false
     };
 
+    /// <summary>
+    /// Reference to the tile adjacent to the edge in the positive direction normal to the edge  
+    /// </summary>
+    /// <remarks>
+    /// Returns null if the edge is a border with no tile in the positive normal direction
+    /// </remarks>
     public Tile? TilePlus { get; private set; }
 
+    /// <summary>
+    /// Reference to the tile adjacent to the edge in the negative direction normal to the edge  
+    /// </summary>
+    /// <remarks>
+    /// Returns null if the edge is a border with no tile in the negative normal direction
+    /// </remarks>
     public Tile? TileMinus { get; private set; }
 
+    /// <summary>
+    /// Returns an enumeration of the tiles that are adjacent to the edge
+    /// </summary>
+    /// <remarks>
+    /// The enumeration will include either one or two tiles.
+    /// If the enumeration includes two tiles, the first will be the one adjacent to the edge
+    /// in the negative normal direction.
+    /// </remarks>
     public IEnumerable<Tile> Tiles
     {
         get
@@ -100,10 +135,22 @@ public class Edge : IResolvableComponent, IFreezable
                 : (tile1, tile2);
     }
 
+    /// <summary>
+    /// Returns the resolution state of the edge
+    /// </summary>
     public Resolution Resolution { get; private set; }
 
+    /// <summary>
+    /// Indicates whether the edge is resolved or not
+    /// </summary>
     public bool IsResolved => Resolution != Resolution.Unknown;
 
+    /// <summary>
+    /// Attempts to set the resolution state of this edge, returning true if the state was changed
+    /// </summary>
+    /// <remarks>
+    /// Invokes the notifier if the state changes from Unknown to a resolved state (Empty or Channel).
+    /// </remarks>
     public bool TryResolve(Resolution resolution, INotifier notifier, ResolutionReason reason = ResolutionReason.Unspecified)
     {
         if (resolution == Resolution.Unknown || Resolution != Resolution.Unknown)

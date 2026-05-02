@@ -37,44 +37,108 @@ public class Tableau : IComponent
         ResolvedEdgeCount = edges.Count(edge => edge.IsResolved);
     }
 
+    /// <summary>
+    /// String identfier of the tableau 
+    /// </summary>
     public string Tag { get; }
 
+    /// <summary>
+    /// List of the count of tiles containing channels in the aisles that comprise a grid   
+    /// </summary>
+    /// <remarks>
+    /// The aisle counts are ordered by the aisle axis (X, Y, Z) and then by the aisle index.
+    /// </remarks>
     public IReadOnlyList<int> ChannelTileCounts { get; }
 
+    /// <summary>
+    /// Count of tiles in the grid
+    /// </summary>
     public int TileCount => Grid.TileCount;
 
+    /// <summary>
+    /// Count of resolved tiles in the grid 
+    /// </summary>
     public int ResolvedTileCount { get; private set; }
 
+    /// <summary>
+    /// Count of unresolved tiles in the grid
+    /// </summary>
     public int UnresolvedTileCount => Grid.TileCount - ResolvedTileCount;
 
+    /// <summary>
+    /// Count of tiles containing channels in the grid
+    /// </summary>
     public int ChannelTileCount { get; }
 
+    /// <summary>
+    /// Count of resolved tiles containing channels in the grid 
+    /// </summary>
     public int ResolvedChannelTileCount { get; private set; }
 
+    /// <summary>
+    /// Count of unresolved tiles containing channels in the grid 
+    /// </summary>
     public int UnresolvedChannelTileCount => ChannelTileCount - ResolvedChannelTileCount;
 
+    /// <summary>
+    /// Count of empty tiles in the grid
+    /// </summary>
     public int EmptyTileCount { get; }
 
+    /// <summary>
+    /// Count of resolved empty tiles in the grid
+    /// </summary>
     public int ResolvedEmptyTileCount { get; private set; }
 
+    /// <summary>
+    /// Count of unresolved empty tiles in the grid
+    /// </summary>
     public int UnresolvedEmptyTileCount => EmptyTileCount - ResolvedEmptyTileCount;
 
+    /// <summary>
+    /// Count of edges in the grid
+    /// </summary>
     public int EdgeCount => Grid.EdgeCount;
 
+    /// <summary>
+    /// Count of resolved edges in the grid
+    /// </summary>
     public int ResolvedEdgeCount { get; private set; }
 
+    /// <summary>
+    /// Count of unresolved edges in the grid
+    /// </summary>
     public int UnresolvedEdgeCount => Grid.EdgeCount - ResolvedEdgeCount;
 
+    /// <summary>
+    /// Reference to the grid
+    /// </summary>
     public SolverGrid Grid { get; }
 
+    /// <summary>
+    /// Reference to the resolved channel segments
+    /// </summary>
     public Thalweg Thalweg { get; }
 
+    /// <summary>
+    /// Dictionary of the aisles comprising the grid, whose keys are the normal axis and index of each aisle 
+    /// </summary>
     public FrozenDictionary<(Axis, int), Aisle> Aisles { get; }
 
+    /// <summary>
+    /// Dictionary of the tiles comprising the grid, whose keys are the coordinates of the centre of each tile
+    /// </summary>
     public FrozenDictionary<Coordinates, Tile> Tiles { get; }
 
+    /// <summary>
+    /// Dictionary of the edges comprising the grid, whose keys are the cooordinate pairs specifying the vertices of each edge
+    /// </summary>
     public FrozenDictionary<UnorderedPair<Coordinates>, Edge> Edges { get; }
 
+    /// <summary>
+    /// Updates the resolved counts (and implicitly the unresolved counts) for the grid and pertinent aisles
+    /// whenever a tile or edge component is resolved
+    /// </summary>
     public void NotifyResolution(IComponent component)
     {
         switch (component)

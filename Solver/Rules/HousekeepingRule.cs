@@ -3,18 +3,24 @@ using Solver.Framework;
 
 namespace Solver.Rules;
 
-[RulePrioriry(QueuePriority.VeryHigh)]
+/// <summary>
+/// Simple housekeeping rules 
+/// </summary>
+/// <remarks>
+/// <list type="bullet">
+/// <item>An empty tile's edges must all be empty.</item>
+/// <item>An internal edge that has a channel must have a channel tile on either side that forms part of a thalweg segment.</item>
+/// <item>A border edge that has a channel tile must be an exit</item>
+/// </list>
+/// </remarks>
 public class HousekeepingRule(Tableau tableau) : Rule(tableau)
 {
-    public override string ToString()
-    {
-        return nameof(HousekeepingRule);
-    }
+    public override string Name => nameof(HousekeepingRule);
 
-    public override IEnumerable<Type> GetPertinentComponents()
+    public override IEnumerable<ComponentType> GetPertinentComponents()
     {
-        yield return typeof(Tile);
-        yield return typeof(Edge);
+        yield return ComponentTypes.Tile;
+        yield return ComponentTypes.Edge;
     }
 
     public override void Invoke(IComponent component, INotifier notifier)

@@ -4,19 +4,25 @@ using System.Diagnostics;
 
 namespace Solver.Rules;
 
-[RulePrioriry(QueuePriority.Default)]
+/// <summary>
+/// Use constraint that there must be a single continuous channel with exactly 2 exits
+/// </summary>
+/// <remarks>
+/// <list type="bullet">
+/// <item>Channels must not form a closed loop.</item>
+/// <item>A tile at the end of a thalweg segment where the other end is a termination cannot be an exit if not all channel tiles have been accounted for.</item>
+/// <item>If there are 2 thalweg segments with one termination and the other ends have a common edge, they can be joined at that edge if and only if all channel tiles are accounted for.</item>
+/// </list>
+/// </remarks>
 public class ChannelContinuityRule(Tableau tableau) : Rule(tableau)
 {
-    public override string ToString()
-    {
-        return nameof(ChannelContinuityRule);
-    }
+    public override string Name => nameof(ChannelContinuityRule);
 
-    public override IEnumerable<Type> GetPertinentComponents()
+    public override IEnumerable<ComponentType> GetPertinentComponents()
     {
-        yield return typeof(Tableau);
-        yield return typeof(Thalweg);
-        yield return typeof(Thalweg.Segment);
+        yield return ComponentTypes.Tableau;
+        yield return ComponentTypes.Thalweg;
+        yield return ComponentTypes.ThalwegSegment;
     }
 
     public override void Invoke(IComponent component, INotifier notifier)

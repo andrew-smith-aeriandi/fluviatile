@@ -1,0 +1,858 @@
+﻿<!DOCTYPE html >
+<html lang="en">
+  <head>
+    <meta charset="utf-8"></meta>
+    <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+    <title>Fluviatile</title>
+    <style>svg text {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+svg text::selection {
+    background: none;
+}
+
+#fluviatile-grid {
+    cursor: pointer;
+}
+
+#fluviatile-grid.tracing {
+    cursor: grabbing;
+}
+
+.margin {
+    pointer-events: none;
+    fill: LightSteelBlue;
+    fill-opacity: 1.0;
+    stroke: White;
+    stroke-width: 0;
+    stroke-linejoin: round;
+}
+
+.margin.line {
+    stroke-width: 2;
+}
+
+.title {
+    font: bold 24px sans-serif;
+    fill: SlateGray;
+}
+
+.button {
+    cursor: default;
+    font: bold 24px sans-serif;
+    fill: SlateGray;
+}
+
+.button:hover {
+    fill: DarkSlateGray;
+}
+
+.node-count {
+    pointer-events: none;
+    font: bold 24px sans-serif;
+    fill: White;
+}
+
+.node-count.error {
+    fill: Red;
+}
+
+.cell {
+    fill: LightGreen;
+    fill-opacity: 1.0;
+    stroke: Linen;
+    stroke-width: 2;
+    stroke-linejoin: round;
+}
+
+.cell.plain {
+    fill: ForestGreen;
+}
+
+.river {
+    pointer-events: none;
+    fill: none;
+    stroke: Teal;
+    stroke-width: 3;
+    stroke-linejoin: round;
+}
+
+.trace {
+    pointer-events: none;
+    fill: none;
+    stroke: Teal;
+    stroke-width: 1;
+    stroke-dasharray: 2;
+}
+</style>
+    <script>const Fluviatile = function() {
+    this.svg = undefined;
+    this.size = undefined;
+    this.tracedChannel = [];
+    this.mouseButtons = 0;
+    this.gridCells = {};
+    this.counts = { x: {}, y: {}, z: {} };
+    this.lastTracedCell = null;
+    this.savedState = [];
+    this.dirty = false;
+};
+
+Fluviatile.prototype.initiate = function(svgId) {
+    var svg = document.getElementById(svgId);
+    this.svg = svg;
+    this.size = parseInt(svg.getAttribute('data-size'), 10);
+
+    svg.addEventListener('mousedown', mouseDownHandler.bind(this));
+    svg.addEventListener('mousemove', mouseMoveHandler.bind(this));
+    svg.addEventListener('mouseup', mouseUpHandler.bind(this));
+
+    const saveStateButton = document.getElementById('save-state');
+    saveStateButton.addEventListener('click', saveStateHandler.bind(this));
+
+    const revertStateButton = document.getElementById('revert-state');
+    revertStateButton.addEventListener('click', revertStateHandler.bind(this));
+
+    const copyDisplayTextButton = document.getElementById('display-text');
+    copyDisplayTextButton.addEventListener('click', copyTextButton.bind(this));
+
+    const cells = svg.querySelectorAll('.cell');
+    const state = {};
+
+    for (let i = 0; i < cells.length; i++) {
+        const cell = cells[i];
+        const id = cell.getAttribute('id');
+
+        const gridCell = createCell(
+            0,
+            parseInt(cell.getAttribute('data-u'), 10),
+            parseInt(cell.getAttribute('data-v'), 10),
+            parseFloat(cell.getAttribute('data-x')),
+            parseFloat(cell.getAttribute('data-y')));
+
+        this.gridCells[id] = gridCell;
+        state[id] = gridCell.state;
+
+        cell.addEventListener('contextmenu', contextMenuHandler.bind(this));
+        cell.addEventListener('mousedown', mouseDownHandler.bind(this));
+        cell.addEventListener('mousemove', mouseMoveHandler.bind(this));
+        cell.addEventListener('mouseenter', mouseEnterHandler.bind(this));
+        cell.addEventListener('mouseup', mouseUpHandler.bind(this));
+    }
+
+    this.savedState.push(state);
+    this.dirty = false;
+
+    const nodeCounts = svg.querySelectorAll('.node-count');
+
+    for (let i = 0; i < nodeCounts.length; i++) {
+        const nodeCount = nodeCounts[i];
+        const group = nodeCount.getAttribute('data-group');
+        const index = nodeCount.getAttribute('data-index');
+        this.counts[group][index] = {
+            id: nodeCount.getAttribute('id'),
+            count: parseInt(nodeCount.getAttribute('data-count'), 10),
+            max: parseInt(nodeCount.getAttribute('data-max'), 10),
+            positive: 0,
+            negative: 0
+        };
+    }
+};
+
+Fluviatile.prototype.startChannelTrace = function() {
+    if (!this.lastTracedCell) return;
+
+    this.svg.classList.add('tracing');
+    this.tracedChannel.length = 0;
+    this.tracedChannel.push(this.lastTracedCell);
+};
+
+Fluviatile.prototype.cancelChannelTrace = function() {
+    this.svg.classList.remove('tracing');
+
+    let cell, elementId;
+    while (cell = this.tracedChannel.pop()) {
+        const updatedElements = [];
+        while (elementId = cell.elements.pop()) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                if (element.classList.contains('trace')) {
+                    element.parentNode.removeChild(element);
+                } else {
+                    updatedElements.push(elementId);
+                }
+            }
+        }
+        cell.elements = updatedElements;
+    }
+
+    this.lastTracedCell = null;
+    this.mouseButtons = 0;
+};
+
+Fluviatile.prototype.completeChannelTrace = function() {
+    this.svg.classList.remove('tracing');
+
+    for (let i = 0; i < this.tracedChannel.length; i++) {
+        const before = i - 1 >= 0 ? this.tracedChannel[i - 1] : null;
+        const cell = this.tracedChannel[i];
+        const after = i + 1 < this.tracedChannel.length ? this.tracedChannel[i + 1] : null;
+        let state = 0;
+
+        if (before !== null && after !== null) {
+            const u1 = cell.u - before.u;
+            const v1 = cell.v - before.v;
+            const u2 = after.u - cell.u;
+            const v2 = after.v - cell.v;
+
+            if ((u1 === 1 && v1 === 1 && u2 === -1 && v2 === 2) || (u1 === 1 && v1 === -2 && u2 === -1 && v2 === -1)) {
+                state = 13;
+            } else if ((u1 === 2 && v1 === -1 && u2 === 1 && v2 === 1) || (u1 === -1 && v1 === -1 && u2 === -2 && v2 === 1)) {
+                state = 81;
+            } else if ((u1 === 1 && v1 === -2 && u2 === 2 && v2 === -1) || (u1 === -2 && v1 === 1 && u2 === -1 && v2 === 2)) {
+                state = 7;
+            } else if ((u1 === -1 && v1 === -1 && u2 === 1 && v2 === -2) || (u1 === -1 && v1 === 2 && u2 === 1 && v2 === 1)) {
+                state = 97;
+            } else if ((u1 === -2 && v1 === 1 && u2 === -1 && v2 === -1) || (u1 === 1 && v1 === 1 && u2 === 2 && v2 === -1)) {
+                state = 11;
+            } else if ((u1 === -1 && v1 === 2 && u2 === -2 && v2 === 1) || (u1 === 2 && v1 === -1 && u2 === 1 && v2 === -2)) {
+                state = 49;
+            }
+        } else {
+            const u = before !== null ? before.u - cell.u : after.u - cell.u;
+            const v = before !== null ? before.v - cell.v : after.v - cell.v;
+
+            if (u === 1 && v === 1) {
+                state = 65;
+            } else if (u === -1 && v === 2) {
+                state = 5;
+            } else if (u === -2 && v === 1) {
+                state = 17;
+            } else if (u === -1 && v === -1) {
+                state = 9;
+            } else if (u === 1 && v === -2) {
+                state = 33;
+            } else if (u === 2 && v === -1) {
+                state = 3;
+            }
+        }
+
+        const desiredState = state | cell.state;
+        if (desiredState !== cell.state) {
+            cell.state = desiredState;
+            this.dirty = true;
+            this.clearElements(cell);
+            this.addElement(cell, 'channel', desiredState);
+        }
+    }
+
+    this.tracedChannel.length = 0;
+    this.lastTracedCell = null;
+};
+
+Fluviatile.prototype.addElement = function(cell, typePrefix, typeId, className) {
+    if (!cell || cell.x === undefined || cell.x === null || cell.y === undefined || cell.y === null) return;
+
+    const elementId = getId(typePrefix);
+    const href = '#' + typePrefix + (!typeId ? '' : '-' + typeId);
+
+    const element = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    element.setAttribute('href', href);
+    element.setAttribute('id', elementId);
+    element.setAttribute('x', cell.x);
+    element.setAttribute('y', cell.y);
+
+    if (className) {
+        element.setAttribute('class', className);
+    }
+
+    this.svg.appendChild(element);
+    cell.elements.push(elementId);
+};
+
+Fluviatile.prototype.clearElements = function(cell) {
+    let elementId;
+
+    while (elementId = cell.elements.pop()) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.parentNode.removeChild(element);
+        }
+    }
+};
+
+Fluviatile.prototype.applyState = function(state) {
+    for (let group in this.counts) {
+        for (let index in this.counts[group]) {
+            const count = this.counts[group][index];
+            count.positive = 0;
+            count.negative = 0;
+        }
+    }
+
+    for (let id in this.gridCells) {
+        const cell = this.gridCells[id];
+        cell.state = state[id] || 0;
+        this.clearElements(cell);
+
+        const element = document.getElementById(id);
+        element.classList.remove('plain');
+
+        if (cell.state === 0) {
+            continue;
+        }
+
+        const xcount = this.counts['x'][String(Math.floor(cell.u / 3) + this.size)];
+        const ycount = this.counts['y'][String(Math.floor(cell.v / 3) + this.size)];
+        const zcount = this.counts['z'][String(Math.floor(cell.w / 3) + this.size)];
+
+        if ((cell.state & 1) === 1) {
+            element.classList.remove('plain');
+            this.addElement(cell, 'channel', cell.state);
+            xcount.positive += 1;
+            ycount.positive += 1;
+            zcount.positive += 1;
+        } else if ((cell.state & 256) === 256) {
+            element.classList.add('plain');
+            xcount.negative += 1;
+            ycount.negative += 1;
+            zcount.negative += 1;
+        }
+    }
+
+    for (let group in this.counts) {
+        for (let index in this.counts[group]) {
+            const count = this.counts[group][index];
+            const nodeCount = document.getElementById(count.id);
+            if (count.positive > count.count || count.negative > count.max - count.count) {
+                nodeCount.classList.add('error');
+            } else {
+                nodeCount.classList.remove('error');
+            }
+        }
+    }
+};
+
+Fluviatile.prototype.saveState = function() {
+    this.cancelChannelTrace();
+    if (!this.dirty) return;
+
+    const state = {};
+    for (let id in this.gridCells) {
+        state[id] = this.gridCells[id].state;
+    }
+
+    this.savedState.push(state);
+    this.dirty = false;
+};
+
+Fluviatile.prototype.revertState = function() {
+    this.cancelChannelTrace();
+
+    const state = !this.dirty && this.savedState.length > 1
+        ? this.savedState.pop()
+        : this.savedState[this.savedState.length - 1];
+
+    this.dirty = false;
+    this.applyState(state);
+};
+
+function saveStateHandler(e) {
+    this.saveState();
+}
+
+function revertStateHandler(e) {
+    this.revertState();
+}
+
+function copyTextButton(e) {
+    if (!e.target) return;
+    if (!navigator.clipboard) return;
+
+    let copyText = e.target.getAttribute('data-copy-text');
+    if (copyText === undefined) {
+        copyText = e.target.textContent;
+    }
+
+    if (typeof copyText === 'string') {
+        navigator.clipboard.writeText(copyText);
+    }
+}
+
+function contextMenuHandler(e) {
+    e.preventDefault();
+    return false;
+}
+
+function mouseDownHandler(e) {
+    e.stopPropagation();
+    this.mouseButtons = e.buttons;
+
+    const cell = this.gridCells[e.target.id];
+    if ((this.mouseButtons & 1) === 1 && (cell === undefined || (cell.state & 1) === 1)) {
+        this.lastTracedCell = cell || createCell(0);
+    }
+}
+
+function mouseMoveHandler(e) {
+    e.stopPropagation();
+    if (!this.lastTracedCell) return;
+
+    if (this.tracedChannel.length === 0) {
+        this.startChannelTrace();
+        return;
+    }
+
+    const previous = this.lastTracedCell;
+    if (previous.state === 0) return;
+
+    let cell = this.gridCells[e.target.id];
+    if (cell !== undefined) return;
+
+    const edge = this.size * 3 - 1;
+
+    let state = 0;
+    if (previous.u === edge) {
+        state = 3;
+        cell = createCell(0, previous.u + 2, previous.v - 1);
+    } else if (previous.v === edge) {
+        state = 5;
+        cell = createCell(0, previous.u - 1, previous.v + 2);
+    } else if (previous.w === edge) {
+        state = 9;
+        cell = createCell(0, previous.u - 1, previous.v - 1);
+    } else if (previous.u === -edge) {
+        state = 17;
+        cell = createCell(0, previous.u - 2, previous.v + 1);
+    } else if (previous.v === -edge) {
+        state = 33;
+        cell = createCell(0, previous.u + 1, previous.v - 2);
+    } else if (previous.w === -edge) {
+        state = 65;
+        cell = createCell(0, previous.u + 1, previous.v + 1);
+    } else {
+        this.cancelChannelTrace();
+        return;
+    }
+
+    const combinedState = previous.state | state;
+    if (combinedState === 15 || combinedState === 113) {
+        this.cancelChannelTrace();
+        return;
+    }
+
+    if (combinedState !== previous.state) {
+        this.tracedChannel.push(cell);
+        this.addElement(previous, 'channel', state, 'trace');
+    }
+}
+
+function mouseEnterHandler(e) {
+    e.stopPropagation();
+    if (this.tracedChannel.length === 0) return;
+
+    const cell = this.gridCells[e.target.id];
+    if (cell === undefined || cell === this.lastTracedCell || (cell.state & 1) === 0 || this.tracedChannel.indexOf(cell) >= 0) {
+        this.cancelChannelTrace();
+        return;
+    }
+
+    const previous = this.lastTracedCell;
+    if (previous.state !== 0 && Math.abs(cell.u - previous.u) + Math.abs(cell.v - previous.v) > 3) {
+        this.cancelChannelTrace();
+        return;
+    }
+
+    const edge = this.size * 3 - 1;
+
+    if (previous.state === 0) {
+        if (cell.u === -edge) {
+            previous.u = cell.u - 2;
+            previous.v = cell.v + 1;
+        } else if (cell.u === edge) {
+            previous.u = cell.u + 2;
+            previous.v = cell.v - 1;
+        } else if (cell.v === -edge) {
+            previous.u = cell.u + 1;
+            previous.v = cell.v - 2;
+        } else if (cell.v === edge) {
+            previous.u = cell.u - 1;
+            previous.v = cell.v + 2
+        } else if (cell.w === -edge) {
+            previous.u = cell.u + 1;
+            previous.v = cell.v + 1;
+        } else if (cell.w === edge) {
+            previous.u = cell.u - 1;
+            previous.v = cell.v - 1;
+        } else {
+            this.cancelChannelTrace();
+            return;
+        }
+    }
+
+    const u = cell.u - previous.u;
+    const v = cell.v - previous.v;
+    let state1 = 0;
+    let state2 = 0;
+
+    if (u === -1 && v === 2) {
+        state1 = 5;
+        state2 = 33;
+    } else if (u === 1 && v === -2) {
+        state1 = 33;
+        state2 = 5;
+    } else if (u === 2 && v === -1) {
+        state1 = 3;
+        state2 = 17;
+    } else if (u === -2 && v === 1) {
+        state1 = 17;
+        state2 = 3;
+    } else if (u === -1 && v === -1) {
+        state1 = 9;
+        state2 = 65;
+    } else if (u === 1 && v === 1) {
+        state1 = 65;
+        state2 = 9;
+    }
+
+    const combinedState1 = previous.state | state1;
+    const combinedState2 = cell.state | state2;
+
+    if (combinedState1 === 15 || combinedState1 === 113 || combinedState2 === 15 || combinedState2 === 113) {
+        this.cancelChannelTrace();
+        return;
+    }
+
+    if (combinedState1 !== previous.state) {
+        this.addElement(previous, 'channel', state1, 'trace');
+    }
+
+    if (combinedState2 !== cell.state) {
+        this.addElement(cell, 'channel', state2, 'trace');
+    }
+
+    this.tracedChannel.push(cell);
+    this.lastTracedCell = cell;
+}
+
+function mouseUpHandler(e) {
+    e.stopPropagation();
+    const cell = this.gridCells[e.target.id];
+    const mouseButtons = this.mouseButtons;
+    this.mouseButtons = 0;
+
+    if (this.tracedChannel.length > 1) {
+        this.completeChannelTrace();
+        return;
+    }
+
+    this.cancelChannelTrace();
+
+    if (cell) {
+        xcount = this.counts['x'][String(Math.floor(cell.u / 3) + this.size)];
+        ycount = this.counts['y'][String(Math.floor(cell.v / 3) + this.size)];
+        zcount = this.counts['z'][String(Math.floor(cell.w / 3) + this.size)];
+
+        if ((mouseButtons & 1) === 1) {
+            if (cell.state === 0) {
+                xcount.positive += 1;
+                ycount.positive += 1;
+                zcount.positive += 1;
+                cell.state = 1;
+                this.dirty = true;
+                this.addElement(cell, 'channel', 1);
+            } else if ((cell.state & 1) === 1) {
+                xcount.positive -= 1;
+                ycount.positive -= 1;
+                zcount.positive -= 1;
+                cell.state = 0;
+                this.dirty = true;
+                this.clearElements(cell);
+            }
+        } else if ((mouseButtons & 2) === 2) {
+            if (cell.state === 0) {
+                xcount.negative += 1;
+                ycount.negative += 1;
+                zcount.negative += 1;
+                cell.state = 256;
+                this.dirty = true;
+                e.target.classList.add('plain');
+            } else if ((cell.state & 256) === 256) {
+                xcount.negative -= 1;
+                ycount.negative -= 1;
+                zcount.negative -= 1;
+                cell.state = 0;
+                this.dirty = true;
+                e.target.classList.remove('plain');
+            }
+        }
+
+        const xnodeCount = document.getElementById(xcount.id);
+        if (xcount.positive > xcount.count || xcount.negative > xcount.max - xcount.count) {
+            xnodeCount.classList.add('error');
+        } else {
+            xnodeCount.classList.remove('error');
+        }
+
+        const ynodeCount = document.getElementById(ycount.id);
+        if (ycount.positive > ycount.count || ycount.negative > ycount.max - ycount.count) {
+            ynodeCount.classList.add('error');
+        } else {
+            ynodeCount.classList.remove('error');
+        }
+
+        const znodeCount = document.getElementById(zcount.id);
+        if (zcount.positive > zcount.count || zcount.negative > zcount.max - zcount.count) {
+            znodeCount.classList.add('error');
+        } else {
+            znodeCount.classList.remove('error');
+        }
+    }
+}
+
+const createCell = function (state, u, v, x, y) {
+    return {
+        state: typeof state === 'number' ? state : 0,
+        u: typeof u === 'number' ? u : null,
+        v: typeof v === 'number' ? v : null,
+        w: typeof u === 'number' && typeof v === 'number' ? -(u + v) : null,
+        x: typeof x === 'number' ? x : null,
+        y: typeof y === 'number' ? y : null,
+        elements: []
+    };
+};
+
+const getId = (function () {
+    let prefixes = {};
+    return function (prefix) {
+        const value = (prefixes[prefix] || 0) + 1;
+        prefixes[prefix] = value;
+        return prefix + '_' + value;
+    };
+})();
+
+document.addEventListener('DOMContentLoaded', function() {
+    const fluviatile = new Fluviatile();
+    fluviatile.initiate('fluviatile-grid');
+    fluviatile.saveState();
+
+    if (initialState) {
+        fluviatile.applyState(initialState);
+        fluviatile.saveState();
+    }
+}, false);
+
+// Inject polyfill if classList not supported for SVG elements.
+// https://github.com/tobua/svg-classlist-polyfill/blob/master/polyfill.js
+if (!('classList' in SVGElement.prototype)) {
+    Object.defineProperty(SVGElement.prototype, 'classList', {
+        get: function get() {
+            var _this = this
+
+            return {
+                contains: function contains(className) {
+                    return _this.className.baseVal.split(' ').indexOf(className) !== -1
+                },
+                add: function add(className) {
+                    var newClass = (_this.getAttribute('class') + ' ' + className).trim()
+                    return _this.setAttribute('class', newClass)
+                },
+                remove: function remove(className) {
+                    var classes = _this.getAttribute('class') || ''
+                    var regex = new RegExp('(?:^|\\s)' + className + '(?!\\S)', 'g')
+                    classes = classes.replace(regex, '').trim()
+                    _this.setAttribute('class', classes)
+                },
+                toggle: function toggle(className) {
+                    if (this.contains(className)) {
+                        this.remove(className)
+                    } else {
+                        this.add(className)
+                    }
+                },
+            }
+        },
+    })
+}
+</script>
+  </head>
+  <body>
+    <script>
+const initialState = {
+   "cell-7+5": 13,
+   "cell-7+8": 256,
+   "cell-4-4": 256,
+   "cell-4-1": 13,
+   "cell+4+1": 49,
+   "cell+4+4": 256,
+   "cell+7-8": 81,
+   "cell+7-5": 97,
+   "cell+7-2": 49,
+   "cell-7-1": 7,
+   "cell+1+1": 49,
+   "cell+1+4": 97,
+   "cell+4-8": 81,
+   "cell+1+7": 97,
+   "cell+4-5": 256,
+   "cell-2+1": 81,
+   "cell+4-2": 256,
+   "cell-2+4": 256,
+   "cell+5+2": 256,
+   "cell-2+7": 256,
+   "cell+8-7": 13,
+   "cell+8-4": 13,
+   "cell+8-1": 256,
+   "cell+1-8": 81,
+   "cell+1-5": 256,
+   "cell-5+1": 97,
+   "cell+1-2": 81,
+   "cell-5+4": 256,
+   "cell+2+2": 7,
+   "cell-5+7": 256,
+   "cell-2-5": 97,
+   "cell+2+5": 13,
+   "cell+5-7": 11,
+   "cell-2-2": 97,
+   "cell+5-4": 256,
+   "cell-1+2": 11,
+   "cell+5-1": 7,
+   "cell-1+5": 256,
+   "cell-1+8": 256,
+   "cell-8+1": 97,
+   "cell-8+4": 97,
+   "cell-8+7": 49,
+   "cell+2-7": 11,
+   "cell-5-2": 81,
+   "cell+2-4": 256,
+   "cell-4+2": 11,
+   "cell+2-1": 13,
+   "cell-4+5": 256,
+   "cell-1-7": 7,
+   "cell-4+8": 256,
+   "cell-1-4": 13,
+   "cell-1-1": 11,
+   "cell+7+1": 256,
+   "cell-7+2": 13
+};
+</script>
+    <svg id="fluviatile-grid" data-size="3" height="800" width="1000">
+      <polygon points="352,192.15392 232,400 352,607.84607 272,607.84607 152,400 272,192.15392" class="margin"></polygon>
+      <polygon points="364,614.7743 604,614.7743 724,406.9282 764,476.21024 644,684.05634 404,684.05634" class="margin"></polygon>
+      <polygon points="724,393.0718 604,185.22571 364,185.22571 404,115.943665 644,115.943665 764,323.78976" class="margin"></polygon>
+      <line x1="352" y1="192.15392" x2="272" y2="192.15392" class="margin line"></line>
+      <line x1="312" y1="261.43594" x2="232" y2="261.43594" class="margin line"></line>
+      <line x1="272" y1="330.71796" x2="192" y2="330.71796" class="margin line"></line>
+      <line x1="232" y1="400" x2="152" y2="400" class="margin line"></line>
+      <line x1="272" y1="469.28204" x2="192" y2="469.28204" class="margin line"></line>
+      <line x1="312" y1="538.5641" x2="232" y2="538.5641" class="margin line"></line>
+      <line x1="352" y1="607.84607" x2="272" y2="607.84607" class="margin line"></line>
+      <line x1="364" y1="614.7743" x2="404" y2="684.05634" class="margin line"></line>
+      <line x1="444" y1="614.7743" x2="484" y2="684.05634" class="margin line"></line>
+      <line x1="524" y1="614.7743" x2="564" y2="684.05634" class="margin line"></line>
+      <line x1="604" y1="614.7743" x2="644" y2="684.05634" class="margin line"></line>
+      <line x1="644" y1="545.49225" x2="684" y2="614.7743" class="margin line"></line>
+      <line x1="684" y1="476.21024" x2="724" y2="545.49225" class="margin line"></line>
+      <line x1="724" y1="406.9282" x2="764" y2="476.21024" class="margin line"></line>
+      <line x1="724" y1="393.0718" x2="764" y2="323.78976" class="margin line"></line>
+      <line x1="684" y1="323.78976" x2="724" y2="254.50774" class="margin line"></line>
+      <line x1="644" y1="254.50774" x2="684" y2="185.22571" class="margin line"></line>
+      <line x1="604" y1="185.22571" x2="644" y2="115.943665" class="margin line"></line>
+      <line x1="524" y1="185.22571" x2="564" y2="115.943665" class="margin line"></line>
+      <line x1="444" y1="185.22571" x2="484" y2="115.943665" class="margin line"></line>
+      <line x1="364" y1="185.22571" x2="404" y2="115.943665" class="margin line"></line>
+      <polygon points="360,192.15392 400,261.43594 440,192.15392" id="cell-8+1" class="cell" data-u="-8" data-v="1" data-x="-80" data-y="-184.75208"></polygon>
+      <polygon points="440,192.15392 480,261.43594 520,192.15392" id="cell-8+4" class="cell" data-u="-8" data-v="4" data-x="0" data-y="-184.75208"></polygon>
+      <polygon points="520,192.15392 560,261.43594 600,192.15392" id="cell-8+7" class="cell" data-u="-8" data-v="7" data-x="80" data-y="-184.75208"></polygon>
+      <polygon points="400,261.43594 360,192.15392 320,261.43594" id="cell-7-1" class="cell" data-u="-7" data-v="-1" data-x="-120" data-y="-161.65805"></polygon>
+      <polygon points="480,261.43594 440,192.15392 400,261.43594" id="cell-7+2" class="cell" data-u="-7" data-v="2" data-x="-40" data-y="-161.65805"></polygon>
+      <polygon points="560,261.43594 520,192.15392 480,261.43594" id="cell-7+5" class="cell" data-u="-7" data-v="5" data-x="40" data-y="-161.65805"></polygon>
+      <polygon points="640,261.43594 600,192.15392 560,261.43594" id="cell-7+8" class="cell" data-u="-7" data-v="8" data-x="120" data-y="-161.65805"></polygon>
+      <polygon points="320,261.43594 360,330.71796 400,261.43594" id="cell-5-2" class="cell" data-u="-5" data-v="-2" data-x="-120" data-y="-115.47003"></polygon>
+      <polygon points="400,261.43594 440,330.71796 480,261.43594" id="cell-5+1" class="cell" data-u="-5" data-v="1" data-x="-40" data-y="-115.47003"></polygon>
+      <polygon points="480,261.43594 520,330.71796 560,261.43594" id="cell-5+4" class="cell" data-u="-5" data-v="4" data-x="40" data-y="-115.47003"></polygon>
+      <polygon points="560,261.43594 600,330.71796 640,261.43594" id="cell-5+7" class="cell" data-u="-5" data-v="7" data-x="120" data-y="-115.47003"></polygon>
+      <polygon points="360,330.71796 320,261.43594 280,330.71796" id="cell-4-4" class="cell" data-u="-4" data-v="-4" data-x="-160" data-y="-92.37604"></polygon>
+      <polygon points="440,330.71796 400,261.43594 360,330.71796" id="cell-4-1" class="cell" data-u="-4" data-v="-1" data-x="-80" data-y="-92.37604"></polygon>
+      <polygon points="520,330.71796 480,261.43594 440,330.71796" id="cell-4+2" class="cell" data-u="-4" data-v="2" data-x="0" data-y="-92.37604"></polygon>
+      <polygon points="600,330.71796 560,261.43594 520,330.71796" id="cell-4+5" class="cell" data-u="-4" data-v="5" data-x="80" data-y="-92.37604"></polygon>
+      <polygon points="680,330.71796 640,261.43594 600,330.71796" id="cell-4+8" class="cell" data-u="-4" data-v="8" data-x="160" data-y="-92.37604"></polygon>
+      <polygon points="280,330.71796 320,400 360,330.71796" id="cell-2-5" class="cell" data-u="-2" data-v="-5" data-x="-160" data-y="-46.18802"></polygon>
+      <polygon points="360,330.71796 400,400 440,330.71796" id="cell-2-2" class="cell" data-u="-2" data-v="-2" data-x="-80" data-y="-46.18802"></polygon>
+      <polygon points="440,330.71796 480,400 520,330.71796" id="cell-2+1" class="cell" data-u="-2" data-v="1" data-x="0" data-y="-46.18802"></polygon>
+      <polygon points="520,330.71796 560,400 600,330.71796" id="cell-2+4" class="cell" data-u="-2" data-v="4" data-x="80" data-y="-46.18802"></polygon>
+      <polygon points="600,330.71796 640,400 680,330.71796" id="cell-2+7" class="cell" data-u="-2" data-v="7" data-x="160" data-y="-46.18802"></polygon>
+      <polygon points="320,400 280,330.71796 240,400" id="cell-1-7" class="cell" data-u="-1" data-v="-7" data-x="-200" data-y="-23.093994"></polygon>
+      <polygon points="400,400 360,330.71796 320,400" id="cell-1-4" class="cell" data-u="-1" data-v="-4" data-x="-120" data-y="-23.093994"></polygon>
+      <polygon points="480,400 440,330.71796 400,400" id="cell-1-1" class="cell" data-u="-1" data-v="-1" data-x="-40" data-y="-23.093994"></polygon>
+      <polygon points="560,400 520,330.71796 480,400" id="cell-1+2" class="cell" data-u="-1" data-v="2" data-x="40" data-y="-23.093994"></polygon>
+      <polygon points="640,400 600,330.71796 560,400" id="cell-1+5" class="cell" data-u="-1" data-v="5" data-x="120" data-y="-23.093994"></polygon>
+      <polygon points="720,400 680,330.71796 640,400" id="cell-1+8" class="cell" data-u="-1" data-v="8" data-x="200" data-y="-23.093994"></polygon>
+      <polygon points="240,400 280,469.28204 320,400" id="cell+1-8" class="cell" data-u="1" data-v="-8" data-x="-200" data-y="23.093994"></polygon>
+      <polygon points="320,400 360,469.28204 400,400" id="cell+1-5" class="cell" data-u="1" data-v="-5" data-x="-120" data-y="23.093994"></polygon>
+      <polygon points="400,400 440,469.28204 480,400" id="cell+1-2" class="cell" data-u="1" data-v="-2" data-x="-40" data-y="23.093994"></polygon>
+      <polygon points="480,400 520,469.28204 560,400" id="cell+1+1" class="cell" data-u="1" data-v="1" data-x="40" data-y="23.093994"></polygon>
+      <polygon points="560,400 600,469.28204 640,400" id="cell+1+4" class="cell" data-u="1" data-v="4" data-x="120" data-y="23.093994"></polygon>
+      <polygon points="640,400 680,469.28204 720,400" id="cell+1+7" class="cell" data-u="1" data-v="7" data-x="200" data-y="23.093994"></polygon>
+      <polygon points="360,469.28204 320,400 280,469.28204" id="cell+2-7" class="cell" data-u="2" data-v="-7" data-x="-160" data-y="46.18802"></polygon>
+      <polygon points="440,469.28204 400,400 360,469.28204" id="cell+2-4" class="cell" data-u="2" data-v="-4" data-x="-80" data-y="46.18802"></polygon>
+      <polygon points="520,469.28204 480,400 440,469.28204" id="cell+2-1" class="cell" data-u="2" data-v="-1" data-x="0" data-y="46.18802"></polygon>
+      <polygon points="600,469.28204 560,400 520,469.28204" id="cell+2+2" class="cell" data-u="2" data-v="2" data-x="80" data-y="46.18802"></polygon>
+      <polygon points="680,469.28204 640,400 600,469.28204" id="cell+2+5" class="cell" data-u="2" data-v="5" data-x="160" data-y="46.18802"></polygon>
+      <polygon points="280,469.28204 320,538.5641 360,469.28204" id="cell+4-8" class="cell" data-u="4" data-v="-8" data-x="-160" data-y="92.37604"></polygon>
+      <polygon points="360,469.28204 400,538.5641 440,469.28204" id="cell+4-5" class="cell" data-u="4" data-v="-5" data-x="-80" data-y="92.37604"></polygon>
+      <polygon points="440,469.28204 480,538.5641 520,469.28204" id="cell+4-2" class="cell" data-u="4" data-v="-2" data-x="0" data-y="92.37604"></polygon>
+      <polygon points="520,469.28204 560,538.5641 600,469.28204" id="cell+4+1" class="cell" data-u="4" data-v="1" data-x="80" data-y="92.37604"></polygon>
+      <polygon points="600,469.28204 640,538.5641 680,469.28204" id="cell+4+4" class="cell" data-u="4" data-v="4" data-x="160" data-y="92.37604"></polygon>
+      <polygon points="400,538.5641 360,469.28204 320,538.5641" id="cell+5-7" class="cell" data-u="5" data-v="-7" data-x="-120" data-y="115.47003"></polygon>
+      <polygon points="480,538.5641 440,469.28204 400,538.5641" id="cell+5-4" class="cell" data-u="5" data-v="-4" data-x="-40" data-y="115.47003"></polygon>
+      <polygon points="560,538.5641 520,469.28204 480,538.5641" id="cell+5-1" class="cell" data-u="5" data-v="-1" data-x="40" data-y="115.47003"></polygon>
+      <polygon points="640,538.5641 600,469.28204 560,538.5641" id="cell+5+2" class="cell" data-u="5" data-v="2" data-x="120" data-y="115.47003"></polygon>
+      <polygon points="320,538.5641 360,607.84607 400,538.5641" id="cell+7-8" class="cell" data-u="7" data-v="-8" data-x="-120" data-y="161.65808"></polygon>
+      <polygon points="400,538.5641 440,607.84607 480,538.5641" id="cell+7-5" class="cell" data-u="7" data-v="-5" data-x="-40" data-y="161.65808"></polygon>
+      <polygon points="480,538.5641 520,607.84607 560,538.5641" id="cell+7-2" class="cell" data-u="7" data-v="-2" data-x="40" data-y="161.65808"></polygon>
+      <polygon points="560,538.5641 600,607.84607 640,538.5641" id="cell+7+1" class="cell" data-u="7" data-v="1" data-x="120" data-y="161.65808"></polygon>
+      <polygon points="440,607.84607 400,538.5641 360,607.84607" id="cell+8-7" class="cell" data-u="8" data-v="-7" data-x="-80" data-y="184.75208"></polygon>
+      <polygon points="520,607.84607 480,538.5641 440,607.84607" id="cell+8-4" class="cell" data-u="8" data-v="-4" data-x="0" data-y="184.75208"></polygon>
+      <polygon points="600,607.84607 560,538.5641 520,607.84607" id="cell+8-1" class="cell" data-u="8" data-v="-1" data-x="80" data-y="184.75208"></polygon>
+      <text x="282.4" y="239.59492" transform="rotate(0, 292, 226.79492)" id="node-count-x0" class="node-count" data-group="x" data-index="0" data-count="6" data-max="7">6</text>
+      <text x="242.4" y="308.87695" transform="rotate(0, 252, 296.07697)" id="node-count-x1" class="node-count" data-group="x" data-index="1" data-count="4" data-max="9">4</text>
+      <text x="202.4" y="378.15897" transform="rotate(0, 212, 365.35898)" id="node-count-x2" class="node-count" data-group="x" data-index="2" data-count="7" data-max="11">7</text>
+      <text x="202.4" y="447.441" transform="rotate(0, 212, 434.64102)" id="node-count-x3" class="node-count" data-group="x" data-index="3" data-count="9" data-max="11">9</text>
+      <text x="242.4" y="516.723" transform="rotate(0, 252, 503.92303)" id="node-count-x4" class="node-count" data-group="x" data-index="4" data-count="4" data-max="9">4</text>
+      <text x="282.4" y="586.00507" transform="rotate(0, 292, 573.2051)" id="node-count-x5" class="node-count" data-group="x" data-index="5" data-count="5" data-max="7">5</text>
+      <text x="414.4" y="662.2153" transform="rotate(60, 424, 649.4153)" id="node-count-y0" class="node-count" data-group="y" data-index="0" data-count="7" data-max="7">7</text>
+      <text x="494.4" y="662.2153" transform="rotate(60, 504, 649.4153)" id="node-count-y1" class="node-count" data-group="y" data-index="1" data-count="4" data-max="9">4</text>
+      <text x="574.4" y="662.2153" transform="rotate(60, 584, 649.4153)" id="node-count-y2" class="node-count" data-group="y" data-index="2" data-count="9" data-max="11">9</text>
+      <text x="634.4" y="627.5743" transform="rotate(60, 644, 614.7743)" id="node-count-y3" class="node-count" data-group="y" data-index="3" data-count="9" data-max="11">9</text>
+      <text x="674.4" y="558.29224" transform="rotate(60, 684, 545.49225)" id="node-count-y4" class="node-count" data-group="y" data-index="4" data-count="4" data-max="9">4</text>
+      <text x="714.4" y="489.01022" transform="rotate(60, 724, 476.21024)" id="node-count-y5" class="node-count" data-group="y" data-index="5" data-count="2" data-max="7">2</text>
+      <text x="714.4" y="336.58975" transform="rotate(-60, 724, 323.78976)" id="node-count-z0" class="node-count" data-group="z" data-index="0" data-count="2" data-max="7">2</text>
+      <text x="674.4" y="267.30774" transform="rotate(-60, 684, 254.50774)" id="node-count-z1" class="node-count" data-group="z" data-index="1" data-count="6" data-max="9">6</text>
+      <text x="634.4" y="198.02571" transform="rotate(-60, 644, 185.22571)" id="node-count-z2" class="node-count" data-group="z" data-index="2" data-count="5" data-max="11">5</text>
+      <text x="574.4" y="163.3847" transform="rotate(-60, 584, 150.5847)" id="node-count-z3" class="node-count" data-group="z" data-index="3" data-count="8" data-max="11">8</text>
+      <text x="494.4" y="163.3847" transform="rotate(-60, 504, 150.5847)" id="node-count-z4" class="node-count" data-group="z" data-index="4" data-count="8" data-max="9">8</text>
+      <text x="414.4" y="163.3847" transform="rotate(-60, 424, 150.5847)" id="node-count-z5" class="node-count" data-group="z" data-index="5" data-count="6" data-max="7">6</text>
+      <defs>
+        <circle id="channel-1" cx="480" cy="400" r="2" class="river"></circle>
+        <path id="channel-7" d="M 480,423.09402 A 40 40 60 0 1 500,388.453" class="river"></path>
+        <path id="channel-13" d="M 500,388.453 A 40 40 60 0 1 460,388.453" class="river"></path>
+        <path id="channel-11" d="M 460,388.453 A 40 40 60 0 1 480,423.09402" class="river"></path>
+        <path id="channel-3" d="M 480,423.09402 L 480,400" class="river"></path>
+        <path id="channel-5" d="M 500,388.453 L 480,400" class="river"></path>
+        <path id="channel-9" d="M 460,388.453 L 480,400" class="river"></path>
+        <path id="channel-49" d="M 480,376.906 A 40 40 60 0 1 460,411.54703" class="river"></path>
+        <path id="channel-97" d="M 460,411.54703 A 40 40 60 0 1 500,411.54703" class="river"></path>
+        <path id="channel-81" d="M 500,411.54703 A 40 40 60 0 1 480,376.906" class="river"></path>
+        <path id="channel-17" d="M 480,376.906 L 480,400" class="river"></path>
+        <path id="channel-33" d="M 460,411.54703 L 480,400" class="river"></path>
+        <path id="channel-65" d="M 500,411.54703 L 480,400" class="river"></path>
+      </defs>
+      <text x="160" y="64" transform="rotate(0, 0, 0)" id="display-text" class="title" data-copy-text="[6, 4, 7, 9, 4, 5, 7, 4, 9, 9, 4, 2, 2, 6, 5, 8, 8, 6]">Counts: [6, 4, 7, 9, 4, 5, 7, 4, 9, 9, 4, 2, 2, 6, 5, 8, 8, 6]</text>
+      <text x="160" y="128" transform="rotate(0, 0, 0)" id="save-state" class="button">Save</text>
+      <text x="160" y="160" transform="rotate(0, 0, 0)" id="revert-state" class="button">Revert</text>
+    </svg>
+  </body>
+</html>

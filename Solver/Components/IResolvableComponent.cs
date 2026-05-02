@@ -8,5 +8,8 @@ public interface IResolvableComponent : IComponent
 
     bool IsResolved { get; }
 
-    bool TryResolve(Resolution resolution, INotifier notifier, ResolutionReason reason = ResolutionReason.Unspecified);
+    bool TryResolve(
+        Resolution resolution,
+        INotifier notifier,
+        ResolutionReason reason = ResolutionReason.Unspecified);
 }

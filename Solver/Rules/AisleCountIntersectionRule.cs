@@ -4,19 +4,19 @@ using static Solver.Framework.LinqExtensions;
 
 namespace Solver.Rules;
 
-[RulePrioriry(QueuePriority.Default)]
+/// <summary>
+/// Identify intersecting aisle counts that mandate a non-border channel in an aisle with an unresolved channel count of 2,
+/// such that we can mark other unresolved tiles in that aisle as empty.
+/// </summary>
 public class AisleCountIntersectionRule(Tableau tableau) : Rule(tableau)
 {
-    public override string ToString()
-    {
-        return nameof(AisleCountIntersectionRule);
-    }
+    public override string Name => nameof(AisleCountIntersectionRule);
 
-    public override IEnumerable<Type> GetPertinentComponents()
+    public override IEnumerable<ComponentType> GetPertinentComponents()
     {
-        yield return typeof(Tableau);
-        yield return typeof(Aisle);
-        yield return typeof(Tile);
+        yield return ComponentTypes.Tableau;
+        yield return ComponentTypes.Aisle;
+        yield return ComponentTypes.Tile;
     }
 
     public override void Invoke(IComponent component, INotifier notifier)

@@ -30,6 +30,5 @@ public static class ResolutionReasonExtensions
             ResolutionReason.Hypothetical => 5.0,
             _ => throw new UnreachableException()
         };
-
     }
 }

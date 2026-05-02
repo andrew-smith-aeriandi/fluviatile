@@ -1,49 +1,25 @@
 ﻿using Solver.Components;
 using Solver.Rules;
-using System.Reflection;
 
 namespace Solver.Framework;
 
-public class Ruleset
+public record Ruleset
 {
-    private readonly Dictionary<Type, List<(IRule, int)>> _ruleRegistry;
-    private readonly IRule _housekeepingRule;
+    public required IRule HousekeepingRule { get; init; }
 
-    public Ruleset(
-        IEnumerable<IRule> rules,
-        IRule housekeepingRule)
+    public required IReadOnlyDictionary<ComponentType, IList<(IRule Rule, int Priority)>> RuleRegistry { get; init; }
+
+    public required IRulePrioritiser Prioritiser { get; init; }
+
+    public IList<(IRule Rule, int Priority)> GetRules(ComponentType componentType)
     {
-        _ruleRegistry = rules.Aggregate(
-            new Dictionary<Type, List<(IRule, int)>>(),
-            (registry, rule) =>
-            {
-                var attribute = rule.GetType().GetCustomAttribute<RulePrioriryAttribute>();
-                var priority = attribute?.Value ?? QueuePriority.Default;
-                //var priority = QueuePriority.Default;
-
-                foreach (var componentType in rule.GetPertinentComponents())
-                {
-                    if (!registry.TryGetValue(componentType, out var registeredActions))
-                    {
-                        registeredActions = [];
-                        registry.Add(componentType, registeredActions);
-                    }
-
-                    registeredActions.Add((rule, priority));
-                }
-
-                return registry;
-            });
-
-        _housekeepingRule = housekeepingRule;
-    }
-
-    public IRule HousekeepingRule => _housekeepingRule;
-
-    public IEnumerable<(IRule Rule, int Priority)> GetRules(IComponent component)
-    {
-        return _ruleRegistry.TryGetValue(component.GetType(), out var rules)
+        return RuleRegistry.TryGetValue(componentType, out var rules)
             ? rules
             : [];
+    }
+
+    public IList<(IRule Rule, int Priority)> GetRules(IComponent component)
+    {
+        return GetRules(component.GetComponentType());
     }
 }

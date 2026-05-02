@@ -3,7 +3,17 @@ using Solver.Framework;
 
 namespace Solver.Rules;
 
-[RulePrioriry(QueuePriority.Default)]
+/// <summary>
+/// Rules based on the fact that there must be exactly 2 exits on the border of the grid
+/// </summary>
+/// <remarks>
+/// <list type="bullet">
+/// <item>If both exits have been resolved, all other border edges must be empty.</item>
+/// <item>If both exits can be restricted to a subset of borders, all other border edges must be empty.</item>
+/// <item>If one exit can restricted to a subset of borders, some other border edges can be resolved as empty depending on the aisle count.</item>
+/// <item>If one exit can restricted to a subset of borders, other corner tile pairs that are both resolved as channels must be linked by a thalweg segment.</item>
+/// </list>
+/// </remarks>
 public class ExitCountRule : Rule
 {
     private readonly IReadOnlyList<UnorderedPair<Coordinates>> _cornerRadialCoordinates;
@@ -24,14 +34,11 @@ public class ExitCountRule : Rule
         ];
     }
 
-    public override string ToString()
-    {
-        return nameof(ExitCountRule);
-    }
+    public override string Name => nameof(ExitCountRule);
 
-    public override IEnumerable<Type> GetPertinentComponents()
+    public override IEnumerable<ComponentType> GetPertinentComponents()
     {
-        yield return typeof(Tableau);
+        yield return ComponentTypes.Tableau;
     }
 
     public override void Invoke(IComponent component, INotifier notifier)

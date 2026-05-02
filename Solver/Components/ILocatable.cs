@@ -1,5 +1,4 @@
-﻿
-using Solver.Framework;
+﻿using Solver.Framework;
 
 namespace Solver.Components;
 

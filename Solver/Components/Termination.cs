@@ -34,10 +34,19 @@ public class Termination : IComponent, ILinkable, IFreezable
         _frozen = true;
     }
 
+    /// <summary>
+    /// Coordinates of the centre of the "virtual" tile that is adjacent to a border edge where the channel exits the grid
+    /// </summary>
     public Coordinates Coordinates { get; }
 
+    /// <summary>
+    /// References the border edge where the channel exits the grid
+    /// </summary>
     public Edge Border { get; private set; }
 
+    /// <summary>
+    /// Always returns true 
+    /// </summary>
     public bool IsTerminal => true;
 
     public override int GetHashCode()

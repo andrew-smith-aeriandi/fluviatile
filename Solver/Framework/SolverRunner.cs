@@ -5,24 +5,33 @@ namespace Solver.Framework;
 public class SolverRunner
 {
     private readonly RulesetFactory _rulesetFactory;
+    private readonly IRulePrioritiser? _rulePrioritiser;
     private readonly SolverOptions _options;
 
     public SolverRunner(
         RulesetFactory rulesetFactory,
+        IRulePrioritiser? rulePrioritiser,
         SolverOptions options)
     {
         ArgumentNullException.ThrowIfNull(rulesetFactory);
         ArgumentNullException.ThrowIfNull(options);
 
         _rulesetFactory = rulesetFactory;
+        _rulePrioritiser = rulePrioritiser;
         _options = options;
     }
 
-    public IEnumerable<SolverState> Solve(Tableau tableau)
+    public IEnumerable<SolverState> Solve(
+        Tableau tableau)
     {
         ArgumentNullException.ThrowIfNull(tableau);
 
-        var state = new SolverState(tableau, _rulesetFactory, _options);
+        var state = new SolverState(
+            tableau: tableau,
+            rulesetFactory: _rulesetFactory,
+            prioritiser: _rulePrioritiser,
+            options: _options);
+
         return Solve(state);
     }
 

@@ -1,9 +1,25 @@
 ﻿using Solver.Framework;
+using System.Diagnostics;
 
 namespace Solver.Components;
 
 public static class ComponentExtensions
 {
+    public static ComponentType GetComponentType(this IComponent component)
+    {
+        return component switch
+        {
+            Tableau _ => ComponentTypes.Tableau,
+            Aisle _ => ComponentTypes.Aisle,
+            Tile _ => ComponentTypes.Tile,
+            Edge _ => ComponentTypes.Edge,
+            Thalweg _ => ComponentTypes.Thalweg,
+            Thalweg.Segment _ => ComponentTypes.ThalwegSegment,
+            Termination _ => ComponentTypes.Termination,
+            _ => throw new UnreachableException()
+        };
+    }
+
     public static ResolutionCounts GetCounts(this IEnumerable<IResolvableComponent> resolvableComponents)
     {
         return resolvableComponents.Aggregate(

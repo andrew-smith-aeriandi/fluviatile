@@ -3,15 +3,11 @@ using Solver.Framework;
 
 namespace Solver.Rules;
 
-[RulePrioriry(QueuePriority.VeryLow)]
 public class NoopRule(Tableau tableau) : Rule(tableau)
 {
-    public override string ToString()
-    {
-        return nameof(NoopRule);
-    }
+    public override string Name => nameof(NoopRule);
 
-    public override IEnumerable<Type> GetPertinentComponents()
+    public override IEnumerable<ComponentType> GetPertinentComponents()
     {
         yield break;
     }

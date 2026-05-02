@@ -58,26 +58,74 @@ public partial class Thalweg : IComponent
         _linkedChannelTileCount += segment.ChannelTileCount;
     }
 
+    /// <summary>
+    /// References the associated grid
+    /// </summary>
     public SolverGrid Grid => _grid;
 
+    /// <summary>
+    /// List of resolved segments
+    /// </summary>
+    /// <remarks>
+    /// For a solved tableau, there is a single continuous channel, so this list will have a single element.
+    /// </remarks>
     public IReadOnlyList<Segment> Segments => _segments;
 
+    /// <summary>
+    /// Count of resolved segments
+    /// </summary>
+    /// <remarks>
+    /// Returns 1 for a solved tableau since there is a single continuous channel.
+    /// </remarks>
     public int SegmentCount => _segments.Count;
 
+    /// <summary>
+    /// Count of tiles containing channels in the grid
+    /// </summary>
     public int ChannelTileCount => _channelTileCount;
 
+    /// <summary>
+    /// Count of tiles that are part of a resolved thalweg segment in the tableau
+    /// </summary>
+    /// <remarks>
+    /// For a solved tableau, this property will have the same value as the ChannelTileCount property.
+    /// </remarks>
     public int LinkedChannelTileCount => _linkedChannelTileCount;
 
+    /// <summary>
+    /// Count of tiles that are not part of a resolved thalweg segment in the tableau
+    /// </summary>
+    /// <remarks>
+    /// Returns 0 for a solved tableau.
+    /// </remarks>
     public int UnlinkedChannelTileCount => _channelTileCount - _linkedChannelTileCount;
 
     public IReadOnlyList<Termination> Terminations => _terminations;
 
+    /// <summary>
+    /// Always returns 2
+    /// </summary>
     public int TerminationCount => SolverGrid.TerminationCount;
 
+    /// <summary>
+    /// Returns the number of resolved terminations, either 0, 1 or 2.
+    /// </summary>
+    /// <remarks>
+    /// Returns 2 for a solved tableau.
+    /// </remarks>
     public int ResolvedTerminationCount => _terminations.Count;
 
+    /// <summary>
+    /// Returns the number of unresolved terminations, either 0, 1 or 2.
+    /// </summary>
+    /// <remarks>
+    /// Returns 0 for a solved tableau.
+    /// </remarks>
     public int UnresolvedTerminationCount => SolverGrid.TerminationCount - _terminations.Count;
 
+    /// <summary>
+    /// Attempts to retrieve the resolved thalweg segment that contains the specified linkable component (Tile or Termination)
+    /// </summary>
     public bool TryGetSegment(ILinkable link, [MaybeNullWhen(false)] out Segment segment)
     {
         if (link is not null && _membership.TryGetValue(link, out segment))
@@ -97,12 +145,21 @@ public partial class Thalweg : IComponent
         return termination is not null;
     }
 
+    /// <summary>
+    /// Indicates whether the specified component is included in a resolved thalweg segment
+    /// </summary>
     public bool IsLinked(ILinkable component)
     {
         return _membership.ContainsKey(component);
     }
 
-    public bool TryLink(Edge edge, INotifier notifier, ResolutionReason reason = ResolutionReason.Unspecified)
+    /// <summary>
+    /// Attempts to join linkable components into a resolved thalweg segment
+    /// </summary>
+    public bool TryLink(
+        Edge edge,
+        INotifier notifier,
+        ResolutionReason reason = ResolutionReason.Unspecified)
     {
         ArgumentNullException.ThrowIfNull(edge);
 
@@ -113,9 +170,7 @@ public partial class Thalweg : IComponent
 
         if (edge.Tiles.Any(t => t.Resolution != Resolution.Channel))
         {
-            return false;
-            //TODO: Fix this
-            //throw new ArgumentException($"Any adjacent tiles must be resolved as channels: {edge}", nameof(edge));
+            throw new ArgumentException($"Any adjacent tiles must be resolved as channels: {edge}", nameof(edge));
         }
 
         if (edge.Resolution != Resolution.Channel)

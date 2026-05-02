@@ -5,7 +5,9 @@ namespace Solver.Rules;
 
 public interface IRule
 {
-    IEnumerable<Type> GetPertinentComponents();
+    string Name { get; }
+
+    IEnumerable<ComponentType> GetPertinentComponents();
 
     void Invoke(IComponent component, INotifier notifier);
 }

@@ -9,6 +9,7 @@ public static class SolverStateExtensions
         return new SolverExecutionResult
         {
             Status = state.Status,
+            ElapsedTime = state.ElapsedTime,
             RuleInvocationCount = state.RuleInvocationCount,
             ResolutionReasonCount = state.ResolutionReasonCount,
             HypotheticalsCount = state.HypotheticalComponentsCount,

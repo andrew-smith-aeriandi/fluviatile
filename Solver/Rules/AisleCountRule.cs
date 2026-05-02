@@ -3,19 +3,19 @@ using Solver.Framework;
 
 namespace Solver.Rules;
 
-[RulePrioriry(QueuePriority.High)]
+/// <summary>
+/// Identify aisles where either the unresolved channel count is zero such that any unresolved tiles must be empty, 
+/// or where the unresolved empty count is zero such that any unresolved tiles must be channels. 
+/// </summary>
 public class AisleCountRule(Tableau tableau) : Rule(tableau)
 {
-    public override string ToString()
-    {
-        return nameof(AisleCountRule);
-    }
+    public override string Name => nameof(AisleCountRule);
 
-    public override IEnumerable<Type> GetPertinentComponents()
+    public override IEnumerable<ComponentType> GetPertinentComponents()
     {
-        yield return typeof(Tableau);
-        yield return typeof(Aisle);
-        yield return typeof(Tile);
+        yield return ComponentTypes.Tableau;
+        yield return ComponentTypes.Aisle;
+        yield return ComponentTypes.Tile;
     }
 
     public override void Invoke(IComponent component, INotifier notifier)

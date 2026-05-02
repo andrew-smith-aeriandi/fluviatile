@@ -4,17 +4,18 @@ using Tableau = Solver.Components.Tableau;
 
 namespace Solver.Rules;
 
-[RulePrioriry(QueuePriority.Default)]
+/// <summary>
+/// Use <see href="https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm">Tarjan's strongly connected components algorithm</see> 
+/// to find articulation points that have unresolved tiles or edges, i.e. tiles that if removed
+/// would divide the graph into multiple connected graphs (channels), which would not be a valid solution.
+/// </summary>
 public class TarjansRule(Tableau tableau) : Rule(tableau)
 {
-    public override string ToString()
-    {
-        return nameof(TarjansRule);
-    }
+    public override string Name => nameof(TarjansRule);
 
-    public override IEnumerable<Type> GetPertinentComponents()
+    public override IEnumerable<ComponentType> GetPertinentComponents()
     {
-        yield return typeof(Tableau);
+        yield return ComponentTypes.Tableau;
     }
 
     public override void Invoke(IComponent component, INotifier notifier)
@@ -110,8 +111,6 @@ public class TarjansRule(Tableau tableau) : Rule(tableau)
             }
         }
 
-        // Use Tarjan's algorithm to find articulation points that have unresolved tiles or edeges, i.e. tiles that if removed
-        // would divide the graph into multiple connected graphs (channels), which would not be a valid solution.
         var bridgeTiles = Tarjan
             .GetArticulationPoints(tiles, adjacency)
             .ToArray();
