@@ -221,7 +221,9 @@ public static class Gallery
         new([4, 7, 7, 2, 7, 7, 3, 8, 9, 7, 4, 3, 3, 4, 9, 10, 5, 3], SolverStatus.Solved, "Time: 49.310ms, Rule Invocations: 255, Reasons: 10, Hypotheticals: 0, Difficulty: 1.387"),
         new([3, 6, 9, 5, 8, 3, 4, 8, 6, 10, 6, 0, 2, 7, 6, 6, 7, 6], SolverStatus.Solved, "Time: 53.970ms, Rule Invocations: 357, Reasons: 9, Hypotheticals: 0, Difficulty: 1.044"),
         new([7, 6, 6, 8, 7, 3, 5, 5, 10, 9, 5, 3, 4, 4, 5, 10, 8, 6], SolverStatus.Solved, "Time: 107.467ms, Rule Invocations: 469, Reasons: 14, Hypotheticals: 4, Difficulty: 1.425"),
-        new([7, 4, 7, 6, 7, 7, 7, 6, 8, 6, 7, 4, 5, 5, 9, 8, 4, 7], SolverStatus.Solved, "Solved; Time: 69.297ms, Rule Invocations: 475, Reasons: 11, Hypotheticals: 2, Difficulty: 1.071")
+        new([7, 4, 7, 6, 7, 7, 7, 6, 8, 6, 7, 4, 5, 5, 9, 8, 4, 7], SolverStatus.Solved, "Time: 69.297ms, Rule Invocations: 475, Reasons: 11, Hypotheticals: 2, Difficulty: 1.071"),
+        new([3, 7, 6, 9, 8, 2, 4, 8, 5, 9, 7, 2, 3, 6, 7, 8, 8, 3], SolverStatus.Solved, "Time: 118.894ms, Rule Invocations: 332, Reasons: 8, Hypotheticals: 0, Difficulty: 1.113"),
+        new([7, 7, 8, 7, 7, 7, 7, 6, 9, 10, 8, 3, 5, 4, 11, 9, 8, 6], SolverStatus.Solved, "Time: 130.457ms, Rule Invocations: 496, Reasons: 8, Hypotheticals: 3, Difficulty: 0.960")
      ];
 
     public static Puzzle GetByIndex(Index index)
